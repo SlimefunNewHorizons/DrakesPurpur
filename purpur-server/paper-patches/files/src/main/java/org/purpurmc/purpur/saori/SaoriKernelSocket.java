@@ -11,12 +11,16 @@ import java.util.logging.Logger;
 
 /**
  * SaoriKernelSocket — Direct Zero-Lag Bridge between DrakesPurpur and SAORI SRE
- * Eradicates log scraping and heavy external Discord bots.
+ * Secure token management: Reads STRICTLY from Environment Variables or Local Secure Config
+ * NEVER HARDCODES SECRETS OR TOKENS IN REPOSITORIES.
  * Author: Jack (JackStar6677-1) - Star Systems & DrakesCraft Labs
  */
 public final class SaoriKernelSocket {
     private static final Logger LOGGER = Logger.getLogger("SaoriKernelBridge");
-    private static final String SAORI_INGEST_URL = "http://127.0.0.1:8089/api/v1/mc/event";
+    private static final String DEFAULT_INGEST_URL = "http://127.0.0.1:8089/api/v1/mc/event";
+    private static String ingestUrl = DEFAULT_INGEST_URL;
+    private static String bearerToken = "";
+
     private static final ExecutorService ASYNC_DISPATCHER = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "Saori-Kernel-Dispatcher");
         t.setDaemon(true);
@@ -24,6 +28,22 @@ public final class SaoriKernelSocket {
     });
 
     private SaoriKernelSocket() {}
+
+    public static void initialize() {
+        String envUrl = System.getenv("SAORI_INGEST_URL");
+        if (envUrl != null && !envUrl.isBlank()) {
+            ingestUrl = envUrl.trim();
+        }
+        String envToken = System.getenv("SAORI_INGEST_TOKEN");
+        if (envToken != null && !envToken.isBlank()) {
+            bearerToken = envToken.trim();
+        }
+        LOGGER.info("[SaoriBridge] Direct Kernel Bridge active. Target endpoint: " + ingestUrl);
+    }
+
+    public static ExecutorService getAsyncExecutor() {
+        return ASYNC_DISPATCHER;
+    }
 
     public static void dispatchChat(String playerUuid, String playerName, String message, String worldName) {
         dispatchJson(String.format(
@@ -50,11 +70,14 @@ public final class SaoriKernelSocket {
         ASYNC_DISPATCHER.submit(() -> {
             HttpURLConnection conn = null;
             try {
-                URL url = new URL(SAORI_INGEST_URL);
+                URL url = new URL(ingestUrl);
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 conn.setRequestProperty("User-Agent", "DrakesPurpur-Kernel/26.2");
+                if (!bearerToken.isEmpty()) {
+                    conn.setRequestProperty("Authorization", "Bearer " + bearerToken);
+                }
                 conn.setConnectTimeout(1500);
                 conn.setReadTimeout(1500);
                 conn.setDoOutput(true);

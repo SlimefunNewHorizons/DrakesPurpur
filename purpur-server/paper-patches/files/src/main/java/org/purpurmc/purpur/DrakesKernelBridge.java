@@ -1,22 +1,58 @@
 package org.purpurmc.purpur;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.purpurmc.purpur.saori.SaoriKernelSocket;
 
 /**
- * DrakesPurpur Kernel Bridge & Crash Guard
- * Architecture: Jack (JackStar6677-1) - DrakesCraft Labs
+ * DrakesPurpur Kernel Bridge & Autonomous Crash Guard
+ * Integrates directly with Star Infrastructure & SQLite WAL
+ * Author: Jack (JackStar6677-1) - Star Systems & DrakesCraft Labs
  */
 public final class DrakesKernelBridge {
     private static final Logger LOGGER = Logger.getLogger("DrakesKernel");
     private static volatile boolean rustLoaded = false;
+    private static final String FAULTS_DB_PATH = "drakes_faults.db";
+    private static volatile boolean dbInitialized = false;
 
     private DrakesKernelBridge() {}
 
     public static void initialize() {
-        LOGGER.info("[DrakesPurpur] Inicializando Kernel Soberano 26.2...");
+        LOGGER.info("==========================================================");
+        LOGGER.info("  [DrakesPurpur 26.2] Sovereign High-Performance Kernel  ");
+        LOGGER.info("  Architecture: JackStar6677-1 | Star Systems & Drakes   ");
+        LOGGER.info("==========================================================");
+        initFaultDatabase();
         loadRustNativeBridge();
+        SaoriKernelSocket.initialize();
+    }
+
+    private static void initFaultDatabase() {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + FAULTS_DB_PATH);
+                 Statement stmt = conn.createStatement()) {
+                stmt.execute("PRAGMA journal_mode = WAL;");
+                stmt.execute("PRAGMA synchronous = NORMAL;");
+                stmt.execute("CREATE TABLE IF NOT EXISTS kernel_faults ("
+                    + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + "context TEXT NOT NULL, "
+                    + "source_desc TEXT, "
+                    + "error_message TEXT, "
+                    + "stacktrace TEXT, "
+                    + "timestamp INTEGER NOT NULL, "
+                    + "isolated INTEGER NOT NULL DEFAULT 1);");
+            }
+            dbInitialized = true;
+            LOGGER.info("[CrashGuard] SQLite WAL Fault Database initialized: " + FAULTS_DB_PATH);
+        } catch (Throwable t) {
+            LOGGER.log(Level.WARNING, "[CrashGuard] Failed to initialize SQLite fault DB: " + t.getMessage());
+        }
     }
 
     private static void loadRustNativeBridge() {
@@ -38,7 +74,42 @@ public final class DrakesKernelBridge {
         return rustLoaded;
     }
 
+    /**
+     * Kernel Crash Guard: Intercepts unhandled plugin exceptions, isolates the faulty block/entity,
+     * writes the event to SQLite WAL, and notifies SAORI without stopping the Minecraft tick.
+     */
     public static void handleUncaughtFault(String context, Object source, Throwable fault) {
-        LOGGER.log(Level.SEVERE, "[CrashGuard] Excepcion no capturada en " + context + " (" + source + "): " + fault.getMessage());
+        String sourceDesc = source != null ? source.toString() : "unknown";
+        String msg = fault != null ? fault.getMessage() : "null";
+        LOGGER.log(Level.SEVERE, "[CrashGuard-ISOLATED] Interceptado fallo no capturado en: " + context + " (" + sourceDesc + "): " + msg);
+
+        StringBuilder sb = new StringBuilder();
+        if (fault != null) {
+            for (StackTraceElement elem : fault.getStackTrace()) {
+                sb.append(elem.toString()).append("
+");
+                if (sb.length() > 2000) break;
+            }
+        }
+        String stack = sb.toString();
+
+        // 1. Commit to SQLite WAL asynchronously
+        if (dbInitialized) {
+            SaoriKernelSocket.getAsyncExecutor().submit(() -> {
+                try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + FAULTS_DB_PATH);
+                     PreparedStatement ps = conn.prepareStatement(
+                         "INSERT INTO kernel_faults (context, source_desc, error_message, stacktrace, timestamp, isolated) VALUES (?, ?, ?, ?, ?, 1)")) {
+                    ps.setString(1, context);
+                    ps.setString(2, sourceDesc);
+                    ps.setString(3, msg);
+                    ps.setString(4, stack);
+                    ps.setLong(5, System.currentTimeMillis());
+                    ps.executeUpdate();
+                } catch (Throwable ignored) {}
+            });
+        }
+
+        // 2. Dispatch structured telemetry to SAORI Autonomous SRE
+        SaoriKernelSocket.dispatchFault(context, sourceDesc, msg);
     }
 }
