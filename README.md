@@ -57,7 +57,13 @@ High-concurrency Minecraft servers running massive technical addons (such as Sli
 - Replaces heavy external Discord bridge plugins and disk log scraping (`latest.log`).
 - Enables sub-millisecond bidirectional chat bridging, real-time crash alerting, and automated incident triage by SRE AI agents.
 
-### 5. 🔬 Slimefun Native Monolith (Experimental Branch: `feat/slimefun-native-engine`)
+### 5. 📊 DrakesProfiler & Ryzen Multi-Core Dispatcher (Zero-Dependency Spark Replacement)
+- **Direct Kernel Telemetry:** Reads CPU metrics, JVM memory, and thread utilization directly from `ManagementFactory.getThreadMXBean()` and `OperatingSystemMXBean` with zero overhead.
+- **Root Cause Analysis (Anti-Lag):** Instant breakdown of total loaded chunks, entity counts, living mob density per world, and the top CPU-hogging threads.
+- **Local Markdown (.md) Reports:** Generates standalone diagnostic files in `drakes_reports/` containing markdown tables and hardware metrics without uploading sensitive server data to third-party web viewers.
+- **Multi-Core Ryzen 9 Scheduler:** Utilizes `RyzenWorkerPool` (ForkJoinPool) to parallelize async lookups and SQLite WAL commits across all available processor cores.
+
+### 6. 🔬 Slimefun Native Monolith (Experimental Branch: `feat/slimefun-native-engine`)
 - Parallel R&D branch exploring the complete ingestion of Slimefun core mechanics into native Minecraft classes:
   - Slimefun custom items are evaluated as first-order `Block` and `Item` primitives, removing PDC metadata and wrapper overhead.
   - Produces an all-in-one standalone `DrakesPurpur-Server.jar` that launches Minecraft with full technical automation out of the box.

@@ -52,18 +52,23 @@ public final class DrakesAdminCommand implements CommandExecutor {
             return true;
         }
 
-                if (args[0].equalsIgnoreCase("threads") || args[0].equalsIgnoreCase("spark")) {
-            sender.sendMessage(ChatColor.GOLD + "=== DrakesPurpur Ryzen 9 Thread Profiler ===");
-            sender.sendMessage(ChatColor.YELLOW + "Procesadores detectados: " + ChatColor.AQUA + org.purpurmc.purpur.profiler.DrakesProfiler.getAvailableProcessors() + " cores"
-                + ChatColor.GRAY + " | Worker Pool: " + ChatColor.GREEN + org.purpurmc.purpur.threads.RyzenWorkerPool.getParallelism() + " threads");
-            
-            org.purpurmc.purpur.profiler.DrakesProfiler.ThreadStats[] topThreads = org.purpurmc.purpur.profiler.DrakesProfiler.getTopConsumingThreads(5);
-            for (int i = 0; i < topThreads.length; i++) {
-                org.purpurmc.purpur.profiler.DrakesProfiler.ThreadStats st = topThreads[i];
-                sender.sendMessage(ChatColor.WHITE + "#" + (i + 1) + " " + ChatColor.GOLD + st.name() + ChatColor.GRAY + " (ID: " + st.id() + ")"
-                    + ChatColor.DARK_GRAY + " - CPU Time: " + ChatColor.AQUA + st.cpuTimeMs() + " ms"
-                    + ChatColor.DARK_GRAY + " - " + ChatColor.GREEN + st.state());
+                        if (args[0].equalsIgnoreCase("threads") || args[0].equalsIgnoreCase("spark") || args[0].equalsIgnoreCase("profile")) {
+            org.purpurmc.purpur.profiler.DrakesProfiler.ProfileSnapshot s = org.purpurmc.purpur.profiler.DrakesProfiler.takeSnapshot();
+            java.io.File report = org.purpurmc.purpur.profiler.DrakesProfiler.exportMarkdownReport(s);
+
+            sender.sendMessage(ChatColor.GOLD + "==================================================");
+            sender.sendMessage(ChatColor.YELLOW + "  ⚡ DrakesPurpur Diagnostics (Spark Replacement)  ");
+            sender.sendMessage(ChatColor.GOLD + "==================================================");
+            sender.sendMessage(ChatColor.WHITE + "Hardware: " + ChatColor.AQUA + s.cores() + " Cores (" + s.cpuModel() + ")");
+            sender.sendMessage(ChatColor.WHITE + "Memoria JVM: " + ChatColor.GREEN + s.usedRamMb() + " MB / " + s.maxRamMb() + " MB" + ChatColor.GRAY + " (GC Pauses: " + s.gcTimeMs() + " ms)");
+            sender.sendMessage(ChatColor.WHITE + "Mundo & Carga: " + ChatColor.YELLOW + s.totalChunks() + " Chunks" + ChatColor.GRAY + " | " + ChatColor.AQUA + s.totalEntities() + " Entidades (" + s.totalLivingEntities() + " mobs)");
+            sender.sendMessage(ChatColor.WHITE + "Reporte Markdown: " + ChatColor.GREEN + report.getPath());
+            sender.sendMessage(ChatColor.GOLD + "--- Top 3 Hilos de CPU ---");
+            for (int i = 0; i < Math.min(3, s.topThreads().size()); i++) {
+                org.purpurmc.purpur.profiler.DrakesProfiler.ThreadStats st = s.topThreads().get(i);
+                sender.sendMessage(ChatColor.GRAY + "#" + (i + 1) + " " + ChatColor.YELLOW + st.name() + ChatColor.WHITE + " - " + st.cpuTimeMs() + " ms (" + st.state() + ")");
             }
+            sender.sendMessage(ChatColor.GOLD + "==================================================");
             return true;
         }
 
