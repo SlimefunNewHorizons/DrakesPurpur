@@ -67,7 +67,17 @@ public final class DrakesAdminCommand implements CommandExecutor {
             return true;
         }
 
+                if (args[0].equalsIgnoreCase("menu") || args[0].equalsIgnoreCase("gui")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(ChatColor.RED + "Este comando solo puede ser ejecutado por jugadores en el servidor.");
+                return true;
+            }
+            org.purpurmc.purpur.gui.DrakesAdminMenu.openMenu(player);
+            return true;
+        }
+
         sender.sendMessage(ChatColor.GOLD + "=== DrakesPurpur Kernel Commands ===");
+        sender.sendMessage(ChatColor.YELLOW + "/drakes menu" + ChatColor.GRAY + " - Abre el panel interactivo visual (GUI).");
         sender.sendMessage(ChatColor.YELLOW + "/drakes status" + ChatColor.GRAY + " - Muestra el estado del kernel y puentes.");
         sender.sendMessage(ChatColor.YELLOW + "/drakes fastpath" + ChatColor.GRAY + " - Alterna el bypass de eventos de Slimefun.");
         sender.sendMessage(ChatColor.YELLOW + "/drakes gc" + ChatColor.GRAY + " - Forzar ciclo de limpieza de memoria.");
