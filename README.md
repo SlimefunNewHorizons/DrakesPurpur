@@ -42,8 +42,10 @@ Los servidores de Minecraft con mods y addons técnicos masivos (como Slimefun y
 - **Aislamiento Seguro:** Si una máquina o entidad de un plugin arroja un fallo crítico, el motor la desactiva y registra el incidente en **SQLite WAL (`drakes_faults.db`)**, impidiendo que el servidor se caiga. Los jugadores siguen jugando a 20.0 TPS sin interrupciones.
 
 ### 2. 🦀 Enlace Nativo Rust Off-Heap (Java 25 Panama FFM)
-- Pre-carga en el arranque del kernel la librería de aceleración [`libslimefun_ffi.so`](natives/libslimefun_ffi.so).
-- Las redes eléctricas de Slimefun, transferencias de energía cuántica y cálculos pesados se ejecutan directamente en código nativo ensamblado multi-hilo, liberando gigabytes de memoria del Garbage Collector (G1GC).
+- **El Verdadero Cuello de Botella de Minecraft:** En servidores masivos con más de 80 addons de Slimefun, el problema nunca ha sido la velocidad de cálculo de la CPU, sino los **millones de objetos Java efímeros** que saturan el Garbage Collector, provocando micro-congelamientos (*Stop-The-World GC Pauses*).
+- **Por qué NO reescribir 200 repositorios a Rust/C:** Reescribir años de código Bukkit/Paper en Rust desde cero es inviable e innecesario. El modelo pragmático es **híbrido**: Java sigue ejecutando el juego, los eventos y los plugins, mientras que **Rust maneja la memoria pura off-heap** a través de la API estándar **Panama FFM (Foreign Function & Memory)** sin la sobrecarga del JNI clásico.
+- **Pre-carga en el Kernel:** Carga en el arranque del servidor [`libslimefun_ffi.so`](natives/libslimefun_ffi.so).
+- Las redes eléctricas de Slimefun, transferencias cuánticas y simulaciones continuas se computan fuera del Heap de Java en memoria nativa con paralelismo real (AVX-512 VNNI), liberando gigabytes de memoria del GC (G1GC) y garantizando 20.0 TPS clavados.
 
 ### 3. 📱 Geyser & Bedrock Companion Engine (Optimización Móvil)
 - **Compensación de Redundancia de Paquetes:** Reduce la tasa de actualización de entidades irrelevantes para clientes móviles con ancho de banda limitado.
