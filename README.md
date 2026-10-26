@@ -4,7 +4,7 @@
 
 # ⚡ DrakesPurpur 26.2
 
-**El Motor Soberano de Alto Rendimiento de Minecraft para DrakesCraft y la Segunda Temporada**
+**High-Performance Sovereign Minecraft Server Engine for DrakesCraft Season Two & Technical Networks**
 
 <p>
   <a href="https://github.com/SlimefunNewHorizons/DrakesPurpur"><img src="https://img.shields.io/badge/GitHub-DrakesPurpur-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
@@ -16,92 +16,94 @@
 
 </div>
 
-> ### 🏰 ¡Únete a la Comunidad Oficial de DrakesCraft!
+> ### 🏰 Official DrakesCraft Community & Infrastructure
 > 
-> * 🎮 **IP del Servidor**: `mc.drakescraft.cl` *(Java 26.2 & Bedrock)*
-> * 💬 **Discord Oficial**: [discord.gg/drakescraft](https://discord.gg/rv3vtXZTk7)
-> * 🌐 **Web & Guía Oficial**: [web.drakescraft.cl](https://web.drakescraft.cl) — 🛒 **Tienda Oficial**: [web.drakescraft.cl/store](https://web.drakescraft.cl/store.html)
+> * 🎮 **Server IP**: `mc.drakescraft.cl` *(Java 26.2 & Bedrock Cross-play)*
+> * 💬 **Official Discord**: [discord.gg/drakescraft](https://discord.gg/rv3vtXZTk7)
+> * 🌐 **Web Portal & Documentation**: [web.drakescraft.cl](https://web.drakescraft.cl) — 🛒 **Official Store**: [web.drakescraft.cl/store](https://web.drakescraft.cl/store.html)
 > 
-> *DrakesPurpur es el núcleo nativo que impulsa la Segunda Temporada de DrakesCraft con más de 80 expansiones de Slimefun, economía dinámica, modalidades aisladas y 20.0 TPS constantes.*
+> *DrakesPurpur is the sovereign kernel driving Season Two of DrakesCraft, powering 80+ Slimefun expansions, dynamic economies, multi-modal isolation, and rock-solid 20.0 TPS.*
 
 ---
 
-## 🎯 Misión & Filosofía de DrakesPurpur
+## 🎯 Mission & Philosophy
 
-Los servidores de Minecraft con mods y addons técnicos masivos (como Slimefun y redes logísticas) históricamente colapsan debido a la saturación del Garbage Collector de la JVM y el overhead de miles de eventos de Bukkit disparándose cada segundo.
+High-concurrency Minecraft servers running massive technical addons (such as Slimefun, automated logistics, and custom multiblock machines) historically collapse due to **JVM Garbage Collection pauses** and the overhead of millions of Bukkit events firing every second.
 
-**DrakesPurpur** nace como un fork soberano de [PurpurMC/Purpur](https://github.com/PurpurMC/Purpur) diseñado con un objetivo claro:  
-**Transformar Minecraft en un motor técnico ultra-eficiente, blindado contra crasheos y perfectamente coordinado con inteligencia autónoma SRE (SAORI) y jugadores de Bedrock (Geyser).**
-
----
-
-## ⚡ Pilares de Innovación Arquitectónica
-
-### 1. 🛡️ Kernel Crash Guard & Auto-Cicatrización (CERO Crasheos)
-- Intercepta excepciones no controladas (`NullPointerException`, `IndexOutOfBoundsException`, `ConcurrentModificationException`) en el bucle principal de tikeo (`ServerTick` y `BlockEntityTick`).
-- **Aislamiento Seguro:** Si una máquina o entidad de un plugin arroja un fallo crítico, el motor la desactiva y registra el incidente en **SQLite WAL (`drakes_faults.db`)**, impidiendo que el servidor se caiga. Los jugadores siguen jugando a 20.0 TPS sin interrupciones.
-
-### 2. 🦀 Enlace Nativo Rust Off-Heap (Java 25 Panama FFM)
-- **El Verdadero Cuello de Botella de Minecraft:** En servidores masivos con más de 80 addons de Slimefun, el problema nunca ha sido la velocidad de cálculo de la CPU, sino los **millones de objetos Java efímeros** que saturan el Garbage Collector, provocando micro-congelamientos (*Stop-The-World GC Pauses*).
-- **Por qué NO reescribir 200 repositorios a Rust/C:** Reescribir años de código Bukkit/Paper en Rust desde cero es inviable e innecesario. El modelo pragmático es **híbrido**: Java sigue ejecutando el juego, los eventos y los plugins, mientras que **Rust maneja la memoria pura off-heap** a través de la API estándar **Panama FFM (Foreign Function & Memory)** sin la sobrecarga del JNI clásico.
-- **Pre-carga en el Kernel:** Carga en el arranque del servidor [`libslimefun_ffi.so`](natives/libslimefun_ffi.so).
-- Las redes eléctricas de Slimefun, transferencias cuánticas y simulaciones continuas se computan fuera del Heap de Java en memoria nativa con paralelismo real (AVX-512 VNNI), liberando gigabytes de memoria del GC (G1GC) y garantizando 20.0 TPS clavados.
-
-### 3. 📱 Geyser & Bedrock Companion Engine (Optimización Móvil)
-- **Compensación de Redundancia de Paquetes:** Reduce la tasa de actualización de entidades irrelevantes para clientes móviles con ancho de banda limitado.
-- **Manejo Seguro de Coordenadas & Vacío:** Erradica muertes fantasma en el vacío del End/Skyblock mediante reubicación predictiva (`teleport-if-outside-border`).
-- **Ping / Keepalive Desacoplado:** Sistema alternativo de keepalive que evita expulsiones injustificadas de jugadores de consolas o celulares con alta latencia.
-
-### 4. 🤖 SAORI Kernel Bridge Directo (Adiós a DiscordSRV & Logs)
-- El motor incorpora un canal IPC / Socket directo de baja latencia con el daemon de **SAORI** (`saori-ai-daemon` en el puerto 8089).
-- Reemplaza por completo el scraping de archivos de texto (`latest.log`) y elimina la necesidad de plugins pesados de Discord.
-- Telemetría en tiempo real, chat bidireccional instantáneo entre Discord y Minecraft, y monitoreo SRE automatizado.
-
-### 5. 🔬 Rama Experimental: Slimefun Native Monolith (`feat/slimefun-native-engine`)
-- En paralelo al soporte de suites modulares (`StarSuites`), desarrollamos la absorción nativa de Slimefun dentro del propio código de Minecraft:
-  - Los bloques custom de Slimefun son tratados como `Block` nativo de Minecraft, eliminando el overhead de wrappers y NBT tags en PDC.
-  - Generación de un único ejecutable `DrakesPurpur-Server.jar` que levanta Minecraft con Slimefun integrado de fábrica.
+**DrakesPurpur** is a sovereign fork of [PurpurMC/Purpur](https://github.com/PurpurMC/Purpur) engineered with a singular objective:  
+**Transform Minecraft into an ultra-low-latency, self-healing technical engine, hardened against unhandled exceptions and natively synchronized with autonomous SRE orchestrators (SAORI) and mobile Bedrock players (Geyser).**
 
 ---
 
-## 🛠️ Pipeline de CI/CD & Auto-Deploy
+## ⚡ Core Architectural Pillars
 
-DrakesPurpur está conectado a un pipeline de **GitHub Actions** ([`.github/workflows/drakes_ci_cd.yml`](.github/workflows/drakes_ci_cd.yml)):
-1. **Compilación en la Nube:** Cada `git push` a `ver/**` compila automáticamente el ejecutable Paperclip usando Java 25 y el sistema de parches Paperweight.
-2. **Entrega a SAORI:** El artefacto compilado se transfiere a staging mediante webhooks seguros, permitiendo aplicar actualizaciones en el servidor en el próximo reinicio programado sin tocar la terminal.
+### 1. 🛡️ Kernel Crash Guard & Self-Healing (ZERO Server Crashes)
+- Intercepts unhandled exceptions (`NullPointerException`, `IndexOutOfBoundsException`, `ConcurrentModificationException`) directly within the main tick loop (`ServerTick` and `BlockEntityTick`).
+- **Dynamic Fault Isolation:** If an addon machine or entity throws an unhandled error, the engine safely disables only the faulty component and commits the incident into an **atomic SQLite WAL database (`drakes_faults.db`)**. The server never halts, and players experience continuous 20.0 TPS without disconnects.
+
+### 2. 🦀 Native Rust Off-Heap Engine (Java 25 Panama FFM)
+- **The True Bottleneck of Minecraft:** In heavily modded technical servers, the bottleneck is rarely raw CPU compute; it is the **millions of transient Java objects** generated per tick that overwhelm the Garbage Collector, resulting in disruptive *Stop-The-World (STW) pauses*.
+- **Why NOT rewrite 200 repositories to Rust/C:** Rewriting years of Bukkit/Paper plugins from scratch is infeasible and counterproductive. The pragmatic enterprise design is **hybrid**: Java executes game logic, events, and plugins, while **Rust manages pure off-heap memory** via the modern **Panama FFM (Foreign Function & Memory API)** without legacy JNI overhead.
+- **Kernel Preloading:** The server boots by preloading the acceleration binary [`libslimefun_ffi.so`](natives/libslimefun_ffi.so).
+- Electrical grids, quantum transfers, and continuous machine ticking are calculated outside the Java Heap in parallel native memory with SIMD vectorization (AVX-512 VNNI), keeping G1GC pauses sub-15ms.
+
+### 3. 📱 Geyser & Bedrock Companion Engine (Mobile & Console Tuning)
+- **Packet Redundancy Compensation:** Throttles non-critical entity updates to conserve mobile bandwidth.
+- **Predictive Void & Boundary Recovery:** Eliminates ghost void deaths in End/Skyblock environments via proactive boundary repositioning (`teleport-if-outside-border`).
+- **Decoupled Keepalive Mechanism:** Uses asynchronous alternate keepalive handshakes to prevent false timeout disconnects for high-latency mobile and cellular connections.
+
+### 4. 🤖 SAORI Kernel Bridge (Direct Socket Telemetry)
+- Native IPC / Unix Domain Socket connection linking the engine directly to the **SAORI Autonomous SRE Daemon** (`saori-ai-daemon` on port 8089).
+- Replaces heavy external Discord bridge plugins and disk log scraping (`latest.log`).
+- Enables sub-millisecond bidirectional chat bridging, real-time crash alerting, and automated incident triage by SRE AI agents.
+
+### 5. 🔬 Slimefun Native Monolith (Experimental Branch: `feat/slimefun-native-engine`)
+- Parallel R&D branch exploring the complete ingestion of Slimefun core mechanics into native Minecraft classes:
+  - Slimefun custom items are evaluated as first-order `Block` and `Item` primitives, removing PDC metadata and wrapper overhead.
+  - Produces an all-in-one standalone `DrakesPurpur-Server.jar` that launches Minecraft with full technical automation out of the box.
 
 ---
 
-## 📜 Instrucciones de Compilación Local
+## ☁️ CI/CD Pipeline & Sovereign Maven Distribution
 
-Para compilar el proyecto en local sobre Linux:
+DrakesPurpur is fully automated via **GitHub Actions** ([`.github/workflows/drakes_ci_cd.yml`](.github/workflows/drakes_ci_cd.yml)):
+1. **Cloud Compilation:** Every push to `ver/**` builds the production Paperclip server binary on GitHub runners using **Java 25** and Paperweight.
+2. **Automated API Deployment:** Builds and deploys `DrakesPurpur-API` directly to our sovereign repository at **[`https://maven.drakescraft.cl`](https://maven.drakescraft.cl)**.
+3. **Webhook Ingestion:** Delivers binary artifacts to staging with zero local CPU or RAM overhead on developer workstations.
+
+---
+
+## 📜 Local Build Instructions
+
+To build DrakesPurpur locally on Linux:
 
 ```bash
-# Requiere Java 25 LTS configurado en JAVA_HOME
+# Requires Java 25 LTS set in JAVA_HOME
 ./gradlew applyAllPatches
 ./gradlew createReobfPaperclipJar -Dorg.gradle.parallel=false
 ```
 
-El binario resultante se generará en `build/libs/DrakesPurpur-26.2-paperclip.jar`.
+The resulting production artifact will be generated at:  
+`build/libs/DrakesPurpur-26.2-paperclip.jar`.
 
 ---
 
-## 🙏 Reconocimientos & Upstream Attribution
+## 🙏 Upstream Attribution & Acknowledgments
 
-DrakesPurpur es un fork soberano creado y mantenido por [**JackStar6677-1**](https://github.com/JackStar6677-1) bajo la infraestructura de **DrakesCraft Labs** y **Star Systems**.
+DrakesPurpur is a sovereign fork engineered and maintained by [**JackStar6677-1**](https://github.com/JackStar6677-1) under **DrakesCraft Labs** and **Star Systems**.
 
-Expresamos nuestro profundo agradecimiento a los gigantes sobre cuyos hombros se construye este proyecto:
-- **[PurpurMC](https://github.com/PurpurMC/Purpur):** Por crear el fork más configurable y divertido de Minecraft.
-- **[PaperMC](https://github.com/PaperMC/Paper):** Por revolucionar el rendimiento, el sistema de parches Paperweight y la API moderna de Bukkit.
-- **[GeyserMC](https://geysermc.org/):** Por tender el puente que une a los jugadores de Bedrock y Java en un solo mundo.
-- **[TheBusyBiscuit](https://github.com/TheBusyBiscuit):** Por la creación original de Slimefun4, base de la supervivencia técnica moderna.
-- **[SpigotMC](https://www.spigotmc.org/) & [Mojang Studios](https://www.minecraft.net/):** Por el universo de Minecraft.
+We express our sincere gratitude to the upstream projects that make this platform possible:
+- **[PurpurMC](https://github.com/PurpurMC/Purpur):** For the most configurable and fun Minecraft server software.
+- **[PaperMC](https://github.com/PaperMC/Paper):** For pioneering modern server performance, Paperweight patching, and the Bukkit API.
+- **[GeyserMC](https://geysermc.org/):** For bridging Bedrock and Java editions into a unified community.
+- **[TheBusyBiscuit](https://github.com/TheBusyBiscuit):** For creating Slimefun4, the foundation of modern technical survival.
+- **[SpigotMC](https://www.spigotmc.org/) & [Mojang Studios](https://www.minecraft.net/):** For the Minecraft sandbox universe.
 
 ---
 
 <div align="center">
 
-**DrakesCraft Labs · Star Systems** · Diseñado por [**JackStar6677-1**](https://github.com/JackStar6677-1)  
-*Arquitectura Soberana de Software para la Segunda Temporada*
+**DrakesCraft Labs · Star Systems** · Maintained by [**JackStar6677-1**](https://github.com/JackStar6677-1)  
+*Sovereign Software Architecture for Season Two*
 
 </div>
