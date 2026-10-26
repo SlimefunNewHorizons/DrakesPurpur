@@ -104,6 +104,10 @@ subprojects {
     }
 
     repositories {
+        mavenLocal()
+        maven("https://maven.drakescraft.cl") {
+            name = "drakescraft-maven"
+        }
         mavenCentral()
         maven(paperMavenPublicUrl)
     }
@@ -113,6 +117,9 @@ subprojects {
             maven("https://repo.purpurmc.org/snapshots") {
                 name = "purpur"
                 credentials(PasswordCredentials::class)
+            }
+            maven("https://maven.drakescraft.cl") {
+                name = "drakescraft-repo"
             }
         }
     }

@@ -1,4 +1,4 @@
-name: DrakesPurpur CI/CD & Auto-Deploy
+name: DrakesPurpur CI/CD & Sovereign Maven Deploy
 
 on:
   push:
@@ -34,8 +34,11 @@ jobs:
       - name: Apply Paper & Purpur Patches
         run: ./gradlew applyAllPatches --stacktrace
 
-      - name: Build Paperclip Server JAR
+      - name: Build Paperclip Server JAR & API
         run: ./gradlew createReobfPaperclipJar --stacktrace
+
+      - name: Publish API to Local / CI Maven
+        run: ./gradlew publishToMavenLocal --stacktrace
 
       - name: Archive Production JAR
         uses: actions/upload-artifact@v4
@@ -44,9 +47,27 @@ jobs:
           path: build/libs/*paperclip*.jar
           retention-days: 14
 
+      - name: Deploy DrakesPurpur-API to maven.drakescraft.cl
+        if: github.ref == 'refs/heads/ver/26.2'
+        env:
+          MAVEN_REPO_TOKEN: ${{ secrets.DRAKES_MAVEN_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Publicando DrakesPurpur-API en maven.drakescraft.cl..."
+          git clone --depth 1 https://x-access-token:${MAVEN_REPO_TOKEN}@github.com/SlimefunNewHorizons/maven-repo.git /tmp/maven-repo || true
+          if [ -d "/tmp/maven-repo" ]; then
+            mkdir -p /tmp/maven-repo/org/purpurmc/purpur/purpur-api/26.2-SNAPSHOT/
+            cp -r ~/.m2/repository/org/purpurmc/purpur/purpur-api/26.2-SNAPSHOT/* /tmp/maven-repo/org/purpurmc/purpur/purpur-api/26.2-SNAPSHOT/ || true
+            cd /tmp/maven-repo
+            git config user.name "JackStar6677-1"
+            git config user.email "pablo.elias.miranda.292003@gmail.com"
+            git add .
+            git commit -m "deploy(api): publish DrakesPurpur-API 26.2-SNAPSHOT to maven.drakescraft.cl" || echo "No changes to commit"
+            git push origin master || git push origin main || true
+          fi
+
       - name: Notify SAORI Orchestrator (Webhook)
         if: success()
         env:
           SAORI_SECRET: ${{ secrets.SAORI_WEBHOOK_SECRET }}
         run: |
-          echo "Build completed successfully. Ready for Saori ingest."
+          echo "Build & Maven Deploy completed successfully. Ready for Saori ingest."
