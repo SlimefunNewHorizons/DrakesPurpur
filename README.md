@@ -63,7 +63,12 @@ High-concurrency Minecraft servers running massive technical addons (such as Sli
 - **Local Markdown (.md) Reports:** Generates standalone diagnostic files in `drakes_reports/` containing markdown tables and hardware metrics without uploading sensitive server data to third-party web viewers.
 - **Multi-Core Ryzen 9 Scheduler:** Utilizes `RyzenWorkerPool` (ForkJoinPool) to parallelize async lookups and SQLite WAL commits across all available processor cores.
 
-### 6. 🔬 Slimefun Native Monolith (Experimental Branch: `feat/slimefun-native-engine`)
+### 6. 🛡️ DrakesGrimGuard & DrakesChatGuard (Zero-Lag Kernel Security)
+- **Prescindiendo de GrimAC:** Validación directa en el kernel (`DrakesGrimGuard`) de Reach geométrico (<3.20m), velocidad horizontal (<4.20 b/t), fly y clicks por segundo (<22 CPS) antes de enrutar paquetes a la capa Bukkit.
+- **Prescindiendo de Chat Plugins Externos:** `DrakesChatGuard` incorpora filtro anti-spam (600ms de cadencia), censura bilingüe en tiempo real (`§8[censurado]§r`), prevención de paquetes crash (>256 caracteres) e intercepción de exploits de inyección de comandos (`/op`, `/calc`, `/execute`).
+- **Pruebas Sintéticas CLI Sin GUI:** `/drakes test all` ejecuta pruebas automáticas en consola validando el anticheat, chat y el motor Rust sin requerir clientes conectados.
+
+### 7. 🔬 Slimefun Native Monolith (Experimental Branch: `feat/slimefun-native-engine`)
 - Parallel R&D branch exploring the complete ingestion of Slimefun core mechanics into native Minecraft classes:
   - Slimefun custom items are evaluated as first-order `Block` and `Item` primitives, removing PDC metadata and wrapper overhead.
   - Produces an all-in-one standalone `DrakesPurpur-Server.jar` that launches Minecraft with full technical automation out of the box.
@@ -81,16 +86,16 @@ DrakesPurpur is fully automated via **GitHub Actions** ([`.github/workflows/drak
 
 ## 📜 Local Build Instructions
 
-To build DrakesPurpur locally on Linux:
+To build DrakesPurpur locally on Linux (Nova / Workstations):
 
 ```bash
 # Requires Java 25 LTS set in JAVA_HOME
 ./gradlew applyAllPatches
-./gradlew createReobfPaperclipJar -Dorg.gradle.parallel=false
+./gradlew createPaperclipJar -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs="-Xmx3584m -XX:+UseParallelGC"
 ```
 
 The resulting production artifact will be generated at:  
-`build/libs/DrakesPurpur-26.2-paperclip.jar`.
+`purpur-server/build/libs/purpur-paperclip-26.2.local-SNAPSHOT.jar`.
 
 ---
 
@@ -98,9 +103,10 @@ The resulting production artifact will be generated at:
 
 DrakesPurpur is a sovereign fork engineered and maintained by [**JackStar6677-1**](https://github.com/JackStar6677-1) under **DrakesCraft Labs** and **Star Systems**.
 
-We express our sincere gratitude to the upstream projects that make this platform possible:
+We express our sincere gratitude to the upstream projects and sovereign co-creators that make this platform possible:
 - **[PurpurMC](https://github.com/PurpurMC/Purpur):** For the most configurable and fun Minecraft server software.
 - **[PaperMC](https://github.com/PaperMC/Paper):** For pioneering modern server performance, Paperweight patching, and the Bukkit API.
+- **Chagui68 (Chagui):** Autor soberano de la Suite **Multiverse** (`MultiverseNets`, `MultiverseCreatures`, `MultiverseTinker`, `MultiverseProgramming` y `MultiverseGambling`). Reconocido en el kernel `/drakes credits`.
 - **[GeyserMC](https://geysermc.org/):** For bridging Bedrock and Java editions into a unified community.
 - **[TheBusyBiscuit](https://github.com/TheBusyBiscuit):** For creating Slimefun4, the foundation of modern technical survival.
 - **[SpigotMC](https://www.spigotmc.org/) & [Mojang Studios](https://www.minecraft.net/):** For the Minecraft sandbox universe.

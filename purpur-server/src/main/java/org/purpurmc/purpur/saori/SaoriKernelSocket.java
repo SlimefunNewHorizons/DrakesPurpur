@@ -1,42 +1,48 @@
 package org.purpurmc.purpur.saori;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * SaoriKernelSocket — Direct Zero-Lag Bridge between DrakesPurpur and SAORI SRE
- * Secure token management: Reads STRICTLY from Environment Variables or Local Secure Config
- * NEVER HARDCODES SECRETS OR TOKENS IN REPOSITORIES.
+ * SaoriKernelSocket — Direct Zero-Lag Bridge between Purpur Kernel and SAORI SRE Core.
+ * Dispatches async health pings, fault dumps, and chat events directly to Saori's listener
+ * at http://127.0.0.1:8089/kernel or remote Star VPS endpoint without Bukkit event overhead.
  * Author: Jack (JackStar6677-1) - Star Systems & DrakesCraft Labs
  */
 public final class SaoriKernelSocket {
-    private static final Logger LOGGER = Logger.getLogger("SaoriKernelBridge");
-    private static final String DEFAULT_INGEST_URL = "http://127.0.0.1:8089/api/v1/mc/event";
-    private static String ingestUrl = DEFAULT_INGEST_URL;
-    private static String bearerToken = "";
-
-    private static final ExecutorService ASYNC_DISPATCHER = Executors.newSingleThreadExecutor(r -> {
+    private static final Logger LOGGER = Logger.getLogger("SaoriKernelSocket");
+    private static final ExecutorService ASYNC_DISPATCHER = Executors.newFixedThreadPool(2, r -> {
         Thread t = new Thread(r, "Saori-Kernel-Dispatcher");
         t.setDaemon(true);
         return t;
     });
 
+    private static String ingestUrl = "http://127.0.0.1:8089/kernel";
+    private static String bearerToken = "";
+    private static volatile boolean enabled = false;
+
     private SaoriKernelSocket() {}
 
     public static void initialize() {
-        String envUrl = System.getenv("SAORI_INGEST_URL");
-        if (envUrl != null && !envUrl.isBlank()) {
-            ingestUrl = envUrl.trim();
-        }
-        String envToken = System.getenv("SAORI_INGEST_TOKEN");
-        if (envToken != null && !envToken.isBlank()) {
-            bearerToken = envToken.trim();
+        File cfg = new File("saori_bridge.properties");
+        if (cfg.exists()) {
+            try (FileInputStream in = new FileInputStream(cfg)) {
+                Properties props = new Properties();
+                props.load(in);
+                ingestUrl = props.getProperty("ingest_url", "http://127.0.0.1:8089/kernel");
+                bearerToken = props.getProperty("bearer_token", "");
+                enabled = Boolean.parseBoolean(props.getProperty("enabled", "true"));
+            } catch (Throwable t) {
+                LOGGER.warning("[SaoriBridge] No se pudo leer saori_bridge.properties, usando defaults.");
+            }
         }
         LOGGER.info("[SaoriBridge] Direct Kernel Bridge active. Target endpoint: " + ingestUrl);
     }
@@ -47,21 +53,21 @@ public final class SaoriKernelSocket {
 
     public static void dispatchChat(String playerUuid, String playerName, String message, String worldName) {
         dispatchJson(String.format(
-            "{"type":"chat","uuid":"%s","player":"%s","message":"%s","world":"%s","timestamp":%d}",
+            "{\"type\":\"chat\",\"uuid\":\"%s\",\"player\":\"%s\",\"message\":\"%s\",\"world\":\"%s\",\"timestamp\":%d}",
             playerUuid, escape(playerName), escape(message), escape(worldName), System.currentTimeMillis()
         ));
     }
 
     public static void dispatchFault(String component, String details, String trace) {
         dispatchJson(String.format(
-            "{"type":"fault","component":"%s","details":"%s","trace":"%s","timestamp":%d}",
+            "{\"type\":\"fault\",\"component\":\"%s\",\"details\":\"%s\",\"trace\":\"%s\",\"timestamp\":%d}",
             escape(component), escape(details), escape(trace), System.currentTimeMillis()
         ));
     }
 
     public static void dispatchTelemetry(double tps, double mspt, int onlinePlayers, long freeMemoryMb) {
         dispatchJson(String.format(
-            "{"type":"telemetry","tps":%.2f,"mspt":%.2f,"players":%d,"free_ram_mb":%d,"timestamp":%d}",
+            "{\"type\":\"telemetry\",\"tps\":%.2f,\"mspt\":%.2f,\"players\":%d,\"free_ram_mb\":%d,\"timestamp\":%d}",
             tps, mspt, onlinePlayers, freeMemoryMb, System.currentTimeMillis()
         ));
     }
@@ -102,7 +108,6 @@ public final class SaoriKernelSocket {
 
     private static String escape(String s) {
         if (s == null) return "";
-        return s.replace("\", "\\").replace(""", "\"").replace("
-", "\n").replace("", "\r");
+        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
     }
 }

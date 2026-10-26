@@ -41,7 +41,11 @@ public final class RyzenWorkerPool {
         return PARALLELISM;
     }
 
-    public static void runAsync(Runnable task) {
-        POOL.execute(task);
+    public static java.util.concurrent.CompletableFuture<Void> runAsync(Runnable task) {
+        return java.util.concurrent.CompletableFuture.runAsync(task, POOL);
+    }
+
+    public static <T> java.util.concurrent.CompletableFuture<T> supplyAsync(java.util.function.Supplier<T> supplier) {
+        return java.util.concurrent.CompletableFuture.supplyAsync(supplier, POOL);
     }
 }

@@ -86,8 +86,7 @@ public final class DrakesKernelBridge {
         StringBuilder sb = new StringBuilder();
         if (fault != null) {
             for (StackTraceElement elem : fault.getStackTrace()) {
-                sb.append(elem.toString()).append("
-");
+                sb.append(elem.toString()).append("\n");
                 if (sb.length() > 2000) break;
             }
         }
