@@ -52,10 +52,26 @@ public final class DrakesAdminCommand implements CommandExecutor {
             return true;
         }
 
+                if (args[0].equalsIgnoreCase("threads") || args[0].equalsIgnoreCase("spark")) {
+            sender.sendMessage(ChatColor.GOLD + "=== DrakesPurpur Ryzen 9 Thread Profiler ===");
+            sender.sendMessage(ChatColor.YELLOW + "Procesadores detectados: " + ChatColor.AQUA + org.purpurmc.purpur.profiler.DrakesProfiler.getAvailableProcessors() + " cores"
+                + ChatColor.GRAY + " | Worker Pool: " + ChatColor.GREEN + org.purpurmc.purpur.threads.RyzenWorkerPool.getParallelism() + " threads");
+            
+            org.purpurmc.purpur.profiler.DrakesProfiler.ThreadStats[] topThreads = org.purpurmc.purpur.profiler.DrakesProfiler.getTopConsumingThreads(5);
+            for (int i = 0; i < topThreads.length; i++) {
+                org.purpurmc.purpur.profiler.DrakesProfiler.ThreadStats st = topThreads[i];
+                sender.sendMessage(ChatColor.WHITE + "#" + (i + 1) + " " + ChatColor.GOLD + st.name() + ChatColor.GRAY + " (ID: " + st.id() + ")"
+                    + ChatColor.DARK_GRAY + " - CPU Time: " + ChatColor.AQUA + st.cpuTimeMs() + " ms"
+                    + ChatColor.DARK_GRAY + " - " + ChatColor.GREEN + st.state());
+            }
+            return true;
+        }
+
         sender.sendMessage(ChatColor.GOLD + "=== DrakesPurpur Kernel Commands ===");
         sender.sendMessage(ChatColor.YELLOW + "/drakes status" + ChatColor.GRAY + " - Muestra el estado del kernel y puentes.");
         sender.sendMessage(ChatColor.YELLOW + "/drakes fastpath" + ChatColor.GRAY + " - Alterna el bypass de eventos de Slimefun.");
         sender.sendMessage(ChatColor.YELLOW + "/drakes gc" + ChatColor.GRAY + " - Forzar ciclo de limpieza de memoria.");
+        sender.sendMessage(ChatColor.YELLOW + "/drakes threads" + ChatColor.GRAY + " - Profiler nativo de hilos (Reemplazo Spark).");
         sender.sendMessage(ChatColor.YELLOW + "/drakes saori" + ChatColor.GRAY + " - Enviar ping de prueba a SAORI SRE.");
         return true;
     }
