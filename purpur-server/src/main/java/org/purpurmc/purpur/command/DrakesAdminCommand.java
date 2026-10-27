@@ -47,6 +47,32 @@ public final class DrakesAdminCommand extends Command {
             return true;
         }
 
+        // Vanish toggle (Kernel embedded)
+        if (args[0].equalsIgnoreCase("vanish") || args[0].equalsIgnoreCase("vani")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(ChatColor.RED + "Este comando solo puede ser ejecutado por jugadores en el servidor.");
+                return true;
+            }
+            org.purpurmc.purpur.staff.DrakesStaffEngine.toggleVanish(player);
+            return true;
+        }
+
+        // Freeze toggle (Kernel embedded)
+        if (args[0].equalsIgnoreCase("freeze")) {
+            if (args.length < 2) {
+                sender.sendMessage(ChatColor.RED + "Uso: /drakes freeze <jugador>");
+                return true;
+            }
+            Player target = org.bukkit.Bukkit.getPlayer(args[1]);
+            if (target == null) {
+                sender.sendMessage(ChatColor.RED + "Jugador no encontrado: " + args[1]);
+                return true;
+            }
+            Player moderator = sender instanceof Player p ? p : null;
+            org.purpurmc.purpur.staff.DrakesStaffEngine.toggleFreeze(target, moderator);
+            return true;
+        }
+
         // FastPath toggle
         if (args[0].equalsIgnoreCase("fastpath")) {
             boolean current = SlimefunFastPath.isFastPathEnabled();
