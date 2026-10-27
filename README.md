@@ -200,6 +200,104 @@ The resulting production artifact will be generated at:
 
 ---
 
+## Standalone Season Two Stack & Operational Deployment (Port 25588)
+
+DrakesPurpur 26.2 acts as the monolithic host kernel powering the **Season Two** operational stack. In this architectural model, **all 94 Slimefun addons are fully encapsulated within the StarSuites monorepo (9 Mega-Suites)**, while core server infrastructure plugins (e.g., LuckPerms, BentoBox, WorldEdit, EssentialsX, MarriageMaster) remain modular plugins.
+
+### 1. Hardware & System Prerequisites
+* **Operating System**: Linux x86_64 (glibc 2.35+, Ubuntu 22.04+ or Debian 12+)
+* **Java Runtime**: **OpenJDK / Eclipse Temurin Java 25 LTS**
+* **Memory Allocation**: 8 GB minimum, 12-16 GB recommended for multi-modal operation
+* **Native Rust Acceleration**: `plugins/Slimefun/native/libslimefun_ffi.so` compiled for target architecture (Tiger Lake / AVX-512 VNNI compatible)
+* **Ports**: Game Port `25588` (TCP/UDP), RCON Port `25589` (TCP)
+
+### 2. Recommended Production Startup Script (`run.sh`)
+```bash
+#!/usr/bin/env bash
+JAVA_BIN="/usr/lib/jvm/java-25-openjdk-amd64/bin/java"
+JAR_FILE="drakespurpur-standalone.jar"
+
+exec "$JAVA_BIN" \
+  -Xms8G -Xmx12G \
+  -XX:+UseG1GC \
+  -XX:+ParallelRefProcEnabled \
+  -XX:MaxGCPauseMillis=20 \
+  -XX:+UnlockExperimentalVMOptions \
+  -XX:+DisableExplicitGC \
+  -XX:+AlwaysPreTouch \
+  -XX:G1NewSizePercent=30 \
+  -XX:G1MaxNewSizePercent=40 \
+  -XX:G1ReservePercent=15 \
+  -XX:G1HeapWastePercent=5 \
+  -XX:G1MixedGCCountTarget=4 \
+  -XX:InitiatingHeapOccupancyPercent=15 \
+  -XX:G1MixedGCLiveThresholdPercent=90 \
+  -XX:G1RSetUpdatingPauseTimePercent=5 \
+  -XX:SurvivorRatio=32 \
+  -XX:+PerfDisableSharedMem \
+  -XX:MaxTenuringThreshold=1 \
+  --enable-native-access=ALL-UNNAMED \
+  -Dusing.aikars.flags=https://mcflags.emc.gs \
+  -Daikars.new.flags=true \
+  -jar "$JAR_FILE" --nogui
+```
+
+### 3. Architecture & Plugin Demarcation
+To ensure maximum stability and zero class collisions, Season Two enforces strict domain separation:
+
+* **Inside the Suites (`plugins/Drakes*.jar`):**  
+  All 94 technical Slimefun addons are distributed across 9 compiled suites:
+  * `DrakesCore.jar`: Kernel, SQLite WAL, Dough-core, and Spatial Ticker Engine.
+  * `DrakesTech.jar`: Networks, Infinity, DynaTech, Supreme, FluffyMachines, Nanotech, EMCTech, Quaptics, etc.
+  * `DrakesBio.jar`: Genetic Chickens, Cultivation, SlimyBees, MobCapturer, TreeTaps, Gastronomicon, GlobalWarming, Drugfun.
+  * `DrakesMagic.jar`: AlchimiaVitae, Crystamae, RelicsOfCthonia, SoulJars, Netheopoiesis, TranscEndence, SpiritsUnchained, etc.
+  * `DrakesGenerators.jar`: UltimateGenerators, LiteXpansion, SMG, EcoPower, OreChunks, BetterReactors, Liquid.
+  * `DrakesUtility.jar`: Backpacks, ColoredEnderChests, ChestTerminal, SFCalc, SlimeHUD, SoundMuffler, ExtraTools, PatPat, etc.
+  * `DrakesCombat.jar`: SlimeTinker, Warfare, ExtraGear, ObsidianExpansion, SlimefunNukes, Galactifun, HardcoreSlimefun, etc.
+  * `DrakesServer.jar`: Star Engine, Dynamic Market, InvSwitcher (6 modalities), PlayerVaultZ, AxGraves, BreweryX.
+  * `DrakesMultiverse.jar`: Sovereign Suite by Chagui68 (MultiverseNets & MultiverseCreatures).
+* **Outside the Suites (Modular Infrastructure in `plugins/`):**  
+  Network and administration plugins: `LuckPerms`, `Vault`, `WorldEdit`, `WorldGuard`, `EssentialsX`, `nLogin`, `nAntiBot`, `TAB`, `DiscordSRV`, `Geyser`, `ViaVersion`, `BentoBox` (BSkyBlock, AOneBlock, OneChunk), `MarriageMaster`, `Multiverse-Core`, `DecentHolograms`, `ProtocolLib`.
+
+### 4. Dimensions & Datapack Layout
+Modern Minecraft (26.2/Paper) stores auxiliary multi-world dimensions under `world/dimensions/minecraft/`:
+* **Dimensions Path**: `world/dimensions/minecraft/<dimension_name>` (32 dimensions loaded, including `clasico`, `clasico_nether`, `clasico_the_end`, `laboratorio`, `oneblock_world`, `onechunk_world`, `bskyblock_world`, `galactifun_*`).
+* **Datapacks Path**: `world/datapacks/`
+  * Includes `Terralith_26.2_v2.6.4.zip` for vanilla world generation in `survival_clasico`.
+  * Includes `Continents_v1.1.13.zip`, `Geophilic`, and `Dungeons and Taverns`.
+
+### 5. Gameplay & Environmental Controls
+* **HardcoreSlimefun (`enabled: false` by default):**
+  * Research loss on death and hazardous machine failures are completely disabled by default to prevent unfair player deaths.
+  * Toggleable dynamically in-game by operators:
+    * `/hardcoresf toggle` (or `/hsf toggle`)
+    * `/hardcoresf on` / `/hardcoresf off`
+    * `/hardcoresf reload`
+* **GlobalWarming (`eventos-climaticos.enabled: false` by default):**
+  * Catastrophic environmental destruction (sea level rise, fire storms) is suppressed by default in `plugins/DrakesBio/modules/globalwarming.yml`.
+  * Managed via administrative command: `/gw`.
+
+### 6. Verification & Operational Health Check
+To verify server operational status via RCON or console:
+```bash
+# Check loaded plugins and suites
+plugins
+
+# Verify tick performance (target: 20.0 TPS)
+tps
+
+# Verify loaded multi-world dimensions
+mv list
+
+# Execute synthetic kernel anticheat and crash-guard tests
+/drakes test all
+
+# Inspect StarSuites active modules
+/drakessuites
+```
+
+---
+
 ## Upstream Attribution & Acknowledgments
 
 DrakesPurpur is a sovereign fork engineered and maintained by [**JackStar6677-1**](https://github.com/JackStar6677-1) under **DrakesCraft Labs** and **Star Systems**.
