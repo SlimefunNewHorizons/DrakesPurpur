@@ -61,13 +61,14 @@ public final class DrakesModalityEngine {
     }
 
     public static String getModalityForWorld(World world) {
-        if (world == null) return "survival";
+        if (world == null) return "survival_sf";
         String name = world.getName().toLowerCase();
+        if (name.contains("clasico") || name.contains("classic") || name.contains("vanilla")) return "survival_clasico";
         if (name.contains("oneblock") || name.contains("ob")) return "oneblock";
+        if (name.contains("onechunk") || name.contains("oc")) return "onechunk";
         if (name.contains("skyblock") || name.contains("bskyblock") || name.contains("islands")) return "skyblock";
-        if (name.contains("creative") || name.contains("creativo")) return "creative";
         if (name.contains("lab") || name.contains("test") || name.contains("laboratorio")) return "lab";
-        return "survival";
+        return "survival_sf";
     }
 
     public static void handleWorldChange(Player player, World fromWorld, World toWorld) {

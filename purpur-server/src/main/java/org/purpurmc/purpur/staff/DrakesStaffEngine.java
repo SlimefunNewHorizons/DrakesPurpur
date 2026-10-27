@@ -23,6 +23,7 @@ public final class DrakesStaffEngine {
     private static final Logger LOGGER = Logger.getLogger("DrakesStaffEngine");
     private static final Set<UUID> VANISHED_PLAYERS = ConcurrentHashMap.newKeySet();
     private static final Set<UUID> FROZEN_PLAYERS = ConcurrentHashMap.newKeySet();
+    private static final Set<UUID> SOVEREIGN_GOD_PLAYERS = ConcurrentHashMap.newKeySet();
     private static final Map<UUID, AltRecord> ALT_CACHE = new ConcurrentHashMap<>();
 
     public record AltRecord(String ipHash, String country, String isp, int altCount) {}
@@ -30,7 +31,7 @@ public final class DrakesStaffEngine {
     private DrakesStaffEngine() {}
 
     public static void initialize() {
-        LOGGER.info("[StaffEngine] Initialized kernel-embedded staff management & vanish/freeze matrix.");
+        LOGGER.info("[StaffEngine] Initialized kernel-embedded staff management, vanish/freeze matrix & sovereign godmode.");
     }
 
     public static boolean toggleVanish(Player player) {
@@ -40,18 +41,43 @@ public final class DrakesStaffEngine {
             for (Player target : Bukkit.getOnlinePlayers()) {
                 target.showPlayer(player);
             }
-            player.sendMessage(ChatColor.GOLD + "[StaffEngine] " + ChatColor.YELLOW + "Modo Vanish: " + ChatColor.RED + "DESACTIVADO");
+            player.setSleepingIgnored(false);
+            player.setCanPickupItems(true);
+            player.setCollidable(true);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aVanish &7desactivado&a. Volviste a ser visible."));
             return false;
         } else {
             VANISHED_PLAYERS.add(uuid);
             for (Player target : Bukkit.getOnlinePlayers()) {
-                if (!target.hasPermission("drakes.staff")) {
+                if (!target.hasPermission("odysseia.vanish.see") && !target.hasPermission("drakes.staff")) {
                     target.hidePlayer(player);
                 }
             }
-            player.sendMessage(ChatColor.GOLD + "[StaffEngine] " + ChatColor.YELLOW + "Modo Vanish: " + ChatColor.GREEN + "ACTIVADO " + ChatColor.GRAY + "(Invisible en tab y mundo)");
+            player.setSleepingIgnored(true);
+            player.setCanPickupItems(false);
+            player.setCollidable(false);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aVanish &2activado&a. Quedaste oculto para jugadores sin permiso de staff."));
             return true;
         }
+    }
+
+    public static boolean toggleSovereignGod(Player player) {
+        UUID uuid = player.getUniqueId();
+        if (SOVEREIGN_GOD_PLAYERS.contains(uuid)) {
+            SOVEREIGN_GOD_PLAYERS.remove(uuid);
+            player.setInvulnerable(false);
+            player.sendMessage(ChatColor.DARK_RED + "✦ [SovereignGod] Inmunidad absoluta DESACTIVADA.");
+            return false;
+        } else {
+            SOVEREIGN_GOD_PLAYERS.add(uuid);
+            player.setInvulnerable(true);
+            player.sendMessage(ChatColor.GOLD + "✦ [SovereignGod] Inmunidad absoluta ACTIVADA (Invulnerable ante cualquier daño/void).");
+            return true;
+        }
+    }
+
+    public static boolean isSovereignGod(UUID uuid) {
+        return SOVEREIGN_GOD_PLAYERS.contains(uuid);
     }
 
     public static boolean isVanished(UUID uuid) {

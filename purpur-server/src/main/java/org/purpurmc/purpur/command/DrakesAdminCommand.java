@@ -57,6 +57,16 @@ public final class DrakesAdminCommand extends Command {
             return true;
         }
 
+        // Sovereign Godmode / Inmortalidad Administrativa (/ultragod)
+        if (args[0].equalsIgnoreCase("ultragod") || args[0].equalsIgnoreCase("godmode")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(ChatColor.RED + "Este comando solo puede ser ejecutado por jugadores.");
+                return true;
+            }
+            org.purpurmc.purpur.staff.DrakesStaffEngine.toggleSovereignGod(player);
+            return true;
+        }
+
         // Freeze toggle (Kernel embedded)
         if (args[0].equalsIgnoreCase("freeze")) {
             if (args.length < 2) {
