@@ -2,8 +2,8 @@
 
   <img src="banner.svg" alt="Slimefun Native Engine Banner" width="920" />
 
-# 🧪 DrakesPurpur: Slimefun Native Engine Monolith
-### `feat/slimefun-native-engine` · Experimental Next-Gen R&D Branch
+# DrakesPurpur: Slimefun Native Engine Monolith
+### `feat/slimefun-native-engine` - Experimental Next-Gen R&D Branch
 
 <p>
   <img src="https://img.shields.io/badge/Architecture-Native%20Monolith-purple?style=for-the-badge&logo=rust&logoColor=white" alt="Native Monolith"/>
@@ -16,7 +16,7 @@
 
 ---
 
-## 🔬 Vision: The World's First Native Slimefun Server Engine
+## Vision: The World's First Native Slimefun Server Engine
 
 Historically, technical modded Minecraft servers are fractured into two conflicting paradigms:
 1. **Bukkit Plugin Layers:** High compatibility, but plagued by `PluginClassLoader` indirection, PDC serialization overhead, and redundant Bukkit event queues.
@@ -29,7 +29,7 @@ Instead of simulating electrical cables, solar generators, and genetic incubator
 
 ---
 
-## ⚡ Technical Roadmap & Architectural Differences
+## Technical Roadmap & Architectural Differences
 
 ```mermaid
 graph TD
@@ -65,7 +65,7 @@ This branch incorporates the sovereign porting toolchain in [`tools/porting/port
 
 ---
 
-## ⚠️ Branch Status & Production Notice
+## Branch Status & Production Notice
 
 > [!WARNING]
 > **EXPERIMENTAL R&D BRANCH:** This branch (`feat/slimefun-native-engine`) is actively undergoing heavy architectural refactoring and is NOT intended for immediate live deployment on Dallas.
@@ -74,7 +74,7 @@ This branch incorporates the sovereign porting toolchain in [`tools/porting/port
 
 ---
 
-## 🛠️ Building the Experimental Monolith
+## Building the Experimental Monolith
 
 ```bash
 # Checkout this branch
