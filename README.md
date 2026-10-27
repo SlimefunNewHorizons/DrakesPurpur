@@ -106,7 +106,7 @@ DrakesPurpur is a sovereign fork engineered and maintained by [**JackStar6677-1*
 We express our sincere gratitude to the upstream projects and sovereign co-creators that make this platform possible:
 - **[PurpurMC](https://github.com/PurpurMC/Purpur):** For the most configurable and fun Minecraft server software.
 - **[PaperMC](https://github.com/PaperMC/Paper):** For pioneering modern server performance, Paperweight patching, and the Bukkit API.
-- **Chagui68 (Chagui):** Autor soberano de la Suite **Multiverse** (`MultiverseNets`, `MultiverseCreatures`, `MultiverseTinker`, `MultiverseProgramming` y `MultiverseGambling`). Reconocido en el kernel `/drakes credits`.
+- **Chagui68 (Chagui):** Autor soberano de la Suite **Multiverse** (`MultiverseNets`, `MultiverseCreatures`, `MultiverseTinker`, `MultiverseProgramming` y `MultiverseGambling`) e innovador en **[Pumpkin-launcher](https://github.com/Chagui68/Pumpkin-launcher)** (compatibilidad de ClassLoader, sanitización de plugins y parches PatchBukkit). Reconocido en el kernel `/drakes credits`.
 - **[GeyserMC](https://geysermc.org/):** For bridging Bedrock and Java editions into a unified community.
 - **[TheBusyBiscuit](https://github.com/TheBusyBiscuit):** For creating Slimefun4, the foundation of modern technical survival.
 - **[SpigotMC](https://www.spigotmc.org/) & [Mojang Studios](https://www.minecraft.net/):** For the Minecraft sandbox universe.

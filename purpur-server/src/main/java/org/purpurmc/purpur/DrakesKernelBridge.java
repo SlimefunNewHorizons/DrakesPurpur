@@ -30,6 +30,7 @@ public final class DrakesKernelBridge {
         initFaultDatabase();
         loadRustNativeBridge();
         SaoriKernelSocket.initialize();
+        org.purpurmc.purpur.compat.ChaguiPumpkinCompat.initialize();
     }
 
     private static void initFaultDatabase() {
