@@ -618,4 +618,31 @@ public class PurpurConfig {
             startupCommands.add(command);
         });
     }
+
+    // ==========================================
+    // DrakesCraft & Star Sovereign Configuration
+    // ==========================================
+    public static boolean drakesModalityIsolationEnabled = true;
+    public static boolean drakesWeeklyLabResetEnabled = true;
+    public static boolean drakesDailyBackupEnabled = true;
+    public static int drakesBackupRetentionDays = 7;
+    public static boolean drakesAntiXrayEnhanced = true;
+    public static boolean drakesStaffNametagAltDisplay = true;
+    public static String drakesMotdLine1 = "<gradient:#FF5555:#FFAA00><b>DrakesCraft 26.2</b></gradient> <dark_gray>· <gray>Temporada 2 Oficial";
+    public static String drakesMotdLine2 = "<yellow>Slimefun 11 <dark_gray>| <aqua>Multi-Modalidad <dark_gray>| <gold>Kernel Soberano";
+    public static String drakesTabHeader = "\n<gradient:#FF5555:#FFAA00><b>✦ DRAKES SURVIVAL NETWORK ✦</b></gradient>\n<gray>mc.drakescraft.cl <dark_gray>· <white>Temporada 2\n";
+    public static String drakesTabFooter = "\n<gray>Ping: <green>%ping%ms <dark_gray>· <gray>Modalidad: <gold>%modality% <dark_gray>· <gray>En Línea: <aqua>%online%/%max%\n<yellow>web.drakescraft.cl\n";
+
+    private static void drakesSovereignSettings() {
+        drakesModalityIsolationEnabled = getBoolean("settings.drakes.modalities.enabled", drakesModalityIsolationEnabled);
+        drakesWeeklyLabResetEnabled = getBoolean("settings.drakes.modalities.weekly-lab-reset", drakesWeeklyLabResetEnabled);
+        drakesDailyBackupEnabled = getBoolean("settings.drakes.backup.daily-7z-enabled", drakesDailyBackupEnabled);
+        drakesBackupRetentionDays = getInt("settings.drakes.backup.retention-days", drakesBackupRetentionDays);
+        drakesAntiXrayEnhanced = getBoolean("settings.drakes.security.enhanced-anti-xray", drakesAntiXrayEnhanced);
+        drakesStaffNametagAltDisplay = getBoolean("settings.drakes.staff.show-alts-on-nametag", drakesStaffNametagAltDisplay);
+        drakesMotdLine1 = getString("settings.drakes.motd.line1", drakesMotdLine1);
+        drakesMotdLine2 = getString("settings.drakes.motd.line2", drakesMotdLine2);
+        drakesTabHeader = getString("settings.drakes.tab.header", drakesTabHeader);
+        drakesTabFooter = getString("settings.drakes.tab.footer", drakesTabFooter);
+    }
 }

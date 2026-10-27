@@ -110,12 +110,56 @@ public final class DrakesStaffEngine {
         return FROZEN_PLAYERS.contains(uuid);
     }
 
-    public static void registerAlt(UUID uuid, String ipHash, String country, String isp, int altCount) {
-        ALT_CACHE.put(uuid, new AltRecord(ipHash, country, isp, altCount));
+    public static void registerAlt(UUID uuid, String playerName, String ip, String country, String isp) {
+        String ipClean = ip != null ? ip.replace("/", "").split(":")[0] : "127.0.0.1";
+        org.purpurmc.purpur.threads.RyzenWorkerPool.runAsync(() -> {
+            try {
+                Class.forName("org.sqlite.JDBC");
+                try (java.sql.Connection conn = java.sql.DriverManager.getConnection("jdbc:sqlite:drakes_staff_telemetry.db");
+                     java.sql.Statement stmt = conn.createStatement()) {
+                    stmt.execute("PRAGMA journal_mode = WAL;");
+                    stmt.execute("CREATE TABLE IF NOT EXISTS player_ip_history ("
+                        + "uuid TEXT NOT NULL, name TEXT NOT NULL, ip TEXT NOT NULL, country TEXT, isp TEXT, last_seen INTEGER, "
+                        + "PRIMARY KEY(uuid, ip));");
+                }
+                try (java.sql.Connection conn = java.sql.DriverManager.getConnection("jdbc:sqlite:drakes_staff_telemetry.db");
+                     java.sql.PreparedStatement ps = conn.prepareStatement(
+                         "INSERT INTO player_ip_history (uuid, name, ip, country, isp, last_seen) VALUES (?, ?, ?, ?, ?, ?) "
+                         + "ON CONFLICT(uuid, ip) DO UPDATE SET last_seen = excluded.last_seen;");
+                     java.sql.PreparedStatement countPs = conn.prepareStatement(
+                         "SELECT COUNT(DISTINCT uuid) FROM player_ip_history WHERE ip = ?;")) {
+                    ps.setString(1, uuid.toString());
+                    ps.setString(2, playerName);
+                    ps.setString(3, ipClean);
+                    ps.setString(4, country != null ? country : "CL");
+                    ps.setString(5, isp != null ? isp : "ISP");
+                    ps.setLong(6, System.currentTimeMillis());
+                    ps.executeUpdate();
+
+                    countPs.setString(1, ipClean);
+                    int alts = 1;
+                    try (java.sql.ResultSet rs = countPs.executeQuery()) {
+                        if (rs.next()) alts = rs.getInt(1);
+                    }
+                    ALT_CACHE.put(uuid, new AltRecord(ipClean, country != null ? country : "CL", isp != null ? isp : "ISP", alts));
+                }
+            } catch (Throwable t) {
+                LOGGER.fine("[StaffEngine] Error registering player IP telemetry: " + t.getMessage());
+            }
+        });
+    }
+
+    public static String getStaffInspectionLine(Player target) {
+        AltRecord record = getAltRecord(target.getUniqueId());
+        return ChatColor.DARK_AQUA + "[" + target.getName() + "] "
+            + ChatColor.GRAY + "Alts: " + (record.altCount() > 1 ? ChatColor.RED : ChatColor.GREEN) + record.altCount() + " "
+            + ChatColor.GRAY + "| IP: " + ChatColor.YELLOW + record.ipHash() + " "
+            + ChatColor.GRAY + "| Pais: " + ChatColor.AQUA + record.country() + " "
+            + ChatColor.GRAY + "| Red: " + ChatColor.LIGHT_PURPLE + record.isp();
     }
 
     public static AltRecord getAltRecord(UUID uuid) {
-        return ALT_CACHE.getOrDefault(uuid, new AltRecord("unknown", "CL", "Entel/VTR", 1));
+        return ALT_CACHE.getOrDefault(uuid, new AltRecord("127.0.0.1", "CL", "Local/Fiber", 1));
     }
 
     public static Set<UUID> getVanishedPlayers() {

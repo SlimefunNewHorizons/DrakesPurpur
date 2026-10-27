@@ -83,6 +83,21 @@ public final class DrakesAdminCommand extends Command {
             return true;
         }
 
+        // Staff Inspect / Telemetry
+        if (args[0].equalsIgnoreCase("inspect") || args[0].equalsIgnoreCase("alts") || args[0].equalsIgnoreCase("check")) {
+            if (args.length < 2) {
+                sender.sendMessage(ChatColor.RED + "Uso: /drakes inspect <jugador>");
+                return true;
+            }
+            Player target = org.bukkit.Bukkit.getPlayer(args[1]);
+            if (target == null) {
+                sender.sendMessage(ChatColor.RED + "Jugador no encontrado: " + args[1]);
+                return true;
+            }
+            sender.sendMessage(org.purpurmc.purpur.staff.DrakesStaffEngine.getStaffInspectionLine(target));
+            return true;
+        }
+
         // FastPath toggle
         if (args[0].equalsIgnoreCase("fastpath")) {
             boolean current = SlimefunFastPath.isFastPathEnabled();
