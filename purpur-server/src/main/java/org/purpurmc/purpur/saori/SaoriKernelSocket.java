@@ -1,113 +1,176 @@
 package org.purpurmc.purpur.saori;
 
-import java.io.File;
-import java.io.FileInputStream;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 /**
- * SaoriKernelSocket — Direct Zero-Lag Bridge between Purpur Kernel and SAORI SRE Core.
- * Dispatches async health pings, fault dumps, and chat events directly to Saori's listener
- * at http://127.0.0.1:8089/kernel or remote Star VPS endpoint without Bukkit event overhead.
- * Author: Jack (JackStar6677-1) - Star Systems & DrakesCraft Labs
+ * Transporte motor -> SAORI. Cola en memoria acotada + un hilo propio; nunca bloquea al llamador.
+ * Lleva todo por PrivacyGate. Destino: POST {endpoint}/kernel con Bearer (solo loopback).
  */
 public final class SaoriKernelSocket {
-    private static final Logger LOGGER = Logger.getLogger("SaoriKernelSocket");
-    private static final ExecutorService ASYNC_DISPATCHER = Executors.newFixedThreadPool(2, r -> {
-        Thread t = new Thread(r, "Saori-Kernel-Dispatcher");
-        t.setDaemon(true);
-        return t;
-    });
+    private static final Logger LOGGER = Logger.getLogger("SaoriLink");
+    private static final int BATCH = 50;
+    private static final long MAX_BACKOFF_MS = 60_000;
 
-    private static String ingestUrl = "http://127.0.0.1:8089/kernel";
-    private static String bearerToken = "";
+    private static volatile SaoriConfig cfg = null;
+    private static volatile BlockingQueue<JsonObject> queue = new ArrayBlockingQueue<>(10);
+    private static volatile Thread worker;
     private static volatile boolean enabled = false;
+
+    private static final AtomicLong SENT = new AtomicLong();
+    private static final AtomicLong DROPPED = new AtomicLong();
+    private static final AtomicLong BLOCKED = new AtomicLong();
+    private static volatile long lastOkMs;
+    private static volatile long lastErrMs;
+    private static volatile String lastError = "";
 
     private SaoriKernelSocket() {}
 
-    public static void initialize() {
-        File cfg = new File("saori_bridge.properties");
-        if (cfg.exists()) {
-            try (FileInputStream in = new FileInputStream(cfg)) {
-                Properties props = new Properties();
-                props.load(in);
-                ingestUrl = props.getProperty("ingest_url", "http://127.0.0.1:8089/kernel");
-                bearerToken = props.getProperty("bearer_token", "");
-                enabled = Boolean.parseBoolean(props.getProperty("enabled", "true"));
-            } catch (Throwable t) {
-                LOGGER.warning("[SaoriBridge] No se pudo leer saori_bridge.properties, usando defaults.");
-            }
+    public static synchronized void initialize(SaoriConfig config) {
+        cfg = config;
+        enabled = config.enabled;
+        if (!enabled) {
+            LOGGER.info("[SaoriLink] SAORI desactivada (" + (config.token == null ? config.tokenProblem : "enabled: false") + ").");
+            return;
         }
-        LOGGER.info("[SaoriBridge] Direct Kernel Bridge active. Target endpoint: " + ingestUrl);
+        queue = new ArrayBlockingQueue<>(config.queueSize);
+        Thread t = new Thread(SaoriKernelSocket::loop, "Saori-Kernel-Dispatcher");
+        t.setDaemon(true);
+        worker = t;
+        t.start();
+        LOGGER.info("[SaoriLink] Transporte activo hacia " + config.endpoint + " (cola " + config.queueSize + ").");
     }
 
-    public static ExecutorService getAsyncExecutor() {
-        return ASYNC_DISPATCHER;
+    static void countBlocked() {
+        BLOCKED.incrementAndGet();
+    }
+
+    public static boolean isEnabled() {
+        return enabled;
+    }
+
+    public static String stats() {
+        return "cola=" + queue.size() + "/" + (cfg == null ? 0 : cfg.queueSize) + " enviados=" + SENT.get()
+            + " descartados=" + DROPPED.get() + " bloqueados_privacidad=" + BLOCKED.get()
+            + " ultimo_ok=" + age(lastOkMs) + " ultimo_error=" + (lastErrMs == 0 ? "-" : age(lastErrMs) + " (" + lastError + ")");
+    }
+
+    private static String age(long ms) {
+        return ms == 0 ? "nunca" : ((System.currentTimeMillis() - ms) / 1000) + "s";
+    }
+
+    /** Encola un evento. kind + texto pasan por PrivacyGate. Nunca bloquea ni lanza. */
+    public static boolean emit(String kind, String textForGate, JsonObject body) {
+        SaoriConfig c = cfg;
+        if (!enabled || c == null) return false;
+        try {
+            if (!c.gate.allow(kind, textForGate)) {
+                BLOCKED.incrementAndGet();
+                return false;
+            }
+            body.addProperty("type", kind);
+            body.addProperty("timestamp", System.currentTimeMillis());
+            BlockingQueue<JsonObject> q = queue;
+            if (!q.offer(body)) {
+                q.poll(); // descarta el mas viejo, conserva lo reciente
+                DROPPED.incrementAndGet();
+                q.offer(body);
+            }
+            return true;
+        } catch (Throwable t) {
+            return false;
+        }
     }
 
     public static void dispatchChat(String playerUuid, String playerName, String message, String worldName) {
-        dispatchJson(String.format(
-            "{\"type\":\"chat\",\"uuid\":\"%s\",\"player\":\"%s\",\"message\":\"%s\",\"world\":\"%s\",\"timestamp\":%d}",
-            playerUuid, escape(playerName), escape(message), escape(worldName), System.currentTimeMillis()
-        ));
+        JsonObject o = new JsonObject();
+        o.addProperty("uuid", playerUuid);
+        o.addProperty("player", playerName);
+        o.addProperty("message", message);
+        o.addProperty("world", worldName);
+        emit("chat", message, o);
     }
 
     public static void dispatchFault(String component, String details, String trace) {
-        dispatchJson(String.format(
-            "{\"type\":\"fault\",\"component\":\"%s\",\"details\":\"%s\",\"trace\":\"%s\",\"timestamp\":%d}",
-            escape(component), escape(details), escape(trace), System.currentTimeMillis()
-        ));
+        JsonObject o = new JsonObject();
+        o.addProperty("component", component);
+        o.addProperty("details", details);
+        o.addProperty("trace", trace);
+        emit("fault", component + " " + details + " " + trace, o);
     }
 
     public static void dispatchTelemetry(double tps, double mspt, int onlinePlayers, long freeMemoryMb) {
-        dispatchJson(String.format(
-            "{\"type\":\"telemetry\",\"tps\":%.2f,\"mspt\":%.2f,\"players\":%d,\"free_ram_mb\":%d,\"timestamp\":%d}",
-            tps, mspt, onlinePlayers, freeMemoryMb, System.currentTimeMillis()
-        ));
+        JsonObject o = new JsonObject();
+        o.addProperty("tps", Math.round(tps * 100) / 100.0);
+        o.addProperty("mspt", Math.round(mspt * 100) / 100.0);
+        o.addProperty("players", onlinePlayers);
+        o.addProperty("free_ram_mb", freeMemoryMb);
+        emit("telemetry", null, o);
     }
 
-    private static void dispatchJson(String jsonPayload) {
-        ASYNC_DISPATCHER.submit(() -> {
-            HttpURLConnection conn = null;
+    private static void loop() {
+        long backoff = 0;
+        List<JsonObject> batch = new ArrayList<>(BATCH);
+        while (true) {
             try {
-                URL url = new URL(ingestUrl);
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                conn.setRequestProperty("User-Agent", "DrakesPurpur-Kernel/26.2");
-                if (!bearerToken.isEmpty()) {
-                    conn.setRequestProperty("Authorization", "Bearer " + bearerToken);
-                }
-                conn.setConnectTimeout(1500);
-                conn.setReadTimeout(1500);
-                conn.setDoOutput(true);
-
-                byte[] payloadBytes = jsonPayload.getBytes(StandardCharsets.UTF_8);
-                try (OutputStream os = conn.getOutputStream()) {
-                    os.write(payloadBytes);
-                }
-                int responseCode = conn.getResponseCode();
-                if (responseCode >= 400) {
-                    LOGGER.fine("[SaoriBridge] Non-200 response from SAORI ingest: " + responseCode);
-                }
+                if (backoff > 0) Thread.sleep(backoff);
+                batch.clear();
+                JsonObject first = queue.take();
+                batch.add(first);
+                queue.drainTo(batch, BATCH - 1);
+                JsonArray arr = new JsonArray();
+                batch.forEach(arr::add);
+                JsonObject payload = new JsonObject();
+                payload.add("events", arr);
+                post("/kernel", payload.toString(), cfg.timeoutMs, cfg.timeoutMs);
+                SENT.addAndGet(batch.size());
+                lastOkMs = System.currentTimeMillis();
+                backoff = 0;
+            } catch (InterruptedException e) {
+                return;
             } catch (Throwable t) {
-                LOGGER.fine("[SaoriBridge] Ingest endpoint offline or unreachable: " + t.getMessage());
-            } finally {
-                if (conn != null) {
-                    conn.disconnect();
-                }
+                lastErrMs = System.currentTimeMillis();
+                lastError = t.getClass().getSimpleName();
+                // el lote fallido se pierde (log/telemetria no son criticos); backoff exponencial
+                DROPPED.addAndGet(batch.size());
+                backoff = backoff == 0 ? 1000 : Math.min(MAX_BACKOFF_MS, backoff * 2);
             }
-        });
+        }
     }
 
-    private static String escape(String s) {
-        if (s == null) return "";
-        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+    /** POST JSON con Bearer; devuelve el cuerpo de la respuesta. Lanza si status >= 400 o hay timeout. */
+    static String post(String path, String json, int connectMs, int readMs) throws java.io.IOException {
+        SaoriConfig c = cfg;
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(c.endpoint + path).openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            conn.setRequestProperty("User-Agent", "DrakesPurpur-Kernel/26.2");
+            conn.setRequestProperty("Authorization", "Bearer " + c.token);
+            conn.setConnectTimeout(connectMs);
+            conn.setReadTimeout(readMs);
+            conn.setDoOutput(true);
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(json.getBytes(StandardCharsets.UTF_8));
+            }
+            int code = conn.getResponseCode();
+            if (code >= 400) throw new java.io.IOException("HTTP " + code);
+            try (var in = conn.getInputStream()) {
+                return new String(in.readNBytes(65536), StandardCharsets.UTF_8);
+            }
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
     }
 }

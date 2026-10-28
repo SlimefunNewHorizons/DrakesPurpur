@@ -74,6 +74,7 @@ public class PurpurConfig {
         commands = new HashMap<>();
         commands.put("purpur", new PurpurCommand("purpur"));
         commands.put("drakes", new org.purpurmc.purpur.command.DrakesAdminCommand("drakes"));
+        commands.put("saori", new org.purpurmc.purpur.saori.SaoriCommand("saori"));
 
         version = getInt("config-version", 49);
         set("config-version", 49);

@@ -128,8 +128,7 @@ public final class DrakesAdminCommand extends Command {
 
         // Telemetry ping
         if (args[0].equalsIgnoreCase("saori")) {
-            SaoriKernelSocket.dispatchTelemetry(20.0, 5.0, 1, Runtime.getRuntime().freeMemory() / (1024 * 1024));
-            sender.sendMessage(ChatColor.GOLD + "[DrakesPurpur] " + ChatColor.GREEN + "Ping de telemetria despachado a SAORI exitosamente.");
+            org.purpurmc.purpur.saori.SaoriLink.admin(sender, args);
             return true;
         }
 
@@ -246,7 +245,7 @@ public final class DrakesAdminCommand extends Command {
         sender.sendMessage(ChatColor.YELLOW + "/drakes threads" + ChatColor.GRAY + " - Profiler nativo de hilos (Reemplazo Spark).");
         sender.sendMessage(ChatColor.YELLOW + "/drakes fastpath" + ChatColor.GRAY + " - Alterna el bypass de eventos de Slimefun.");
         sender.sendMessage(ChatColor.YELLOW + "/drakes gc" + ChatColor.GRAY + " - Forzar ciclo de limpieza de memoria.");
-        sender.sendMessage(ChatColor.YELLOW + "/drakes saori" + ChatColor.GRAY + " - Enviar ping de prueba a SAORI SRE.");
+        sender.sendMessage(ChatColor.YELLOW + "/drakes saori" + ChatColor.GRAY + " status|check|test - Integracion directa con SAORI.");
         sender.sendMessage(ChatColor.YELLOW + "/drakes menu" + ChatColor.GRAY + " - Abre el panel interactivo visual (GUI).");
         return true;
     }
@@ -258,6 +257,9 @@ public final class DrakesAdminCommand extends Command {
                     .stream()
                     .filter(sub -> sub.startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("saori")) {
+            return Arrays.asList("status", "check", "test").stream().filter(sub -> sub.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("test")) {
             return Arrays.asList("all", "anticheat", "chat", "rust", "threads")
