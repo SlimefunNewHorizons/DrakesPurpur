@@ -36,6 +36,18 @@ High-concurrency Minecraft servers running extensive technical addons (such as S
 
 ---
 
+## Version compatibility
+
+| Line | Branch | Minecraft | Java | Paper API (compile-time) | Status |
+|---|---|---|---|---|---|
+| DrakesPurpur modular | `ver/26.2` | 26.2 | 25 LTS | Paper `26.2` (`apiVersion = 26.2`, see `gradle.properties`) | test / staging (Season Two) |
+| DrakesPurpur monolith | `monolito-local` (local only) | 26.2 | 25 LTS | Paper `26.2` | test (experimental R&D) |
+| Production server | plain Paper 1.21.11 (not this fork) | 1.21.11 | 21 | `1.21.11-R0.1-SNAPSHOT` | production |
+
+The suites and addons that run on this kernel come from the Universal line of the Slimefun core (`11.0-Universal-26.x-SNAPSHOT`), which is compiled against Paper API `1.21.11-R0.1-SNAPSHOT`, targets Java 21 bytecode and is the same codebase as the 1.21.11 production core. Addons for 26.x are obtained with `ai-hub/scripts/portar_addons.py`.
+
+**Minecraft versions older than 1.21.11 are not supported and not tested.**
+
 ## Core Architectural Pillars
 
 ### 1. Kernel Crash Guard & Self-Healing (Zero Server Crashes)
@@ -140,10 +152,12 @@ DrakesPurpur pioneers a dual-track architectural model addressing both productio
   +----------------------------------------------+  +----------------------------------------------+
 ```
 
-Both branches share the same kernel (including `DrakesDb`); they differ only in how the suites are delivered:
+Both branches share the same kernel (including `DrakesDb`, the `kernel.db` WAL database inspected with `/drakes db`); they differ only in how the suites are delivered:
 
 * **`ver/26.2` (modular):** kernel only; suites are external JARs in `plugins/`.
 * **`monolito-local` (monolith, local branch, never pushed):** suites are embedded in the server JAR from `purpur-server/bundled/drakes-bundled/`. Fill that folder with `scripts/empaquetar_monolito.sh [path-to-Drakes-Suites]`, then build.
+
+**Modular vs monolith, artifact size:** the modular `purpur-paperclip` jar is about **68.8 MB**; the monolith jar with the bundled suites is about **82 MB**.
 
 > **Build notes.** Without `BUILD_NUMBER` the version is `26.2.local-SNAPSHOT`, which breaks addons that parse `Bukkit.getBukkitVersion`; build with `BUILD_NUMBER=134 ./gradlew createPaperclipJar`. For the **modular** build, remove the `srcDir("bundled")` line from the generated `build.gradle.kts` so nothing is embedded.
 

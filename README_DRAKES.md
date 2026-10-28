@@ -1,114 +1,120 @@
-# DrakesPurpur 26.2 - El Motor Soberano de DrakesCraft
-> **Kernel Fork de Purpur 26.2 (Paperweight + Java 25 LTS)**  
-> **Arquitecto Jefe & Creador:** Jack (JackStar6677-1)  
-> **Fecha de Actualizacion:** Octubre 2026  
-> **Proposito:** Proporcionar la base de ejecucion mas rapida, resistente y blindada para la Temporada 2 de DrakesCraft y redes tecnicas de alto rendimiento.
+# DrakesPurpur 26.2 - The Sovereign Engine of DrakesCraft
+> **Purpur 26.2 Kernel Fork (Paperweight + Java 25 LTS)**  
+> **Chief Architect & Creator:** Jack (JackStar6677-1)  
+> **Last updated:** October 2026  
+> **Purpose:** Provide the fastest, most resilient and hardened runtime base for DrakesCraft Season Two and other high-performance technical networks.
 
 ---
 
-## Infraestructura Oficial y Comunidad
+## Official Infrastructure and Community
 
-* **IP de Conexion**: `mc.drakescraft.cl` (Java 26.2 y Bedrock Cross-play en puerto 25565)
-* **Discord Oficial**: [discord.gg/drakescraft](https://discord.gg/rv3vtXZTk7)
-* **Portal Web y Documentacion**: [web.drakescraft.cl](https://web.drakescraft.cl)
-* **Tienda Oficial**: [web.drakescraft.cl/store](https://web.drakescraft.cl/store.html)
+* **Connection IP**: `mc.drakescraft.cl` (Java 26.2 and Bedrock cross-play on port 25565)
+* **Official Discord**: [discord.gg/drakescraft](https://discord.gg/rv3vtXZTk7)
+* **Web Portal and Documentation**: [web.drakescraft.cl](https://web.drakescraft.cl)
+* **Official Store**: [web.drakescraft.cl/store](https://web.drakescraft.cl/store.html)
 
-DrakesPurpur es el nucleo soberano que impulsa la Temporada 2 de DrakesCraft, gestionando mas de 80 expansiones de Slimefun, economias dinamicas, aislamiento multi-modal, herramientas de moderacion integradas en el motor, auditoria de almacenamiento en SQLite WAL y 20.0 TPS continuos.
-
----
-
-## Mision y Filosofia de Ingenieria
-
-Los servidores de Minecraft de alta concurrencia que ejecutan addons tecnicos masivos (como Slimefun, logistica digital automatizada y maquinaria multibloque) colapsan historicamente debido a las pausas del Garbage Collector de la JVM y a la sobrecarga de millones de eventos Bukkit disparandose cada segundo.
-
-**DrakesPurpur** es un fork soberano de [PurpurMC/Purpur](https://github.com/PurpurMC/Purpur) disenado con un objetivo prioritario:  
-**Transformar Minecraft en un motor tecnico de latencia ultra-baja y auto-cicatrizacion, blindado contra excepciones no controladas, sincronizado nativamente con orquestadores autonomos SRE (SAORI) y optimizado para jugadores moviles de Bedrock (Geyser).**
+DrakesPurpur is the sovereign core that powers DrakesCraft Season Two, handling 80+ Slimefun expansions, dynamic economies, multi-modal isolation, in-engine moderation tools, SQLite WAL storage auditing and a continuous 20.0 TPS.
 
 ---
 
-## Pilares de Ingenieria de DrakesPurpur
+## Mission and Engineering Philosophy
 
-### 1. Kernel Crash Guard (Auto-Cicatrizacion y Cero Caidas)
-* Intercepta excepciones no controladas (`NullPointerException`, `IndexOutOfBoundsException`, `ConcurrentModificationException`) directamente en el bucle principal de juego (`ServerTick` y `BlockEntityTick`).
-* **Aislamiento Dinamico de Fallos:** Si una maquina de un addon o una entidad lanza un error no controlado, el motor deshabilita unicamente el componente danado y registra el incidente en una base de datos atomica SQLite WAL (`drakes_faults.db`). El servidor nunca se detiene y la comunidad mantiene 20.0 TPS estables.
+High-concurrency Minecraft servers running massive technical addons (such as Slimefun, automated digital logistics and multiblock machinery) have historically collapsed because of JVM Garbage Collector pauses and the overhead of millions of Bukkit events firing every second.
 
-### 2. Pre-carga Nativa Rust Off-Heap (Java 25 Panama FFM)
-* **El Cuello de Botella Real de Minecraft:** En servidores tecnicos masivos, el limite rara vez es el procesamiento de CPU; es la creacion de millones de objetos transitorios Java por tick que saturan el Garbage Collector, provocando pausas criticas de Stop-The-World (STW).
-* **Diseno Hibrido Empresarial:** Reescribir cientos de plugins Bukkit a Rust o C desde cero es inviable. La arquitectura soberana es hibrida: Java procesa la logica de juego, eventos y plugins, mientras que Rust administra la memoria pura off-heap mediante la API moderna Panama FFM (Foreign Function & Memory API) de Java 25, sin el overhead del JNI clasico.
-* **Pre-carga en Arranque:** El servidor arranca enlazando la libreria nativa `libslimefun_ffi.so`. Redes electricas, transferencias cuanticas y el ticking de maquinas se calculan fuera del Heap de Java con vectorizacion SIMD (AVX-512 VNNI), reduciendo las pausas de G1GC por debajo de 15 milisegundos.
-
-### 3. Motor Soberano de Modalidades (6 Modalidades Canonicas)
-El kernel incorpora un motor interno de enrutamiento (`DrakesModalityEngine`) que divide el servidor en 6 modalidades canonicas dentro de la misma instancia, eliminando la latencia de red y la sobrecarga de RAM de clusters BungeeCord externos:
-* **`survival_sf`**: Modalidad principal de supervivencia tecnica con Slimefun y todas las suites de maquinaria activas.
-* **`survival_clasico`**: Modalidad Survival Vanilla Puro. **Esta es la unica modalidad que opera sin Slimefun.**
-* **`oneblock`**: Modalidad de progresion sobre un bloque infinito regenerativo, integrada con BentoBox y tecnologia.
-* **`onechunk`**: Desafio de ingenieria y supervivencia confinado a los limites de un unico chunk.
-* **`skyblock`**: Progresion tecnica en islas flotantes en el vacio.
-* **`lab`**: Entorno de pruebas tecnicas y laboratorio con reinicio periodico de mapa.
-
-**Garantias de Aislamiento Hermetico:**
-* Snapshots independientes de inventario, armadura y segunda mano por modalidad.
-* Cofres de Ender completamente independientes.
-* Niveles de experiencia, efectos de pocion, hambre y vida totalmente separados.
-* Modos de juego y perfiles de permisos dedicados por modalidad.
-* Migracion asincrona en memoria sin congelamientos de disco en el hilo principal.
-
-### 4. Herramientas de Staff Integradas en el Motor (Sin Dependencia de Plugins)
-Las herramientas de administracion critica residen directamente en el kernel de Purpur:
-* **`/vani` / `/vanish`**: Estado espectral soberano. Intercepta paquetes de entidades en la capa de red, silencia sonidos, detiene particulas, bloquea la recoleccion accidental de items y oculta la presencia en la lista de jugadores (tablist) de forma invisible.
-* **`/ultragod`**: Invulnerabilidad a nivel de kernel superior al comando clasico `/god`. Anula dano por vacio, caidas fuera del limite del mundo, comandos `/kill`, hambre, explosiones y cualquier vector de destruccion ambiental.
-* **`/freeze <jugador>`**: Bloqueo interactivo inmediato de movimiento e interacciones a nivel de paquetes de red para sospechosos de exploits.
-* **`/drakes inspect <jugador>`**: Telemetria administrativa integral:
-  - UUID de la cuenta, ping, cliente utilizado y modalidad activa.
-  - Direccion IP resuelta, geolocalizacion (pais) y proveedor de red (ASN/ISP).
-  - Deteccion de multicuentas (Alts): rastreo cruzado en tiempo real y en SQLite de conexiones compartidas bajo la misma firma de red.
-  - Visualizacion automatica de prefijos informativos sobre la cabeza del jugador para miembros del staff (`settings.drakes.staff.nametag-alt-display`).
-
-### 5. Subsistema de Auditoria de Almacenamiento y Acciones (DrakesStorageAudit)
-Motor transaccional embebido basado en SQLite WAL (`drakes_storage_audit.db`), disenado como una alternativa de cero sobrecarga frente a plugins de rollback externos:
-* Registra colocacion, destruccion y eventos fisicos de bloques.
-* Monitorea transacciones en contenedores (cofres, tolvas, shulkers, barriles) guardando cantidad, datos NBT y el jugador responsable.
-* Registra recoleccion y lanzamiento de items en el suelo, asi como comandos ejecutados.
-* Escritura asincrona mediante el pool multi-nucleo `RyzenWorkerPool`, eliminando cualquier congelamiento del hilo principal del servidor.
-
-### 6. Motor de Respaldos Diarios Automatizados 7z (DrakesBackupScheduler)
-Servicio interno de copias de seguridad sin degradacion de rendimiento:
-* Utiliza el algoritmo de compresion LZMA2 en formato 7z para conseguir la maxima tasa de reduccion de tamano en mapas y configuraciones.
-* Se ejecuta en horarios de baja concurrencia mediante hilos en segundo plano.
-* Aplica una politica de rotacion con ventana de retencion estricta de 7 dias (`retention-days: 7`), purgando automaticamente archivos antiguos para proteger los discos NVMe.
-
-### 7. Geyser y Bedrock Companion Engine (Optimizacion para Movil y Consolas)
-* **Compensacion de Paquetes Redundantes:** Regula el envio de actualizaciones de entidades lejanas para ahorrar ancho de banda movil.
-* **Recuperacion Preventiva del Vacio:** Previene muertes invisibles en el vacio del End y Skyblock reposicionando al jugador antes de la desincronizacion (`teleport-if-outside-border`).
-* **Keepalive Desacoplado:** Handshakes alternativos asincronos que previenen desconexiones por falso timeout en redes celulares de alta latencia.
-
-### 8. Enlace Nativo con SAORI (Socket IPC Directo)
-* Conexion nativa por Socket de Dominio Unix entre el motor y el orquestador autonomo **SAORI** (`saori-ai-daemon` en puerto 8089).
-* Erradica la lectura pesada de archivos de log en disco (`latest.log`) y elimina la necesidad de puentes de Discord externos.
-* Permite sincronizacion de chat bidireccional en submilisegundos, alertas de caida en tiempo real y resolucion automatica de incidentes por agentes de IA.
-
-### 9. DrakesProfiler y Despachador Multi-Nucleo Ryzen
-* **Telemetria Directa:** Lectura de consumo de CPU, memoria JVM y uso de hilos directamente desde `ManagementFactory.getThreadMXBean()` y `OperatingSystemMXBean` con overhead cero.
-* **Diagnostico Anti-Lag:** Desglose instantaneo de chunks cargados, recuento de entidades vivas por mundo y deteccion de hilos saturados.
-* **Informes Locales en Markdown:** Generacion de auditorias en `drakes_reports/` con tablas comparativas y hardware sin exponer datos del servidor a visores web externos.
-* **Planificador Ryzen:** `RyzenWorkerPool` (ForkJoinPool) para distribuir tareas asincronas y escrituras en SQLite entre todos los nucleos del procesador.
-
-### 10. DrakesGrimGuard y DrakesChatGuard (Seguridad Nativa)
-* **Anti-Cheat en Kernel (`DrakesGrimGuard`):** Validacion a nivel de paquetes de Reach geometrico (<3.20m), velocidad horizontal (<4.20 b/t), vuelo y clicks por segundo (<22 CPS) antes de entregar los datos a la capa de Bukkit.
-* **Seguridad de Chat (`DrakesChatGuard`):** Cadencia minima entre mensajes (600ms), censura bilingue en tiempo real (`[censurado]`), proteccion contra paquetes gigantes (>256 caracteres) y bloqueo de inyeccion de comandos (`/op`, `/calc`, `/execute`).
-* **Pruebas Sinteticas en Consola:** `/drakes test all` ejecuta pruebas integrales de seguridad, chat y motor Rust directamente desde la terminal sin necesidad de jugadores conectados.
-
-### 11. Arquitectura Monolitica Slimefun Nativo (`feat/slimefun-native-engine`)
-Rama paralela de investigacion y desarrollo que explora la integracion total de Slimefun como primitivas directas de Minecraft:
-* Los items de Slimefun se evaluan como clases nativas `Block` e `Item`, eliminando metadatos PDC y envoltorios de Bukkit.
-* Ejecucion en memoria en el mismo ciclo que los hornos y tolvas vanilla en `ServerLevel.tickBlockEntities()`.
-* Genera el artefacto autonomo `DrakesPurpur-Server.jar` con soporte para mas de 80 expansiones preinstaladas de fabrica.
+**DrakesPurpur** is a sovereign fork of [PurpurMC/Purpur](https://github.com/PurpurMC/Purpur) designed with one priority goal:  
+**Turn Minecraft into an ultra-low-latency, self-healing technical engine, hardened against unhandled exceptions, natively synchronized with autonomous SRE orchestrators (SAORI) and optimized for mobile Bedrock players (Geyser).**
 
 ---
 
-## Configuracion Centralizada (`purpur.yml`)
+## DrakesPurpur Engineering Pillars
 
-Todas las caracteristicas del kernel se gestionan centralizadamente en `purpur.yml` bajo la seccion `settings.drakes.*`:
+### 1. Kernel Crash Guard (Self-Healing, Zero Crashes)
+* Intercepts unhandled exceptions (`NullPointerException`, `IndexOutOfBoundsException`, `ConcurrentModificationException`) directly in the main game loop (`ServerTick` and `BlockEntityTick`).
+* **Dynamic Fault Isolation:** If an addon machine or an entity throws an unhandled error, the engine disables only the damaged component and logs the incident in an atomic SQLite WAL database (`drakes_faults.db`). The server never stops and the community keeps a stable 20.0 TPS.
+
+### 2. Native Rust Off-Heap Preloading (Java 25 Panama FFM)
+* **Minecraft's Real Bottleneck:** On massive technical servers the limit is rarely CPU processing; it is the creation of millions of transient Java objects per tick that saturate the Garbage Collector, causing critical Stop-The-World (STW) pauses.
+* **Enterprise Hybrid Design:** Rewriting hundreds of Bukkit plugins in Rust or C from scratch is not viable. The sovereign architecture is hybrid: Java handles game logic, events and plugins, while Rust manages pure off-heap memory through Java 25's modern Panama FFM (Foreign Function & Memory) API, without the overhead of classic JNI.
+* **Preloading at Startup:** The server boots by linking the native library `libslimefun_ffi.so`. Electrical networks, quantum transfers and machine ticking are computed outside the Java heap with SIMD vectorization (AVX-512 VNNI), keeping G1GC pauses under 15 milliseconds.
+
+### 3. Sovereign Modality Engine (6 Canonical Modalities)
+The kernel embeds an internal routing engine (`DrakesModalityEngine`) that splits the server into 6 canonical modalities within the same instance, removing the network latency and RAM overhead of external BungeeCord clusters:
+* **`survival_sf`**: Main technical survival modality with Slimefun and all machinery suites active.
+* **`survival_clasico`**: Pure Vanilla Survival modality. **This is the only modality that runs without Slimefun.**
+* **`oneblock`**: Progression on an infinite regenerating block, integrated with BentoBox and technology.
+* **`onechunk`**: Engineering and survival challenge confined to the limits of a single chunk.
+* **`skyblock`**: Technical progression on floating islands in the void.
+* **`lab`**: Technical testing environment and laboratory with periodic map reset.
+
+**Hermetic Isolation Guarantees:**
+* Independent inventory, armor and offhand snapshots per modality.
+* Fully independent Ender Chests.
+* Fully separate experience levels, potion effects, hunger and health.
+* Dedicated game modes and permission profiles per modality.
+* Asynchronous in-memory migration with no disk freezes on the main thread.
+
+### 4. In-Engine Staff Tools (No Plugin Dependency)
+Critical administration tools live directly in the Purpur kernel:
+* **`/vani` / `/vanish`**: Sovereign ghost state. Intercepts entity packets at the network layer, mutes sounds, stops particles, blocks accidental item pickup and hides presence from the tab list invisibly.
+* **`/ultragod`**: Kernel-level invulnerability superior to the classic `/god` command. Negates void damage, falling out of the world border, `/kill` commands, hunger, explosions and any environmental destruction vector.
+* **`/freeze <player>`**: Immediate interactive lock of movement and interactions at the network-packet level for suspected exploiters.
+* **`/drakes inspect <player>`**: Comprehensive administrative telemetry:
+  - Account UUID, ping, client used and active modality.
+  - Resolved IP address, geolocation (country) and network provider (ASN/ISP).
+  - Multi-account (alts) detection: real-time and SQLite cross-tracking of connections sharing the same network signature.
+  - Automatic display of informative prefixes above the head of staff members (`settings.drakes.staff.nametag-alt-display`).
+
+### 4b. DrakesDb: Single Shared Kernel Database
+One SQLite WAL file, `drakes-data/kernel.db`, shared by every kernel subsystem:
+* Batched single-writer thread: callers never block the main thread on disk I/O.
+* API `DrakesDb.get()` with `write(...)`, `read(...)` and a key-value store (`kv`) for suites and addons.
+* Crash-guard failures and the audit trail live in it; `/drakes db` reports its status (queue, batches, size).
+
+### 5. Storage and Action Auditing Subsystem (DrakesStorageAudit)
+Embedded transactional engine based on SQLite WAL (`drakes_storage_audit.db`), designed as a zero-overhead alternative to external rollback plugins:
+* Records block placement, destruction and physical block events.
+* Monitors container transactions (chests, hoppers, shulkers, barrels), storing quantity, NBT data and the responsible player.
+* Records item pickups and drops on the ground, as well as executed commands.
+* Asynchronous writes through the multi-core `RyzenWorkerPool`, eliminating any main-thread freeze.
+
+### 6. Automated Daily 7z Backup Engine (DrakesBackupScheduler)
+Internal backup service with no performance degradation:
+* Uses the LZMA2 compression algorithm in 7z format to achieve the highest size reduction on maps and configurations.
+* Runs during low-concurrency hours on background threads.
+* Applies a rotation policy with a strict 7-day retention window (`retention-days: 7`), automatically purging old files to protect the NVMe drives.
+
+### 7. Geyser and Bedrock Companion Engine (Mobile and Console Optimization)
+* **Redundant Packet Compensation:** Throttles updates of distant entities to save mobile bandwidth.
+* **Preventive Void Recovery:** Prevents invisible deaths in the End and Skyblock void by repositioning the player before desynchronization (`teleport-if-outside-border`).
+* **Decoupled Keepalive:** Asynchronous alternative handshakes that prevent false-timeout disconnects on high-latency cellular networks.
+
+### 8. Native Link with SAORI (Direct IPC Socket)
+* Native Unix Domain Socket connection between the engine and the autonomous orchestrator **SAORI** (`saori-ai-daemon` on port 8089).
+* Eliminates heavy disk log reading (`latest.log`) and removes the need for external Discord bridges.
+* Enables sub-millisecond bidirectional chat synchronization, real-time crash alerts and automatic incident resolution by AI agents.
+
+### 9. DrakesProfiler and Ryzen Multi-Core Dispatcher
+* **Direct Telemetry:** Reads CPU usage, JVM memory and thread usage directly from `ManagementFactory.getThreadMXBean()` and `OperatingSystemMXBean` with zero overhead.
+* **Anti-Lag Diagnostics:** Instant breakdown of loaded chunks, living entity count per world and detection of saturated threads.
+* **Local Markdown Reports:** Generates audits in `drakes_reports/` with comparative tables and hardware data, without exposing server data to external web viewers.
+* **Ryzen Scheduler:** `RyzenWorkerPool` (ForkJoinPool) distributes asynchronous tasks and SQLite writes across all processor cores.
+
+### 10. DrakesGrimGuard and DrakesChatGuard (Native Security)
+* **In-Kernel Anti-Cheat (`DrakesGrimGuard`):** Packet-level validation of geometric reach (<3.20m), horizontal speed (<4.20 b/t), flight and clicks per second (<22 CPS) before the data reaches the Bukkit layer.
+* **Chat Security (`DrakesChatGuard`):** Minimum cadence between messages (600ms), real-time bilingual censorship (`[censurado]`), protection against oversized packets (>256 characters) and command injection blocking (`/op`, `/calc`, `/execute`).
+* **Synthetic Console Tests:** `/drakes test all` runs full security, chat and Rust engine tests directly from the terminal without connected players.
+
+### 11. Native Slimefun Monolith Architecture (`feat/slimefun-native-engine`)
+Parallel research and development branch exploring the full integration of Slimefun as direct Minecraft primitives:
+* Slimefun items are evaluated as native `Block` and `Item` classes, removing PDC metadata and Bukkit wrappers.
+* In-memory execution in the same cycle as vanilla furnaces and hoppers in `ServerLevel.tickBlockEntities()`.
+* Produces the standalone artifact `DrakesPurpur-Server.jar` with support for 80+ factory-preinstalled expansions.
+
+---
+
+## Centralized Configuration (`purpur.yml`)
+
+All kernel features are managed centrally in `purpur.yml` under the `settings.drakes.*` section:
 
 ```yaml
 settings:
@@ -165,47 +171,47 @@ settings:
 
 ---
 
-## Pipeline CI/CD y Distribucion Maven Soberana
+## CI/CD Pipeline and Sovereign Maven Distribution
 
-El repositorio se encuentra automatizado con **GitHub Actions** (`.github/workflows/drakes_ci_cd.yml`):
-1. **Compilacion en la Nube:** Cada commit en ramas `ver/**` compila el binario Paperclip del servidor en runners de GitHub con **Java 25** y Paperweight.
-2. **Despliegue Automatico de API:** Compila y despliega `DrakesPurpur-API` al repositorio oficial en **`https://maven.drakescraft.cl`**.
-3. **Distribucion por Webhook:** Envia el artefacto final a staging sin consumo de CPU ni memoria en estaciones de trabajo locales.
+The repository is automated with **GitHub Actions** (`.github/workflows/drakes_ci_cd.yml`):
+1. **Cloud Compilation:** Every commit on `ver/**` branches builds the server's Paperclip binary on GitHub runners with **Java 25** and Paperweight.
+2. **Automatic API Deployment:** Builds and deploys `DrakesPurpur-API` to the official repository at **`https://maven.drakescraft.cl`**.
+3. **Webhook Distribution:** Sends the final artifact to staging with no CPU or memory usage on local workstations.
 
 ---
 
-## Instrucciones de Compilacion Local
+## Local Build Instructions
 
-Para compilar DrakesPurpur localmente en sistemas Linux (Nova / Workstations):
+To build DrakesPurpur locally on Linux systems (Nova / workstations):
 
 ```bash
-# Requiere Java 25 LTS configurado en JAVA_HOME
+# Requires Java 25 LTS configured in JAVA_HOME
 ./gradlew applyAllPatches
 ./gradlew createPaperclipJar -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs="-Xmx3584m -XX:+UseParallelGC"
 ```
 
-El binario de produccion generado estara disponible en:  
+The generated production binary will be available at:  
 `purpur-server/build/libs/purpur-paperclip-26.2.local-SNAPSHOT.jar`.
 
 ---
 
-## Reconocimientos y Atribucion Upstream
+## Acknowledgments and Upstream Attribution
 
-DrakesPurpur es un fork soberano disenado y mantenido por [**JackStar6677-1**](https://github.com/JackStar6677-1) bajo **DrakesCraft Labs** y **Star Systems**.
+DrakesPurpur is a sovereign fork designed and maintained by [**JackStar6677-1**](https://github.com/JackStar6677-1) under **DrakesCraft Labs** and **Star Systems**.
 
-Agradecemos profundamente a los proyectos upstream y co-creadores soberanos:
-* **PurpurMC** ([github.com/PurpurMC/Purpur](https://github.com/PurpurMC/Purpur)): Por la base de servidor de Minecraft mas configurable y flexible.
-* **PaperMC** ([github.com/PaperMC/Paper](https://github.com/PaperMC/Paper)): Por liderar la innovacion en rendimiento de servidores, Paperweight y el ecosistema Bukkit.
-* **Chagui68 (Chagui)**: Autor soberano de la **Suite Multiverse** (`MultiverseNets`, `MultiverseCreatures`, `MultiverseTinker`, `MultiverseProgramming` y `MultiverseGambling`) e innovador en **Pumpkin-launcher** (aislamiento de ClassLoader, sanitizacion de plugins y capa PatchBukkit). Reconocido en el kernel mediante `/drakes credits`.
-* **GeyserMC** ([geysermc.org](https://geysermc.org/)): Por unificar las comunidades de Bedrock y Java.
-* **TheBusyBiscuit** ([github.com/TheBusyBiscuit](https://github.com/TheBusyBiscuit)): Por crear Slimefun4, la piedra angular de la supervivencia tecnica moderna.
-* **SpigotMC** y **Mojang Studios**: Por el universo de Minecraft.
+We deeply thank the upstream projects and sovereign co-creators:
+* **PurpurMC** ([github.com/PurpurMC/Purpur](https://github.com/PurpurMC/Purpur)): For the most configurable and flexible Minecraft server base.
+* **PaperMC** ([github.com/PaperMC/Paper](https://github.com/PaperMC/Paper)): For leading server performance innovation, Paperweight and the Bukkit ecosystem.
+* **Chagui68 (Chagui)**: Sovereign author of the **Multiverse Suite** (`MultiverseNets`, `MultiverseCreatures`, `MultiverseTinker`, `MultiverseProgramming` and `MultiverseGambling`) and innovator in **Pumpkin-launcher** (ClassLoader isolation, plugin sanitization and the PatchBukkit layer). Recognized in the kernel through `/drakes credits`.
+* **GeyserMC** ([geysermc.org](https://geysermc.org/)): For unifying the Bedrock and Java communities.
+* **TheBusyBiscuit** ([github.com/TheBusyBiscuit](https://github.com/TheBusyBiscuit)): For creating Slimefun4, the cornerstone of modern technical survival.
+* **SpigotMC** and **Mojang Studios**: For the Minecraft universe.
 
 ---
 
 <div align="center">
 
-**DrakesCraft Labs · Star Systems** · Mantenido por [**JackStar6677-1**](https://github.com/JackStar6677-1)  
-*Arquitectura Soberana de Software para la Temporada Dos*
+**DrakesCraft Labs · Star Systems** · Maintained by [**JackStar6677-1**](https://github.com/JackStar6677-1)  
+*Sovereign Software Architecture for Season Two*
 
 </div>
