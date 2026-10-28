@@ -42,7 +42,7 @@
 +sourceSets {
 +    main {
 +        java { srcDir("../paper-server/src/main/java") }
-+        resources { srcDir("../paper-server/src/main/resources") }
++        resources { srcDir("../paper-server/src/main/resources"); srcDir("bundled") } // monolito: plugins embebidos (drakes-bundled/)
 +    }
 +    test {
 +        java { srcDir("../paper-server/src/test/java") }
