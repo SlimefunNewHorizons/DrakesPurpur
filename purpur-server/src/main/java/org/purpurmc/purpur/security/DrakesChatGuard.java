@@ -111,7 +111,7 @@ public final class DrakesChatGuard {
                 if (!isOp) {
                     BLOCKED_COMMAND_EXPLOITS.incrementAndGet();
                     LOGGER.warning("[ChatGuard] Bloqueado intento de comando peligroso '" + blocked + "' de " + playerUuid);
-                    SaoriKernelSocket.dispatchFault("ChatGuard-CommandExploit", playerUuid.toString(), "Cmd: " + commandLine);
+                    SaoriKernelSocket.dispatchFault("ChatGuard-CommandExploit", playerUuid.toString(), "blocked-prefix: " + blocked);
                     return false;
                 }
             }
