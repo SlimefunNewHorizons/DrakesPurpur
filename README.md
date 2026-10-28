@@ -75,6 +75,12 @@ Critical moderation tools have been moved directly into the server kernel, elimi
   - Multi-account (Alts) detection: scans active connections and historical SQLite telemetry for matching IP and hardware signatures.
   - Automated staff nametag overlay display above player models (`settings.drakes.staff.nametag-alt-display`).
 
+### 4b. DrakesDb: Single Shared Kernel Database
+One SQLite WAL file, `drakes-data/kernel.db`, shared by every kernel subsystem (commit `fd9184e2f`, branch `ver/26.2`, also merged into `monolito-local`):
+* Batched single-writer thread: callers never block the main thread on disk I/O.
+* API `DrakesDb.get()` with `write(...)`, `read(...)` and a key-value store (`kv`) for suites and addons.
+* Crash-guard failures and the audit trail were migrated into it; `/drakes db` reports its status.
+
 ### 5. Storage & Action Auditing Subsystem (DrakesStorageAudit)
 A high-throughput audit subsystem built on SQLite WAL (`drakes_storage_audit.db`), operating as a zero-overhead alternative to external rollbacks:
 * Tracks block placements, destructions, and physics changes.
@@ -123,7 +129,7 @@ DrakesPurpur pioneers a dual-track architectural model addressing both productio
                          +------------------------+------------------------+
                          |                                                 |
                          v                                                 v
-         BRANCH: ver/26.2 (Modular Production)             BRANCH: feat/slimefun-native-engine (Monolith)
+         BRANCH: ver/26.2 (Modular Production)             BRANCH: monolito-local (Monolith)
   +----------------------------------------------+  +----------------------------------------------+
   | - Hardened Purpur Kernel (Panama FFM,        |  | - Complete Ingestion of Slimefun & Addons    |
   |   GrimGuard, ChatGuard, Crash Guard SQLite). |  |   directly into native Minecraft NMS.        |
@@ -134,9 +140,16 @@ DrakesPurpur pioneers a dual-track architectural model addressing both productio
   +----------------------------------------------+  +----------------------------------------------+
 ```
 
+Both branches share the same kernel (including `DrakesDb`); they differ only in how the suites are delivered:
+
+* **`ver/26.2` (modular):** kernel only; suites are external JARs in `plugins/`.
+* **`monolito-local` (monolith, local branch, never pushed):** suites are embedded in the server JAR from `purpur-server/bundled/drakes-bundled/`. Fill that folder with `scripts/empaquetar_monolito.sh [path-to-Drakes-Suites]`, then build.
+
+> **Build notes.** Without `BUILD_NUMBER` the version is `26.2.local-SNAPSHOT`, which breaks addons that parse `Bukkit.getBukkitVersion`; build with `BUILD_NUMBER=134 ./gradlew createPaperclipJar`. For the **modular** build, remove the `srcDir("bundled")` line from the generated `build.gradle.kts` so nothing is embedded.
+
 ### Branch Comparison: What Each Architecture Achieves
 
-| Feature & Objective | Branch `ver/26.2` (Production Modular) | Branch `feat/slimefun-native-engine` (Monolith) |
+| Feature & Objective | Branch `ver/26.2` (Production Modular) | Branch `monolito-local` (Monolith, local only) |
 | :--- | :--- | :--- |
 | **Architectural Model** | **Decoupled Hybrid:** Hardened kernel + external modular StarSuites JARs in `plugins/`. | **Native Monolith:** 100% of Slimefun core & 94 addons embedded into native server classes. |
 | **Configuration Tuning** | **Instant & Granular:** Every addon has its own file in `plugins/Drakes<Suite>/modules/<addon>.yml`. | **Unified & Centralized:** Configured via `purpur.yml` and native kernel data registries. |
@@ -175,6 +188,7 @@ All kernel features, moderation tools, and suite controls are exposed through hi
 | `/drakes security` | `bukkit.command.purpur` | Real-time violation counters for reach, velocity, flight, CPS, spam, and command injection attempts. |
 | `/drakes threads` (or `/drakes spark`, `/drakes profile`) | `bukkit.command.purpur` | Built-in profiler (Spark replacement) exporting standalone Markdown reports to `drakes_reports/`. |
 | `/drakes fastpath` | `bukkit.command.purpur` | Toggles zero-allocation SlimefunFastPath PDC event bypass. |
+| `/drakes db` | `bukkit.command.purpur` | Status of the shared `DrakesDb` kernel database (queue, batches, size). |
 | `/drakes gc` | `bukkit.command.purpur` | Triggers manual Garbage Collection and reports reclaimed RAM in megabytes. |
 | `/drakes saori` | `bukkit.command.purpur` | Dispatches instant IPC test telemetry to the SAORI Autonomous SRE Daemon. |
 | `/drakes menu` (or `/drakes gui`) | `bukkit.command.purpur` | Opens the 54-slot interactive chest GUI for real-time kernel tuning. |
