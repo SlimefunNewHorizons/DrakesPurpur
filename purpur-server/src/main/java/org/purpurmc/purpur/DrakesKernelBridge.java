@@ -32,6 +32,7 @@ public final class DrakesKernelBridge {
         org.purpurmc.purpur.staff.DrakesStaffEngine.initialize();
         org.purpurmc.purpur.modalities.DrakesModalityEngine.initialize();
         org.purpurmc.purpur.storage.DrakesStorageAudit.initialize();
+        org.purpurmc.purpur.perf.DrakesPerf.initialize();
         org.purpurmc.purpur.backup.DrakesBackupManager.initialize();
     }
 

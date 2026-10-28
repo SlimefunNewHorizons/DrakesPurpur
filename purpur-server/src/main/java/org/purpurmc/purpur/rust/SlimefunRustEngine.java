@@ -10,8 +10,9 @@ import org.purpurmc.purpur.DrakesKernelBridge;
 /**
  * SlimefunRustEngine — High-performance Off-Heap Native Engine
  * Links Java 25 LTS to Rust (libslimefun_ffi.so) via Project Panama Foreign Function & Memory (FFM) API.
- * Offloads energy network graph solving and machine ticking from Java Heap to off-heap memory,
- * eliminating JVM Garbage Collection stop-the-world pauses.
+ * Thin, honest binding: no simulated results. If the library is missing or its ABI is not
+ * supported the engine reports "not linked" and returns zeros. It does NOT eliminate GC; see
+ * Slimefun-Rust/docs/RUST_NATIVO.md for measured numbers.
  *
  * Author: Jack (JackStar6677-1) - Star Systems & DrakesCraft Labs
  */
@@ -48,6 +49,11 @@ public final class SlimefunRustEngine {
                 SymbolLookup lookup = SymbolLookup.libraryLookup(nativeFile.getAbsolutePath(), Arena.global());
                 Linker linker = Linker.nativeLinker();
 
+                var abiOpt = lookup.find("slimefun_abi_version");
+                if (abiOpt.isEmpty()) throw new IllegalStateException("sin slimefun_abi_version: biblioteca antigua");
+                int abi = (int) linker.downcallHandle(abiOpt.get(), FunctionDescriptor.of(ValueLayout.JAVA_INT)).invokeExact();
+                if (abi < 1 || abi > 2) throw new IllegalStateException("ABI " + abi + " no soportada (1-2)");
+
                 var tickOpt = lookup.find("slimefun_execute_tick_cycle");
                 if (tickOpt.isPresent()) {
                     tickCycleHandle = linker.downcallHandle(tickOpt.get(), FunctionDescriptor.of(ValueLayout.JAVA_LONG));
@@ -63,10 +69,10 @@ public final class SlimefunRustEngine {
                     lastWastedEnergyHandle = linker.downcallHandle(wastedOpt.get(), FunctionDescriptor.of(ValueLayout.JAVA_LONG));
                 }
 
-                nativeLinked = true;
+                nativeLinked = tickCycleHandle != null;
                 LOGGER.info("[RustEngine] Panama FFM Bindings inicializados exitosamente contra " + nativeFile.getName());
             } else {
-                LOGGER.info("[RustEngine] libslimefun_ffi.so no detectado. Motor off-heap operando en modo simulado de alta velocidad.");
+                LOGGER.info("[RustEngine] libslimefun_ffi.so no detectado. Motor off-heap ausente o ABI incompatible; motor inactivo (sin simulación).");
             }
         } catch (Throwable t) {
             LOGGER.warning("[RustEngine] No se pudieron enlazar símbolos nativos de Rust: " + t.getMessage());
@@ -95,10 +101,8 @@ public final class SlimefunRustEngine {
                 LOGGER.warning("[RustEngine] Fallo en downcall nativo de tick: " + t.getMessage());
             }
         } else {
-            // High-speed simulated off-heap math cycle
+            // Sin biblioteca: no se inventan datos.
             tickIndex = TOTAL_NATIVE_TICKS.get() + 1;
-            unmet = 0;
-            wasted = 150;
         }
 
         long durationNanos = System.nanoTime() - start;
@@ -122,19 +126,15 @@ public final class SlimefunRustEngine {
         double avgMicros = (double) totalNanos / (iterations * 1_000.0);
         double opsPerSec = (double) iterations / Math.max(0.001, wallTimeMs / 1000.0);
 
+        if (!nativeLinked) {
+            return "Rust Engine: biblioteca no enlazada; nada que medir (sin simulacion).";
+        }
         return String.format(
-            "Rust Off-Heap Engine Benchmark (%d ciclos):\n"
-            + "  - Modo: %s\n"
-            + "  - Tiempo promedio por tick: %.2f µs (microsegundos)\n"
-            + "  - Throughput de ticks: %.0f ciclos/segundo\n"
-            + "  - Tiempo total de prueba: %d ms\n"
-            + "  - GC Heap Overhead: 0 MB (100%% off-heap / zero-allocation)",
-            iterations,
-            (nativeLinked ? "Nativo Panama FFM (libslimefun_ffi.so)" : "Emulado Off-Heap"),
-            avgMicros,
-            opsPerSec,
-            wallTimeMs
-        );
+            "Rust FFM tick (%d ciclos, solver sin nodos registrados desde Java):\n"
+            + "  - Costo medio por llamada: %.2f us (3 downcalls)\n"
+            + "  - Tiempo total: %d ms\n"
+            + "  - Aviso: mide solo el costo FFI; no demuestra ganancia frente a Java.",
+            iterations, avgMicros, wallTimeMs);
     }
 
     public record RustCycleResult(long tickNumber, long unmetDemand, long wastedEnergy, long durationNanos, boolean isNative) {}
