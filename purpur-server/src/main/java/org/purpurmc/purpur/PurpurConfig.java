@@ -80,6 +80,9 @@ public class PurpurConfig {
 
         readConfig(PurpurConfig.class, null);
 
+        // Monolito: extrae los plugins embebidos antes de que Paper escanee plugins/
+        org.purpurmc.purpur.bundled.DrakesBundledPlugins.initialize();
+
         Block.BLOCK_STATE_REGISTRY.forEach(BlockBehaviour.BlockStateBase::initCache);
     }
 
@@ -93,7 +96,17 @@ public class PurpurConfig {
         Bukkit.getLogger().log(level, s);
     }
 
+    private static boolean kernelStarted;
+
     public static void registerCommands() {
+        if (!kernelStarted) { // el kernel Drakes nunca se iniciaba: nadie llamaba a DrakesKernelBridge.initialize()
+            kernelStarted = true;
+            try {
+                org.purpurmc.purpur.DrakesKernelBridge.initialize();
+            } catch (Throwable t) {
+                Bukkit.getLogger().log(Level.SEVERE, "[DrakesKernel] fallo al iniciar el kernel", t);
+            }
+        }
         for (Map.Entry<String, Command> entry : commands.entrySet()) {
             MinecraftServer.getServer().server.getCommandMap().register(entry.getKey(), "Purpur", entry.getValue());
         }
