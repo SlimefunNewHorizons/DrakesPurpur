@@ -6,6 +6,8 @@
 
 **High-Performance Sovereign Minecraft Server Engine for DrakesCraft Season Two & Technical Networks**
 
+> **This branch, `ver/26.2`, is the MODULAR engine** (the main line): the kernel only, with every suite and addon loaded as an external jar from `plugins/`. The monolith (suites embedded in the server jar) lives in `feat/slimefun-native-engine`.
+
 <p>
   <a href="https://github.com/SlimefunNewHorizons/DrakesPurpur"><img src="https://img.shields.io/badge/GitHub-DrakesPurpur-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
   <img src="https://img.shields.io/badge/Java-25%20LTS-F89820?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 25"/>
