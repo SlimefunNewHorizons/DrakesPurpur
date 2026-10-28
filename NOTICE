@@ -1,0 +1,8 @@
+DrakesPurpur NOTICE
+
+Base: Purpur (MIT), Paper (GPL-3.0 with LGPL/MIT parts), Spigot/CraftBukkit (GPL-3.0/LGPL), Mojang code as per upstream.
+
+Performance work in purpur-server/.../perf and backup/DrakesBackupManager is original code. Ideas referenced for design only
+(no source copied): Pufferfish (GPL-3.0) dynamic activation, Leaf (upstream licenses), Lithium (LGPL-3.0), Krypton (LGPL-3.0),
+ScalableLux (LGPL-3.0), VMP and C2ME (MIT), FerriteCore (MIT). Any future port of code from these projects must keep
+the original copyright and license headers and be listed here.
