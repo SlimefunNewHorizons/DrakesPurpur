@@ -141,7 +141,7 @@ DrakesPurpur pioneers a dual-track architectural model addressing both productio
                          +------------------------+------------------------+
                          |                                                 |
                          v                                                 v
-         BRANCH: ver/26.2 (Modular Production)             BRANCH: monolito-local (Monolith)
+         BRANCH: ver/26.2 (Modular, Season Two test)             BRANCH: monolito-local (Monolith)
   +----------------------------------------------+  +----------------------------------------------+
   | - Hardened Purpur Kernel (Panama FFM,        |  | - Complete Ingestion of Slimefun & Addons    |
   |   GrimGuard, ChatGuard, Crash Guard SQLite). |  |   directly into native Minecraft NMS.        |
@@ -163,13 +163,13 @@ Both branches share the same kernel (including `DrakesDb`, the `kernel.db` WAL d
 
 ### Branch Comparison: What Each Architecture Achieves
 
-| Feature & Objective | Branch `ver/26.2` (Production Modular) | Branch `monolito-local` (Monolith, local only) |
+| Feature & Objective | Branch `ver/26.2` (Modular, Season Two test) | Branch `monolito-local` (Monolith, local only) |
 | :--- | :--- | :--- |
 | **Architectural Model** | **Decoupled Hybrid:** Hardened kernel + external modular StarSuites JARs in `plugins/`. | **Native Monolith:** 100% of Slimefun core & 94 addons embedded into native server classes. |
 | **Configuration Tuning** | **Instant & Granular:** Every addon has its own file in `plugins/Drakes<Suite>/modules/<addon>.yml`. | **Unified & Centralized:** Configured via `purpur.yml` and native kernel data registries. |
 | **Recompilation Requirement** | **Zero Recompilation:** Edit YAMLs with `nano` and run `/drakessuites reload <suite> [module]`. | Requires kernel compilation (`./gradlew createPaperclipJar`) for core logic mutations. |
 | **Execution Overhead** | Ultra-low: Off-heap Rust SIMD via Panama FFM + Spatial Ticker Engine sleeps idle chunks. | **Absolute Zero Wrapper Overhead:** Eliminates Bukkit Event Bus and PDC NBT serialization entirely. |
-| **Deployment Target** | **Active Production Season Two (Live in Dallas & Staging).** | **Experimental Next-Gen R&D** for future unified server distribution. |
+| **Deployment Target** | **Season Two (26.2) engine: under test on Nova and Star VPS. Dallas production still runs 1.21.11.** | **Experimental Next-Gen R&D** for future unified server distribution. |
 
 ### Why Native Kernel Ingestion is the Future of Open-Source Plugins
 
