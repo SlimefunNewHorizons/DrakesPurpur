@@ -107,6 +107,14 @@ public final class DrakesAdminCommand extends Command {
             return true;
         }
 
+        // Base de datos compartida del kernel
+        if (args[0].equalsIgnoreCase("db")) {
+            org.purpurmc.purpur.storage.DrakesDb db = org.purpurmc.purpur.storage.DrakesDb.get();
+            sender.sendMessage(ChatColor.GOLD + "[DrakesPurpur] " + ChatColor.YELLOW + "DrakesDb: "
+                + (db == null ? ChatColor.RED + "no disponible" : ChatColor.GREEN + db.stats()));
+            return true;
+        }
+
         // Garbage collection
         if (args[0].equalsIgnoreCase("gc")) {
             long before = Runtime.getRuntime().freeMemory();
