@@ -1,9 +1,6 @@
 package org.purpurmc.purpur.storage;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,57 +20,56 @@ public final class DrakesStorageAudit {
     private DrakesStorageAudit() {}
 
     public static void initialize() {
+        DrakesDb db = DrakesDb.get();
+        if (db == null) {
+            LOGGER.log(Level.WARNING, "[StorageAudit] DrakesDb no disponible; auditoria desactivada");
+            return;
+        }
         try {
-            Class.forName("org.sqlite.JDBC");
-            try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + DB_PATH);
-                 Statement stmt = conn.createStatement()) {
-                stmt.execute("PRAGMA journal_mode = WAL;");
-                stmt.execute("PRAGMA synchronous = NORMAL;");
-                stmt.execute("CREATE TABLE IF NOT EXISTS storage_actions ("
-                    + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    + "timestamp INTEGER NOT NULL, "
-                    + "player_uuid TEXT NOT NULL, "
-                    + "player_name TEXT NOT NULL, "
-                    + "world TEXT NOT NULL, "
-                    + "x INTEGER NOT NULL, "
-                    + "y INTEGER NOT NULL, "
-                    + "z INTEGER NOT NULL, "
-                    + "block_type TEXT NOT NULL, "
-                    + "action TEXT NOT NULL, "
-                    + "item_type TEXT, "
-                    + "amount INTEGER NOT NULL DEFAULT 1);");
-                stmt.execute("CREATE INDEX IF NOT EXISTS idx_storage_coords ON storage_actions (world, x, y, z);");
-            }
+            db.execNow("CREATE TABLE IF NOT EXISTS storage_actions ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "timestamp INTEGER NOT NULL, "
+                + "player_uuid TEXT NOT NULL, "
+                + "player_name TEXT NOT NULL, "
+                + "world TEXT NOT NULL, "
+                + "x INTEGER NOT NULL, "
+                + "y INTEGER NOT NULL, "
+                + "z INTEGER NOT NULL, "
+                + "block_type TEXT NOT NULL, "
+                + "action TEXT NOT NULL, "
+                + "item_type TEXT, "
+                + "amount INTEGER NOT NULL DEFAULT 1)");
+            db.execNow("CREATE INDEX IF NOT EXISTS idx_storage_coords ON storage_actions (world, x, y, z)");
+            DrakesDbMigration.importLegacy(db, DB_PATH, "storage_actions");
             initialized = true;
-            LOGGER.info("[StorageAudit] Kernel Storage Forensics active. SQLite DB: " + DB_PATH);
+            LOGGER.info("[StorageAudit] Kernel Storage Forensics active (tabla storage_actions en DrakesDb)");
         } catch (Throwable t) {
-            LOGGER.log(Level.WARNING, "[StorageAudit] Failed to initialize SQLite audit DB: " + t.getMessage());
+            LOGGER.log(Level.WARNING, "[StorageAudit] Failed to initialize audit table: " + t.getMessage());
         }
     }
 
     public static void logAction(UUID playerUuid, String playerName, String world, int x, int y, int z,
                                  String blockType, String action, String itemType, int amount) {
         if (!initialized) return;
-
-        org.purpurmc.purpur.threads.RyzenWorkerPool.runAsync(() -> {
-            try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + DB_PATH);
-                 PreparedStatement ps = conn.prepareStatement(
-                     "INSERT INTO storage_actions (timestamp, player_uuid, player_name, world, x, y, z, block_type, action, item_type, amount) "
-                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
-                ps.setLong(1, System.currentTimeMillis());
+        long now = System.currentTimeMillis();
+        String name = playerName != null ? playerName : "unknown";
+        String item = itemType != null ? itemType : "AIR";
+        DrakesDb.get().write(c -> {
+            try (PreparedStatement ps = c.prepareStatement(
+                "INSERT INTO storage_actions (timestamp, player_uuid, player_name, world, x, y, z, block_type, action, item_type, amount) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
+                ps.setLong(1, now);
                 ps.setString(2, playerUuid.toString());
-                ps.setString(3, playerName != null ? playerName : "unknown");
+                ps.setString(3, name);
                 ps.setString(4, world);
                 ps.setInt(5, x);
                 ps.setInt(6, y);
                 ps.setInt(7, z);
                 ps.setString(8, blockType);
                 ps.setString(9, action);
-                ps.setString(10, itemType != null ? itemType : "AIR");
+                ps.setString(10, item);
                 ps.setInt(11, amount);
                 ps.executeUpdate();
-            } catch (Throwable t) {
-                LOGGER.fine("[StorageAudit] Error recording storage action: " + t.getMessage());
             }
         });
     }
