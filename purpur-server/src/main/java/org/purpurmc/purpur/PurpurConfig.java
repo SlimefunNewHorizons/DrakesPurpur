@@ -80,9 +80,6 @@ public class PurpurConfig {
 
         readConfig(PurpurConfig.class, null);
 
-        // Monolito: extrae los plugins embebidos antes de que Paper escanee plugins/
-        org.purpurmc.purpur.bundled.DrakesBundledPlugins.initialize();
-
         Block.BLOCK_STATE_REGISTRY.forEach(BlockBehaviour.BlockStateBase::initCache);
     }
 
