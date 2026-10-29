@@ -6,6 +6,8 @@
 
 **High-Performance Sovereign Minecraft Server Engine for DrakesCraft Season Two & Technical Networks**
 
+> **This branch, `ver/26.2`, is the MODULAR engine** (the main line): the kernel only, with every suite and addon loaded as an external jar from `plugins/`. The monolith (suites embedded in the server jar) lives in `feat/slimefun-native-engine`.
+
 <p>
   <a href="https://github.com/SlimefunNewHorizons/DrakesPurpur"><img src="https://img.shields.io/badge/GitHub-DrakesPurpur-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
   <img src="https://img.shields.io/badge/Java-25%20LTS-F89820?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 25"/>
@@ -154,8 +156,8 @@ DrakesPurpur pioneers a dual-track architectural model addressing both productio
 
 Both branches share the same kernel (including `DrakesDb`, the `kernel.db` WAL database inspected with `/drakes db`); they differ only in how the suites are delivered:
 
-* **`ver/26.2` (modular):** kernel only; suites are external JARs in `plugins/`.
-* **`feat/slimefun-native-engine` (monolith; the single auxiliary branch, formerly the local `monolito-local`):** suites are embedded in the server JAR from `purpur-server/bundled/drakes-bundled/`. Fill that folder with `scripts/empaquetar_monolito.sh [path-to-Drakes-Suites]`, then build.
+* **`ver/26.2` (MODULAR, the main line, 3876 commits, where all kernel work lands first):** kernel only; suites are external JARs in `plugins/`.
+* **`feat/slimefun-native-engine` (monolith; the single auxiliary branch):** suites are embedded in the server JAR from `purpur-server/bundled/drakes-bundled/`. Fill that folder with `scripts/empaquetar_monolito.sh [path-to-Drakes-Suites]`, then build.
 
 **Modular vs monolith, artifact size:** the modular `purpur-paperclip` jar is about **68.8 MB**; the monolith jar with the bundled suites is about **82 MB**.
 
