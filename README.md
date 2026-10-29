@@ -161,7 +161,11 @@ Both branches share the same kernel (including `DrakesDb`, the `kernel.db` WAL d
 
 **Modular vs monolith, artifact size:** the modular `purpur-paperclip` jar is about **68.8 MB**; the monolith jar with the bundled suites is about **82 MB**.
 
-> **Build notes.** Without `BUILD_NUMBER` the version is `26.2.local-SNAPSHOT`, which breaks addons that parse `Bukkit.getBukkitVersion`; build with `BUILD_NUMBER=134 ./gradlew createPaperclipJar`. For the **modular** build, remove the `srcDir("bundled")` line from the generated `build.gradle.kts` so nothing is embedded.
+> **Build notes.** Without `BUILD_NUMBER` the version is `26.2.local-SNAPSHOT`, which breaks addons that parse `Bukkit.getBukkitVersion`; build with `BUILD_NUMBER=137 ./gradlew createPaperclipJar`.
+> * **Modular jar (default):** nothing is embedded.
+> * **Monolith jar:** run `scripts/empaquetar_monolito.sh`, then `DRAKES_BUNDLE=1 BUILD_NUMBER=137 ./gradlew createPaperclipJar` (or pass `-PdrakesBundle`). Without `DRAKES_BUNDLE` the `bundled/` folder is ignored, so both branches share one build script.
+> * **Choosing suites without recompiling:** on first start the monolith writes `drakes-data/suites.yml` (one commented `true/false` line per bundled suite jar: Core, Bio, Combat, Generators, Magic, Server, Tech, Utility, Multiverse). Set one to `false` and restart; the jar is not extracted to `plugins/`. The 94 addons inside the suites are toggled per file in `plugins/Drakes<Suite>/modules/<addon>.yml`. See [`docs/MONOLITO.md`](docs/MONOLITO.md).
+> * **Tests:** `./gradlew :purpur-server:test` also runs the SAORI tests (`SaoriRulesTest`, `PrivacyGateTest`).
 
 ### Branch Comparison: What Each Architecture Achieves
 
