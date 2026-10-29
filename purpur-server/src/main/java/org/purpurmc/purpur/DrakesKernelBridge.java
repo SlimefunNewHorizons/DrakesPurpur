@@ -20,10 +20,7 @@ public final class DrakesKernelBridge {
     private DrakesKernelBridge() {}
 
     public static void initialize() {
-        LOGGER.info("==========================================================");
-        LOGGER.info("  [DrakesPurpur 26.2] Sovereign High-Performance Kernel  ");
-        LOGGER.info("  Architecture: JackStar6677-1 | Star Systems & Drakes   ");
-        LOGGER.info("==========================================================");
+        DrakesBanner.print(LOGGER);
         org.purpurmc.purpur.storage.DrakesDb.initialize();
         initFaultDatabase();
         loadRustNativeBridge();

@@ -38,6 +38,8 @@ High-concurrency Minecraft servers running extensive technical addons (such as S
 
 ---
 
+> **Installing the engine on your own server:** step-by-step guide in [`docs/INSTALACION_MOTOR.md`](docs/INSTALACION_MOTOR.md) (requirements, start script, first start, config, migration from 1.21.x).
+
 ## Version compatibility
 
 | Line | Branch | Minecraft | Java | Paper API (compile-time) | Status |
