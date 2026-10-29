@@ -43,3 +43,16 @@ y se recargan con `/drakessuites reload <suite> [modulo]`.
 
 `./gradlew :purpur-server:test` ejecuta ademas `SaoriRulesTest` y `PrivacyGateTest` (15 tests,
 `include("org/purpurmc/purpur/**/*Test.class")` en el patch). La primera vez necesita red para poblar la cache de Gradle.
+
+## Reemplazar un addon problematico (y dejarlo trackeado)
+
+Las suites se re-extraen a `plugins/` en CADA arranque si su SHA-256 difiere del embebido: un jar de suite
+reemplazado a mano con el mismo nombre se SOBRESCRIBE al reiniciar (el log lo avisa). Opciones:
+
+1. **Definitivo**: recompilar la suite (Drakes-Suites), `scripts/empaquetar_monolito.sh` y publicar un build nuevo del monolito.
+2. **Hotfix sin recompilar el motor**: en `drakes-data/suites.yml` pon `NombreSuite: keep`, copia tu jar a `plugins/`
+   con el nombre exacto de la suite y reinicia. El motor no lo toca.
+3. Addons de terceros que no son parte de las suites son jars normales de `plugins/`: reemplazalos sin mas.
+
+Cada arranque escribe `drakes-data/bundled-state.yml` (por suite: modo, SHA-256 embebido y, en `keep`, el desplegado).
+Un `keep` queda registrado ahi y como WARNING en el log. Al publicar el build definitivo, vuelve a `true`.
