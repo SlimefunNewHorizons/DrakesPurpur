@@ -41,7 +41,8 @@ public final class DrakesDb {
     }
 
     private static final Logger LOGGER = Logger.getLogger("DrakesDb");
-    private static final String PATH = "drakes-data/kernel.db";
+    /** Ruta de la base; {@code -Ddrakes.db.path} la sustituye (pruebas con datos temporales). */
+    private static final String PATH = System.getProperty("drakes.db.path", "drakes-data/kernel.db");
     private static final int MAX_BATCH = 500;
 
     private static volatile DrakesDb instance;
