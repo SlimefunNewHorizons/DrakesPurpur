@@ -23,13 +23,13 @@ public final class DrakesKernelBridge {
         DrakesBanner.print(LOGGER);
         org.purpurmc.purpur.storage.DrakesDb.initialize();
         initFaultDatabase();
+        org.purpurmc.purpur.perf.DrakesPerf.initialize(); // antes del puente: lee native.* de perf.yml
         loadRustNativeBridge();
         org.purpurmc.purpur.saori.SaoriLink.initialize();
         org.purpurmc.purpur.compat.ChaguiPumpkinCompat.initialize();
         org.purpurmc.purpur.staff.DrakesStaffEngine.initialize();
         org.purpurmc.purpur.modalities.DrakesModalityEngine.initialize();
         org.purpurmc.purpur.storage.DrakesStorageAudit.initialize();
-        org.purpurmc.purpur.perf.DrakesPerf.initialize();
         org.purpurmc.purpur.backup.DrakesBackupManager.initialize();
     }
 
@@ -57,6 +57,10 @@ public final class DrakesKernelBridge {
     }
 
     private static void loadRustNativeBridge() {
+        if (!org.purpurmc.purpur.nativelib.DrakesNative.tickEngineAllowed()) {
+            LOGGER.info("[DrakesPurpur] Motor Rust apagado (perf.yml native.*); todo corre en Java.");
+            return;
+        }
         try {
             File nativeLib = new File("natives/libslimefun_ffi.so");
             if (nativeLib.exists()) {
@@ -64,7 +68,7 @@ public final class DrakesKernelBridge {
                 rustLoaded = true;
                 LOGGER.info("[DrakesPurpur] Motor Rust FFM cargado exitosamente off-heap: " + nativeLib.getAbsolutePath());
             } else {
-                LOGGER.info("[DrakesPurpur] libslimefun_ffi.so no detectado en natives/. Modo simulado activo.");
+                LOGGER.info("[DrakesPurpur] libslimefun_ffi.so no detectado en natives/. Se usa Java.");
             }
         } catch (Throwable t) {
             LOGGER.log(Level.WARNING, "[DrakesPurpur] Advertencia cargando puente nativo Rust: " + t.getMessage());

@@ -1,0 +1,52 @@
+oct 29, 2026 11:50:20 A. M. org.purpurmc.purpur.nativelib.DrakesNative init
+INFORMACIÓN: [Native] enabled=true odysseia=/tmp/claude-1000/so/libodysseia_ffi.so [pulses=true aura=true] slimefun=/tmp/claude-1000/so/libslimefun_ffi.so [fill=true sum=true price=true]
+java=25.0.4.1+1-1-26.04.4-Ubuntu  enabled=true odysseia=/tmp/claude-1000/so/libodysseia_ffi.so [pulses=true aura=true] slimefun=/tmp/claude-1000/so/libslimefun_ffi.so [fill=true sum=true price=true]
+correctitud pulsos: OK (200000 llamadas identicas)
+correctitud fill: OK
+
+pulso Java ingenuo (HashMap+Deque) 512 bloques      50,6 ns/op     56,0 B/op
+pulso Java sin alloc (anillo)      512 bloques      35,0 ns/op      0,0 B/op
+pulso Rust Panama                  512 bloques      79,6 ns/op      0,0 B/op
+
+aura Java                          n=10           20,1 ns/op      0,0 B/op
+aura Rust Panama (critical)        n=10           35,4 ns/op     64,0 B/op
+aura Java                          n=100         135,8 ns/op      0,0 B/op
+aura Rust Panama (critical)        n=100         260,8 ns/op     64,0 B/op
+aura Java                          n=1000       1442,9 ns/op      0,0 B/op
+aura Rust Panama (critical)        n=1000       2459,8 ns/op     64,0 B/op
+aura Java                          n=10000     13024,9 ns/op      0,0 B/op
+aura Rust Panama (critical)        n=10000     22789,4 ns/op     64,0 B/op
+
+suma saturada Java                 n=2             4,6 ns/op      0,0 B/op
+suma saturada Rust Panama          n=2             7,1 ns/op      0,0 B/op
+fill Java (+reset)                 n=2            12,7 ns/op      0,0 B/op
+fill Rust Panama (+reset)          n=2            14,3 ns/op      0,0 B/op
+store Java                         n=2             4,9 ns/op      0,0 B/op
+store Rust Panama                  n=2            10,4 ns/op      0,0 B/op
+suma saturada Java                 n=16           10,3 ns/op      0,0 B/op
+suma saturada Rust Panama          n=16           19,0 ns/op      0,0 B/op
+fill Java (+reset)                 n=16           31,4 ns/op      0,0 B/op
+fill Rust Panama (+reset)          n=16           44,1 ns/op      0,0 B/op
+store Java                         n=16           13,5 ns/op      0,0 B/op
+store Rust Panama                  n=16           17,9 ns/op      0,0 B/op
+suma saturada Java                 n=128          87,9 ns/op      0,0 B/op
+suma saturada Rust Panama          n=128         184,2 ns/op      0,0 B/op
+fill Java (+reset)                 n=128         189,3 ns/op      0,0 B/op
+fill Rust Panama (+reset)          n=128         206,6 ns/op      0,0 B/op
+store Java                         n=128          29,0 ns/op      0,0 B/op
+store Rust Panama                  n=128          66,4 ns/op      0,0 B/op
+suma saturada Java                 n=1024        523,3 ns/op      0,0 B/op
+suma saturada Rust Panama          n=1024       1384,0 ns/op      0,0 B/op
+fill Java (+reset)                 n=1024       1377,0 ns/op      0,0 B/op
+fill Rust Panama (+reset)          n=1024       1559,5 ns/op      0,0 B/op
+store Java                         n=1024        200,4 ns/op      0,0 B/op
+store Rust Panama                  n=1024        360,1 ns/op      0,0 B/op
+suma saturada Java                 n=8192       4162,2 ns/op      0,0 B/op
+suma saturada Rust Panama          n=8192      10684,4 ns/op      0,0 B/op
+fill Java (+reset)                 n=8192       8994,3 ns/op      0,0 B/op
+fill Rust Panama (+reset)          n=8192      11631,8 ns/op      0,0 B/op
+store Java                         n=8192       1360,2 ns/op      0,0 B/op
+store Rust Panama                  n=8192       2903,9 ns/op      0,0 B/op
+
+precio mercado Java                -              45,9 ns/op      0,0 B/op
+precio mercado Rust Panama         -              34,3 ns/op      0,0 B/op

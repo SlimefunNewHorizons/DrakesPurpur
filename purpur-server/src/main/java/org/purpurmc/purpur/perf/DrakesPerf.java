@@ -54,6 +54,21 @@ public final class DrakesPerf {
           min-send-view-distance: 6
           min-simulation-distance: 4
           max-steps: 6
+        # Bibliotecas nativas (Rust) por Panama. APAGADO: en el benchmark (docs/NATIVO.md) Java gano en todo.
+        # Si falta el .so/.dll o la ABI no coincide se usa Java sin avisar a nadie mas que el log.
+        native:
+          enabled: false           # interruptor maestro
+          dir: natives             # tambien se busca en drakes-data/natives, -Ddrakes.native.dir y $DRAKES_NATIVE_DIR
+          ring-capacity: 64        # marcas de tiempo por bloque (>= limite de pulsos largo)
+          max-entries: 8192        # bloques seguidos a la vez; si se llena se deja pasar
+          odysseia:
+            pulses: false          # contador de pulsos de redstone
+            aura: false            # aura de jefe por lotes
+          slimefun:
+            fill: false            # reparto EnergyNet (fillSequential/storeRemaining)
+            sum: false             # suma saturada
+            price: false           # precio de DrakesSlimeMarket
+            tick-engine: false     # SlimefunRustEngine (solo cuenta ticks; sin logica real)
         # Copia de seguridad 7z: no compite con el tick ni con la red.
         backup:
           throttle: true           # nice 19 + ionice idle + hilos limitados
@@ -106,6 +121,7 @@ public final class DrakesPerf {
                 Files.writeString(f.toPath(), DEFAULT_YML, StandardCharsets.UTF_8);
             }
             cfg = YamlConfiguration.loadConfiguration(f);
+            initNative();
             if (!enabled()) {
                 LOGGER.info("[Perf] desactivado en perf.yml");
                 return;
@@ -123,6 +139,19 @@ public final class DrakesPerf {
                 + " backup-throttle=" + cfg.getBoolean("backup.throttle", true));
         } catch (Throwable t) {
             LOGGER.log(Level.WARNING, "[Perf] no se pudo iniciar: " + t.getMessage());
+        }
+    }
+
+    private static void initNative() {
+        try {
+            org.purpurmc.purpur.nativelib.DrakesNative.init(new org.purpurmc.purpur.nativelib.DrakesNative.Settings(
+                cfg.getBoolean("native.enabled", false), cfg.getString("native.dir", "natives"),
+                cfg.getBoolean("native.odysseia.pulses", false), cfg.getBoolean("native.odysseia.aura", false),
+                cfg.getBoolean("native.slimefun.fill", false), cfg.getBoolean("native.slimefun.sum", false),
+                cfg.getBoolean("native.slimefun.price", false), cfg.getBoolean("native.slimefun.tick-engine", false),
+                cfg.getInt("native.ring-capacity", 64), cfg.getInt("native.max-entries", 8192)));
+        } catch (Throwable t) {
+            LOGGER.log(Level.WARNING, "[Native] init fallo (" + t + "); todo en Java.");
         }
     }
 

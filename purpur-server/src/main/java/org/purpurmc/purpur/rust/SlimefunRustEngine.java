@@ -34,6 +34,10 @@ public final class SlimefunRustEngine {
 
     public static synchronized void initPanamaBindings() {
         if (nativeLinked) return;
+        if (!org.purpurmc.purpur.nativelib.DrakesNative.tickEngineAllowed()) {
+            LOGGER.info("[RustEngine] apagado (perf.yml native.enabled / native.slimefun.tick-engine = false); sin carga nativa.");
+            return;
+        }
         try {
             File nativeFile = new File("natives/libslimefun_ffi.so");
             if (!nativeFile.exists()) {
