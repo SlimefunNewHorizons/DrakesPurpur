@@ -1,0 +1,24 @@
+[10:11:53 INFO]: [DrakesKernel] [38;5;99m================================================================[0m
+[10:11:53 INFO]: [DrakesKernel] [1;38;5;141m####  ####   ###  #  #  #####  #### [0m
+[10:11:53 INFO]: [DrakesKernel] [1;38;5;141m#   # #   # #   # # #   #     #     [0m
+[10:11:53 INFO]: [DrakesKernel] [1;38;5;141m#   # ####  ##### ##    ####   ###  [0m
+[10:11:53 INFO]: [DrakesKernel] [1;38;5;141m#   # #  #  #   # # #   #         # [0m
+[10:11:53 INFO]: [DrakesKernel] [1;38;5;141m####  #   # #   # #  #  ##### ####  [0m
+[10:11:53 INFO]: [DrakesKernel] [1;38;5;51m####  #   # ####  ####  #   # ####  [0m[1;38;5;141m ###   ###      ###  [0m
+[10:11:53 INFO]: [DrakesKernel] [1;38;5;51m#   # #   # #   # #   # #   # #   # [0m[1;38;5;141m#   # #        #   # [0m
+[10:11:53 INFO]: [DrakesKernel] [1;38;5;51m####  #   # ####  ####  #   # ####  [0m[1;38;5;141m  ##  ####       ##  [0m
+[10:11:53 INFO]: [DrakesKernel] [1;38;5;51m#     #   # #  #  #     #   # #  #  [0m[1;38;5;141m #    #   #     #    [0m
+[10:11:53 INFO]: [DrakesKernel] [1;38;5;51m#      ###  #   # #      ###  #   # [0m[1;38;5;141m#####  ###  #  ##### [0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;99m================================================================[0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;245mVersion   [0m[1;37mDrakesPurpur 26.2 build 138[0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;245mMinecraft [0m[1;37m26.2[0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;245mJava      [0m[1;37m25.0.4.1+1-1-26.04.4-Ubuntu (OpenJDK 64-Bit Server VM)[0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;245mModo      [0m[1;37mMONOLITO (9 suites embebidas)[0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;245mEdited by [1;37mJackStar6677-1 (JackStar Systems)[38;5;245m - DrakesCraft Season Two[0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;245mGitHub    [0m[4;38;5;81mhttps://github.com/SlimefunNewHorizons/DrakesPurpur[0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;245mPerfil    [0m[4;38;5;81mhttps://github.com/JackStar6677-1[0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;245mMaven     [0m[4;38;5;81mhttps://maven.drakescraft.cl[0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;245mWeb       [0m[4;38;5;81mhttps://web.drakescraft.cl[0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;245mDiscord   [0m[4;38;5;81mhttps://discord.gg/rv3vtXZTk7[0m
+[10:11:53 INFO]: [DrakesKernel] [2;37mBased on Purpur (PurpurMC) and Paper (PaperMC); licensed per upstream; modifications by JackStar6677-1[0m
+[10:11:53 INFO]: [DrakesKernel] [38;5;99m================================================================[0m
