@@ -42,7 +42,7 @@
 +sourceSets {
 +    main {
 +        java { srcDir("../paper-server/src/main/java") }
-+        resources { srcDir("../paper-server/src/main/resources") }
++        resources { srcDir("../paper-server/src/main/resources"); if (providers.environmentVariable("DRAKES_BUNDLE").orNull == "1" || providers.gradleProperty("drakesBundle").isPresent) srcDir("bundled") } // monolito: embebe drakes-bundled/ SOLO con DRAKES_BUNDLE=1 o -PdrakesBundle
 +    }
 +    test {
 +        java { srcDir("../paper-server/src/test/java") }
@@ -122,7 +122,7 @@
      project("paper")
      versionFamily(paperweight.minecraftVersion.map { it.split(".", "-").takeWhile { part -> part.toIntOrNull() != null }.take(2).joinToString(".") })
      version(paperweight.minecraftVersion)
-@@ -341,4 +_,47 @@
+@@ -341,4 +_,50 @@
              }
          }
      }
@@ -171,3 +171,6 @@
 +//
 +//     return files.size
 +// }
++
++// Purpur - tests propios (saori/...): el include original solo coge *TestSuite
++tasks.test { include("org/purpurmc/purpur/**/*Test.class") }
