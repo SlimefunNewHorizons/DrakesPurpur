@@ -314,6 +314,32 @@ DrakesPurpur is fully automated via **GitHub Actions** (`.github/workflows/drake
 
 ---
 
+## Updating a single add-on (monolith)
+
+In the monolith the add-ons live **inside the 9 suite jars**, and the suite jars live **inside the engine jar**.
+On every boot the engine copies them to `plugins/` and **overwrites** any suite jar whose SHA-256 differs from the embedded one
+(the log says `difiere del embebido: se SOBRESCRIBE`). Pick the case that matches what you want:
+
+| I want to... | Do this | Survives restart? |
+|---|---|---|
+| Fix a add-on **for good** | Rebuild the suite in `Drakes-Suites` (branch `26.x`), run `scripts/empaquetar_monolito.sh`, build the new engine jar (`DRAKES_BUNDLE=1 ./gradlew createPaperclipJar`) and publish a release. Replace the engine jar on the server. | Yes (it is the new embedded version) |
+| Hotfix a **whole suite** now, without rebuilding the engine | 1. In `drakes-data/suites.yml` set `DrakesTech: keep` (use the suite name).<br>2. Copy the fixed suite jar to `plugins/` with the **exact same file name** as the old one.<br>3. Restart. The engine no longer touches that jar. | Yes, while it says `keep` |
+| Hotfix **one add-on** inside a suite (e.g. `dynatech`) with a newer standalone jar | 1. Disable the built-in copy: in `plugins/DrakesTech/modules/dynatech.yml` set `enabled: false`.<br>2. Drop the updated standalone add-on jar into `plugins/`.<br>3. Restart. | Yes (the module file is yours; the engine does not rewrite it) |
+| Update an add-on that is **not** part of the suites (third party) | Replace its jar in `plugins/` and restart. | Yes |
+
+Rules that avoid pain:
+- **Never run the built-in and the standalone copy of the same add-on together**: Slimefun fails with `IdConflictException` (duplicate item ids). Always disable one of them.
+- Keep the old jar in a backup folder (never next to the new one in `plugins/`: two jars with the same plugin name also conflict).
+- Every boot the engine writes `drakes-data/bundled-state.yml` (per suite: mode, embedded SHA-256 and, for `keep`, the deployed SHA-256) and prints a WARNING for each `keep`. That file is your tracking: if a suite shows `keep`, someone replaced it by hand.
+- When the permanent fix ships in a new engine build, set the suite back to `true` (or remove the line) and re-enable the module (`enabled: true`).
+- Suites can also be turned off entirely with `false` in `suites.yml`. Details: [`docs/MONOLITO.md`](docs/MONOLITO.md).
+
+**En español, resumen:** el monolito pisa al arrancar cualquier jar de suite que sea distinto del embebido. Para
+arreglar *una suite* ya: pon `NombreSuite: keep` en `drakes-data/suites.yml` y copia tu jar con el mismo nombre.
+Para arreglar *un solo addon*: apaga su módulo (`enabled: false` en `plugins/<Suite>/modules/<addon>.yml`) y mete
+el jar actualizado en `plugins/`. Nunca dejes los dos activos a la vez. Lo definitivo es recompilar la suite y publicar
+un build nuevo. `drakes-data/bundled-state.yml` deja constancia de qué se cambió a mano.
+
 ## Local Build Instructions
 
 To build DrakesPurpur locally on Linux (Nova / Workstations):
