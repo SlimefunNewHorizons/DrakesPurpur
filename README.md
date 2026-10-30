@@ -6,7 +6,7 @@
 
 **High-Performance Sovereign Minecraft Server Engine for DrakesCraft Season Two & Technical Networks**
 
-> **This branch, `ver/26.2`, is the MODULAR engine** (the main line): the kernel only, with every suite and addon loaded as an external jar from `plugins/`. The monolith (suites embedded in the server jar) lives in `feat/slimefun-native-engine`.
+> **This branch, `feat/slimefun-native-engine`, is the MONOLITH** and the base of Season Two (T2, Minecraft 26.2): the kernel **plus the 9 StarSuites embedded in a single executable jar**. The modular line (`ver/26.2`, kernel only, suites as external jars) is secondary and will be re-tested once the monolith is finished.
 
 <p>
   <a href="https://github.com/SlimefunNewHorizons/DrakesPurpur"><img src="https://img.shields.io/badge/GitHub-DrakesPurpur-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
@@ -40,12 +40,36 @@ High-concurrency Minecraft servers running extensive technical addons (such as S
 
 > **Installing the engine on your own server:** step-by-step guide in [`docs/INSTALACION_MOTOR.md`](docs/INSTALACION_MOTOR.md) (requirements, start script, first start, config, migration from 1.21.x).
 
+## The monolith today (read this first)
+
+One jar, one process: Purpur 26.2 + the DrakesPurpur kernel + **9 embedded suites** (`DrakesCore`, Bio, Combat, Generators, Magic, Server, Tech, Utility, Multiverse = 94 add-ons) on the native Slimefun core. Java 25 is required.
+
+**How it works**
+- `DrakesBundledPlugins` runs at boot: it extracts every embedded suite jar to `plugins/` **only when its SHA-256 differs** from the file already there, and Paper then loads them normally. `drakes-data/suites.yml` chooses per suite: `true` = extract, `false` = do not extract (and remove the identical jar), `keep` = never touch a jar you replaced by hand. `-Ddrakes.bundled=false` disables the whole mechanism (the jar then behaves as the modular engine).
+- Every boot writes `drakes-data/bundled-state.yml` (per suite: mode, embedded SHA-256 and, for `keep`, the deployed one): the audit trail of hand-made changes.
+- `drakes-data/perf.yml` holds performance switches (load governor, backups). The Rust/Panama native bridge is **off by default** (`native.enabled: false`): benchmarks showed Java wins or ties on every path ([`docs/NATIVO.md`](docs/NATIVO.md)). A missing or failing native library always falls back to Java.
+- `SaoriLink` / `PrivacyGate` connect the server to the SAORI SRE daemon (telemetry and rules, with a privacy filter); `DrakesDb` is the single SQLite (WAL) kernel database, inspected with `/drakes db`.
+- Third-party plugins (LuckPerms, WorldEdit, EssentialsX, BentoBox, ...) stay regular jars in `plugins/`.
+
+**Deploy a server**
+1. Linux x86_64 with JDK 25 (Temurin).
+2. Download `DrakesPurpur-26.2-monolith-b<N>.jar` and `SHA256SUMS.txt` from [Releases](https://github.com/SlimefunNewHorizons/DrakesPurpur/releases) and verify: `sha256sum -c SHA256SUMS.txt --ignore-missing`.
+3. Put it in an empty folder, accept `eula.txt`, and start it with the flags of the [startup script](#2-recommended-production-startup-script-runsh) (`-Xms/-Xmx`, G1 flags, `--enable-native-access=ALL-UNNAMED`, `-jar <jar> --nogui`).
+4. First boot creates `plugins/` (suites extracted) and `drakes-data/` (`suites.yml`, `perf.yml`, `bundled-state.yml`). Add your third-party plugins, restart, tune each add-on in `plugins/Drakes<Suite>/modules/<addon>.yml` and reload with `/drakessuites reload <suite> [module]`.
+5. Full guide: [`docs/INSTALACION_MOTOR.md`](docs/INSTALACION_MOTOR.md). Updating one add-on or suite: [section below](#updating-a-single-add-on-monolith).
+
+**Build it yourself:** JDK 25, then `scripts/empaquetar_monolito.sh [path/to/Drakes-Suites]` and `DRAKES_BUNDLE=1 BUILD_NUMBER=<N> ./gradlew createPaperclipJar`. Details in [`docs/MONOLITO.md`](docs/MONOLITO.md).
+
+**Resumen (ES):** esta rama es el monolito: un solo jar con el motor y las 9 suites embebidas, base de la T2 (Minecraft 26.2, Java 25). Al arrancar extrae las suites a `plugins/` si cambia su SHA-256; se eligen en `drakes-data/suites.yml` (`true`/`false`/`keep`). Lo nativo (Rust) viene apagado. Se descarga desde Releases con `SHA256SUMS`. La produccion (Dallas, 1.21.11) es otro stack y no se toca desde aqui. El modular (`ver/26.2`) queda como linea secundaria.
+
+---
+
 ## Version compatibility
 
 | Line | Branch | Minecraft | Java | Paper API (compile-time) | Status |
 |---|---|---|---|---|---|
-| DrakesPurpur modular | `ver/26.2` | 26.2 | 25 LTS | Paper `26.2` (`apiVersion = 26.2`, see `gradle.properties`) | test / staging (Season Two) |
-| DrakesPurpur monolith | `feat/slimefun-native-engine` | 26.2 | 25 LTS | Paper `26.2` | test (experimental R&D) |
+| DrakesPurpur monolith (**default**) | `feat/slimefun-native-engine` | 26.2 | 25 LTS | Paper `26.2` | Season Two (T2) test servers, being built up |
+| DrakesPurpur modular | `ver/26.2` | 26.2 | 25 LTS | Paper `26.2` (`apiVersion = 26.2`, see `gradle.properties`) | secondary, to be re-tested after the monolith |
 | Production server | plain Paper 1.21.11 (not this fork) | 1.21.11 | 21 | `1.21.11-R0.1-SNAPSHOT` | production |
 
 The suites and addons that run on this kernel come from the Universal line of the Slimefun core (`11.0-Universal-26.x-SNAPSHOT`), which is compiled against Paper API `1.21.11-R0.1-SNAPSHOT`, targets Java 21 bytecode and is the same codebase as the 1.21.11 production core. Addons for 26.x are obtained with `ai-hub/scripts/portar_addons.py`.
@@ -158,8 +182,8 @@ DrakesPurpur pioneers a dual-track architectural model addressing both productio
 
 Both branches share the same kernel (including `DrakesDb`, the `kernel.db` WAL database inspected with `/drakes db`); they differ only in how the suites are delivered:
 
-* **`ver/26.2` (MODULAR, the main line, 3876 commits, where all kernel work lands first):** kernel only; suites are external JARs in `plugins/`.
-* **`feat/slimefun-native-engine` (monolith; the single auxiliary branch):** suites are embedded in the server JAR from `purpur-server/bundled/drakes-bundled/`. Fill that folder with `scripts/empaquetar_monolito.sh [path-to-Drakes-Suites]`, then build.
+* **`ver/26.2` (MODULAR, secondary):** kernel only; suites are external JARs in `plugins/`. Kernel work is merged into the monolith.
+* **`feat/slimefun-native-engine` (MONOLITH, default branch):** suites are embedded in the server JAR from `purpur-server/bundled/drakes-bundled/`. Fill that folder with `scripts/empaquetar_monolito.sh [path-to-Drakes-Suites]`, then build.
 
 **Modular vs monolith, artifact size:** the modular `purpur-paperclip` jar is about **68.8 MB**; the monolith jar with the bundled suites is about **82 MB**.
 
