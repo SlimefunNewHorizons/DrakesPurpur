@@ -1,6 +1,9 @@
 package org.purpurmc.purpur.backup;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -64,6 +67,7 @@ public final class DrakesBackupManager {
         LOGGER.info("[BackupManager] Starting scheduled daily server archive...");
         String stamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File targetArchive = new File(BACKUP_DIR, "drakes_backup_" + stamp + ".7z");
+        File stderrLog = new File(BACKUP_DIR, "last_backup_stderr.log");
 
         DrakesPerf.setBackupRunning(true);
         try {
@@ -75,11 +79,21 @@ public final class DrakesBackupManager {
             }
             cmd.addAll(List.of("7z", "a", "-t7z", "-mx=3", "-bso0", "-bsp0"));
             if (throttle) cmd.add("-mmt=" + Math.max(1, DrakesPerf.cfg().getInt("backup.threads", 2)));
-            cmd.addAll(List.of("-xr!backups", "-xr!cache", "-xr!*.log", targetArchive.getAbsolutePath(), "."));
+            // Exclude temporary/locked runtime files (session.lock, sockets, active db locks) to avoid non-fatal warnings
+            cmd.addAll(List.of(
+                "-xr!backups",
+                "-xr!cache",
+                "-xr!*.log",
+                "-xr!session.lock",
+                "-xr!*.lck",
+                "-xr!*.sock",
+                "-xr!*.tmp",
+                targetArchive.getAbsolutePath(),
+                "."
+            ));
             ProcessBuilder pb = new ProcessBuilder(cmd);
-            // Antes la salida de 7z se mandaba a un pipe que nadie leia: con muchos archivos el buffer se llenaba y 7z se bloqueaba.
-            pb.redirectErrorStream(true);
             pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+            pb.redirectError(stderrLog);
             Process proc = pb.start();
             long timeout = Math.max(10, DrakesPerf.cfg().getLong("backup.timeout-minutes", 180));
             if (!proc.waitFor(timeout, TimeUnit.MINUTES)) {
@@ -93,14 +107,35 @@ public final class DrakesBackupManager {
             if (code == 0) {
                 LOGGER.info("[BackupManager] Daily backup created successfully: " + targetArchive.getName());
                 cleanOldBackups();
+            } else if (code == 1) {
+                // In 7-Zip, code 1 is a non-fatal warning (some locked runtime files were skipped, archive is valid)
+                String warnSummary = readFirstLine(stderrLog);
+                LOGGER.warning("[BackupManager] Daily backup created with non-fatal warnings (exit code 1, locked/temp files skipped): "
+                    + targetArchive.getName() + (warnSummary != null ? " | " + warnSummary : ""));
+                cleanOldBackups();
             } else {
-                LOGGER.warning("[BackupManager] 7z process exited with code " + code + ". Backup may be incomplete.");
+                String errSummary = readFirstLine(stderrLog);
+                LOGGER.severe("[BackupManager] 7z process failed with fatal exit code " + code + ". Purging incomplete archive."
+                    + (errSummary != null ? " Details: " + errSummary : ""));
+                targetArchive.delete();
             }
         } catch (Throwable t) {
             LOGGER.warning("[BackupManager] Unable to execute 7z backup (7z tool may be missing): " + t.getMessage());
         } finally {
             DrakesPerf.setBackupRunning(false);
         }
+    }
+
+    private static String readFirstLine(File file) {
+        if (file == null || !file.exists() || file.length() == 0) return null;
+        try (BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (!line.isEmpty()) return line;
+            }
+        } catch (Throwable ignored) {}
+        return null;
     }
 
     private static void cleanOldBackups() {
