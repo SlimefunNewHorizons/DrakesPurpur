@@ -77,8 +77,8 @@ Under a panel (Pterodactyl/Pelican) use the same flags in the startup command. C
 
 The suites run on top of the **Slimefun core** (Universal 26.x line, compiled against Paper API 1.21.11, Java 21 bytecode, loads fine on 26.2).
 
-* Core: releases of [DrakesCraft-Labs/Slimefun4-Drake](https://github.com/DrakesCraft-Labs/Slimefun4-Drake/releases) or the Maven repo `https://maven.drakescraft.cl`.
-* Suites: releases of [DrakesCraft-Labs/Drakes-Suites](https://github.com/DrakesCraft-Labs/Drakes-Suites/releases) (branch `26.x` is the active 26 line). Put `Slimefun4*.jar` and the `Drakes*.jar` files in `plugins/`. Install `DrakesCore` first; every other suite depends on it.
+* Core: releases of [SlimefunNewHorizons/Slimefun4-Drake](https://github.com/SlimefunNewHorizons/Slimefun4-Drake/releases) or the Maven repo `https://maven.drakescraft.cl`.
+* Suites: releases of [SlimefunNewHorizons/Drakes-Suites](https://github.com/SlimefunNewHorizons/Drakes-Suites/releases) (branch `26.x` is the active 26 line). Put `Slimefun4*.jar` and the `Drakes*.jar` files in `plugins/`. Install `DrakesCore` first; every other suite depends on it.
 * Third-party infrastructure (LuckPerms, WorldEdit, ...) must be builds that support 26.x.
 
 ## 6. Migrating from Paper/Purpur 1.21.x
