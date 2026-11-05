@@ -56,6 +56,7 @@ public final class DrakesPerf {
           max-steps: 6
         # Copia de seguridad 7z: no compite con el tick ni con la red.
         backup:
+          enabled: true            # false = desactiva el respaldo interno 7z (p.ej. cuando lo hace el panel/Star)
           throttle: true           # nice 19 + ionice idle + hilos limitados
           threads: 2
           defer-if-mspt-above: 35.0
@@ -87,6 +88,10 @@ public final class DrakesPerf {
 
     public static void setBackupRunning(boolean b) {
         backupRunning = b;
+    }
+
+    public static boolean isBackupRunning() {
+        return backupRunning;
     }
 
     public static double msptNow() {

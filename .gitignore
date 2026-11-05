@@ -66,3 +66,5 @@ test-plugin.settings.gradle.kts
 
 # Monolito: jars embebidos (generados por scripts/empaquetar_monolito.sh)
 purpur-server/bundled/
+graphify-out/
+
