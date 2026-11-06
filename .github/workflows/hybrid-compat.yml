@@ -16,7 +16,8 @@ jobs:
       - run: git config --global user.email "no-reply@github.com" && git config --global user.name "Github Actions"
       - name: Build DrakesPurpur Hybrid jar + native lib
         run: |
-          ./gradlew applyAllPatches createPaperclipJar --stacktrace
+          ./gradlew applyAllPatches --stacktrace
+          ./gradlew createPaperclipJar --stacktrace
           (cd native/drakes-hybrid && cargo build --release)
           mkdir -p native-lib && cp native/drakes-hybrid/target/release/libdrakes_hybrid_ffi.so native-lib/
           mkdir -p run && cp purpur-server/build/libs/*paperclip*.jar run/server.jar
@@ -46,7 +47,8 @@ jobs:
           printf 'online-mode=false\nserver-port=25598\nlevel-seed=12345\nview-distance=4\nsimulation-distance=4\nspawn-protection=0\n' > server.properties
           mkdir -p plugins drakes-data && printf 'native:\n  hybrid:\n    enabled: true\n    bits: true\n' > drakes-data/perf.yml
           cp ../ext/slimefun/target/*.jar plugins/ 2>/dev/null; ls ../ext/slimefun/target/*.jar
-          rm -f plugins/*sources*.jar plugins/original-*.jar
+          for j in ../ext/suites/*/target/*.jar; do case "$j" in *sources*|*original-*|*javadoc*) ;; *) cp "$j" plugins/ ;; esac; done
+          rm -f plugins/*sources*.jar plugins/original-*.jar; ls plugins
           # primer arranque solo para extraer el servidor parcheado (cache/patched_*.jar)
           (timeout 600 java -Xmx2G -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../boot0.log 2>&1 &) ; sleep 150; pkill -f server.jar || true; sleep 3
           CP=$(ls cache/patched_*.jar | head -1):$(ls plugins/*.jar | tr '\n' ':')
