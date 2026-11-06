@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate.java
++++ b/net/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate.java
+@@ -542,3 +_,8 @@
+                 tag.put("Pos", posTag);
+                 tag.remove("UUID");
++                // Drakes start - MC-252934: relocate the copied anchor before entity loading validates it.
++                if (tag.contains("block_pos")) {
++                    tag.store("block_pos", BlockPos.CODEC, blockPos);
++                }
++                // Drakes end - no changes to the template or existing world entities
+                 createEntityIgnoreException(problemReporter, level, tag).ifPresent(entity -> {
