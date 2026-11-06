@@ -78,6 +78,15 @@ jobs:
           echo "== log servidor fase 2"
           grep -E "Enabling|Disabling|Done \(|HybridNative|SEVERE|ERROR" ../smoke2.log | cut -c1-170 | head -40
           tail -12 ../smoke2.log | cut -c1-170
+      - name: Diagnostico compilacion del plugin de prueba
+        if: always()
+        run: |
+          cd run
+          unzip -l ../smoke-out.jar 2>/dev/null | tail -3 || true
+          echo "== contenido jar smoke:"; unzip -l plugins/HybridCompatSmoke.jar | tail -6
+          echo "== clases Slimefun en jars:"; for j in plugins/*lime*.jar plugins/*Slime*.jar; do [ -f "$j" ] && unzip -l "$j" | grep -E "/SlimefunItem.class|/BlockStorage.class|implementation/Slimefun.class" | head -4; done
+          CP=$(find cache libraries -name '*.jar' | tr '\n' ':')$(ls plugins/*.jar | tr '\n' ':')
+          echo "== javac:"; mkdir -p /tmp/sm && javac -proc:none -Xmaxerrs 6 -cp "$CP" -d /tmp/sm ../tools/compat-smoke/src/HybridCompatSmoke.java 2>&1 | head -24; echo "javac exit=${PIPESTATUS[0]}"
       - name: Errores en logs
         if: always()
         run: grep -h -E "ERROR|SEVERE|Exception" smoke1.log smoke2.log 2>/dev/null | cut -c1-200 | sort | uniq -c | sort -rn | head -15
