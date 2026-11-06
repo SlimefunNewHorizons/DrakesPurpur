@@ -1,0 +1,27 @@
+name: Hybrid recon (EXPERIMENTAL)
+on:
+  workflow_dispatch:
+  push:
+    branches: ["experimental/horizon-rust-hybrid-engine"]
+    paths: [".github/workflows/hybrid-recon.yml"]
+jobs:
+  recon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: 25, cache: gradle }
+      - uses: gradle/actions/setup-gradle@v6
+      - run: git config --global user.email "no-reply@github.com" && git config --global user.name "Github Actions"
+      - run: ./gradlew applyAllPatches --stacktrace
+      - name: Dump sources
+        run: |
+          S=$(find . -path '*/net/minecraft/util/SimpleBitStorage.java' | head -1); echo "SRC=$S"
+          ROOT=${S%/net/minecraft/util/SimpleBitStorage.java}; echo "ROOT=$ROOT"
+          echo "::group::SimpleBitStorage"; cat $S; echo "::endgroup::"
+          echo "::group::PalettedContainer"; cat $ROOT/net/minecraft/world/level/chunk/PalettedContainer.java; echo "::endgroup::"
+          echo "::group::usages"; grep -rn "new SimpleBitStorage\|\.unpack(\|getRaw()" $ROOT/net/minecraft --include=*.java | head -60; echo "::endgroup::"
+          echo "::group::heightmap/other"; grep -n "SimpleBitStorage\|BitStorage" $ROOT/net/minecraft/world/level/levelgen/Heightmap.java; echo "::endgroup::"
+          mkdir -p /tmp/out && cp $S $ROOT/net/minecraft/world/level/chunk/PalettedContainer.java $ROOT/net/minecraft/world/level/chunk/PalettedContainerRO.java $ROOT/net/minecraft/world/level/chunk/LevelChunkSection.java /tmp/out/ 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        with: { name: mc-sources, path: /tmp/out }
