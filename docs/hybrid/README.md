@@ -12,15 +12,15 @@ Java (DrakesPurpur) sigue siendo la unica autoridad del mundo; Rust solo calcula
 | [DESPLIEGUE.md](DESPLIEGUE.md) | Compilar, servidor de pruebas, plan de despliegue seguro |
 | [bench_hybrid_2026-11-06.txt](bench_hybrid_2026-11-06.txt) | Salida cruda de paridad + benchmark |
 
-## Estado honesto (2026-11-06)
+## Estado (2026-11-06, segunda fase)
 
 | Pieza | Estado | Evidencia |
 |---|---|---|
-| Crate `native/drakes-hybrid` (ABI 1) | Compila, 6 tests Rust OK | `cargo test` |
-| `HybridNative` (puente FFM + fallback Java) | Compila con JDK 25; paridad bit a bit con la referencia Java | `scripts/hybrid-check.sh` |
-| Empaquetado `SimpleBitStorage` por lotes | ~2.1x a 4096 valores (una seccion), mas lento a 256 | bench; **no probado dentro del servidor** |
-| Ruido de Perlin por lotes | **Sin ganancia** (0.77-0.92x). Se deja OFF; el JIT de Java iguala a Rust | bench |
-| Analisis de cabeceras `.mca` (solo lectura) | Paridad con Java; utilidad diagnostica, no de rendimiento | test |
-| Integracion en el pipeline real de chunks de Paper | **NO hecha**: ver LIMITACIONES.md | - |
-| Build completo del servidor (Paper + parches) | **NO ejecutado**: el entorno no alcanza repo.papermc.io (403) | - |
-| Horizon Client -> DrakesPurpur | **NO probado** (no hay cliente ni GPU aqui) | - |
+| Servidor completo compilado con la rama (parche 0023) | OK | CI `Build` + `Hybrid Engine CI` en verde |
+| Kernel de bits **integrado** en `PalettedContainer.pack()/reencodeContents()` con fallback Java | OK, **apagado por defecto** | [RESULTADOS.md](RESULTADOS.md) |
+| Paridad dentro del servidor (13 872 contenedores reales x2 corridas) | 0 diferencias | autotest |
+| Rendimiento Rust vs Java | **Sin mejora demostrable** (0-6 %, bajo el ruido) | RESULTADOS.md |
+| Ruido de Perlin nativo | Sin ganancia (0.77-1.02x); no integrado | bench |
+| Instrumentacion (gen/guardar/cargar/envio, JFR, `perf-status.json`) | OK | RESULTADOS.md |
+| Investigacion Horizon Client / protocolo 776 vs 777 | Documentada, **no probada con cliente real** | [CLIENTE_HORIZON.md](CLIENTE_HORIZON.md) |
+| Slimefun / StarSuites ejecutando sobre la rama | **NO verificado** (ver LIMITACIONES.md) | - |

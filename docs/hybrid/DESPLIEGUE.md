@@ -12,3 +12,9 @@ Sale con codigo != 0 si Rust y Java difieren en un solo bit.
 
 ## Plan seguro
 Fase 0 (hecha): kernels + paridad. Fase 1: parche de servidor que llame `HybridNative.packBits` desde la serializacion de secciones, detras de la config, con test de bytes identicos a vanilla. Fase 2: bots de carga (estilo `horizon-bots`) comparando Purpur / Drakes / Hibrido a igual semilla y hardware, p50/p95/p99 y MSPT. Fase 3: 2 semanas en servidor de pruebas con Slimefun + StarSuites. Solo entonces evaluar produccion. No fusionar sin esas evidencias.
+
+## Servidor de pruebas: que falta (fase 2)
+1. Compilar localmente o bajar el artefacto: `./gradlew applyAllPatches createPaperclipJar` (JDK 25) + `cargo build --release` en `native/drakes-hybrid`.
+2. Probar con `-Ddrakes.hybrid.selftest=8` en una **carpeta desechable**; exige `RESULTADO: OK` y 0 diferencias de paridad.
+3. Con Slimefun + StarSuites reales en `plugins/`: arrancar con `native.hybrid.enabled: false` (control) y luego `true` + `bits: true`; comparar logs y `drakes-data/perf-status.json` (seccion `hybrid`). **Pendiente.**
+4. No activar en produccion: hoy no hay mejora medida que lo justifique.
