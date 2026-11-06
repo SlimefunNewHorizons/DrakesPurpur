@@ -293,6 +293,17 @@ public final class DrakesPerf {
             ws.add(j);
         }
         o.add("worlds", ws);
+        JsonObject hy = new JsonObject(); // Horizon Hybrid Engine: estado + contadores por etapa (si native.hybrid.stats)
+        hy.addProperty("status", org.purpurmc.purpur.nativelib.HybridNative.status());
+        hy.addProperty("library_loaded", org.purpurmc.purpur.nativelib.HybridNative.libraryLoaded());
+        for (org.purpurmc.purpur.hybrid.HybridStats.Stage st : org.purpurmc.purpur.hybrid.HybridStats.ALL) {
+            JsonObject sj = new JsonObject();
+            sj.addProperty("calls", st.calls.sum());
+            sj.addProperty("items", st.items.sum());
+            sj.addProperty("ms", st.nanos.sum() / 1e6);
+            hy.add(st.name, sj);
+        }
+        o.add("hybrid", hy);
         return new GsonBuilder().create().toJson(o);
     }
 
