@@ -16,12 +16,9 @@ jobs:
       - run: ./gradlew applyAllPatches --stacktrace
       - name: Dump sources
         run: |
-          S=$(find . -path '*/net/minecraft/util/SimpleBitStorage.java' | head -1); echo "SRC=$S"
-          ROOT=${S%/net/minecraft/util/SimpleBitStorage.java}; echo "ROOT=$ROOT"
-          echo "::group::SimpleBitStorage"; cat $S; echo "::endgroup::"
-          echo "::group::PalettedContainer"; cat $ROOT/net/minecraft/world/level/chunk/PalettedContainer.java; echo "::endgroup::"
-          echo "::group::usages"; grep -rn "new SimpleBitStorage\|\.unpack(\|getRaw()" $ROOT/net/minecraft --include=*.java | head -60; echo "::endgroup::"
-          echo "::group::heightmap/other"; grep -n "SimpleBitStorage\|BitStorage" $ROOT/net/minecraft/world/level/levelgen/Heightmap.java; echo "::endgroup::"
-          mkdir -p /tmp/out && cp $S $ROOT/net/minecraft/world/level/chunk/PalettedContainer.java $ROOT/net/minecraft/world/level/chunk/PalettedContainerRO.java $ROOT/net/minecraft/world/level/chunk/LevelChunkSection.java /tmp/out/ 2>&1 || true
-      - uses: actions/upload-artifact@v4
-        with: { name: mc-sources, path: /tmp/out }
+          S=$(find . -path '*/net/minecraft/util/SimpleBitStorage.java' | head -1)
+          ROOT=${S%/net/minecraft/util/SimpleBitStorage.java}
+          echo "=====SBS"; sed -n 1,360p $S
+          echo "=====LCS"; grep -n "PalettedContainer\|write(\|read(" $ROOT/net/minecraft/world/level/chunk/LevelChunkSection.java | head -30
+          echo "=====SCD"; grep -n "pack(\|PackedData\|unpack(" $ROOT/net/minecraft/world/level/chunk/storage/SerializableChunkData.java | head -30
+          echo "=====END"
