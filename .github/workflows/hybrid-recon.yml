@@ -1,0 +1,26 @@
+name: Hybrid recon (EXPERIMENTAL)
+on:
+  workflow_dispatch:
+  push:
+    branches: ["experimental/horizon-rust-hybrid-engine"]
+    paths: [".github/workflows/hybrid-recon.yml"]
+jobs:
+  recon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: 25, cache: gradle }
+      - uses: gradle/actions/setup-gradle@v6
+      - run: git config --global user.email "no-reply@github.com" && git config --global user.name "Github Actions"
+      - run: ./gradlew applyAllPatches --stacktrace
+      - name: Dump
+        run: |
+          S=$(find . -path '*/net/minecraft/util/SimpleBitStorage.java' | head -1)
+          R=${S%/net/minecraft/util/SimpleBitStorage.java}; L=$R/net/minecraft/world/level/levelgen
+          strip() { sed -e 's#//.*$##' -e '/^\s*$/d' -e '/^import /d' "$1"; }
+          echo "=====WC"; wc -l $L/DensityFunctions.java $L/DensityFunction.java $L/NoiseChunk.java $L/synth/*.java $L/NoiseRouter.java $L/Beardifier.java $L/blending/*.java | cat
+          echo "=====DECLS DensityFunctions"; grep -n "record \|class \|interface \|enum " $L/DensityFunctions.java | sed 's/^\([0-9]*\):\s*/\1: /' | cut -c1-170
+          echo "=====DensityFunction.java"; strip $L/DensityFunction.java
+          echo "=====ImprovedNoise"; strip $L/synth/ImprovedNoise.java
+          echo "=====END"
