@@ -1,5 +1,5 @@
-import io.github.thebusybiscuit.api.items.SlimefunItem;
-import io.github.thebusybiscuit.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
