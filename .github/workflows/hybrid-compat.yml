@@ -53,7 +53,10 @@ jobs:
           (timeout 600 java -Xmx2G -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../boot0.log 2>&1 &) ; sleep 150; pkill -f server.jar || true; sleep 3
           CP=$(find cache libraries -name '*.jar' | tr '\n' ':')$(ls plugins/*.jar | tr '\n' ':')
           echo "classpath jars: $(echo $CP | tr ':' '\n' | wc -l)"
-          mkdir -p ../smoke-out && javac -proc:none -cp "$CP" -d ../smoke-out ../tools/compat-smoke/src/HybridCompatSmoke.java
+          echo "== plugins/"; ls -la plugins | awk '{print $5, $9}' | head -40
+          for j in plugins/*.jar; do echo "$j: SlimefunItem.class=$(unzip -l "$j" | grep -c 'SlimefunItem.class') BlockStorage.class=$(unzip -l "$j" | grep -c 'BlockStorage.class')"; done
+          unzip -l plugins/$(ls plugins | grep -i slimefun | head -1) | grep -E "/SlimefunItem.class|/BlockStorage.class|/Slimefun.class" | head -5
+          mkdir -p ../smoke-out && (javac -proc:none -Xmaxerrs 8 -cp "$CP" -d ../smoke-out ../tools/compat-smoke/src/HybridCompatSmoke.java 2>&1 | head -30)
           cp ../tools/compat-smoke/plugin.yml ../smoke-out/ && (cd ../smoke-out && jar cf ../run/plugins/HybridCompatSmoke.jar .)
       - name: Smoke fase 1
         if: steps.bsf.outcome == 'success'
