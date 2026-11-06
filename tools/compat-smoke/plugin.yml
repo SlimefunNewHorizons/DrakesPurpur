@@ -1,0 +1,5 @@
+name: HybridCompatSmoke
+version: 1.0
+main: HybridCompatSmoke
+api-version: '1.21'
+softdepend: [Slimefun]
