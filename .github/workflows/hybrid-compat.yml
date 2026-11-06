@@ -64,7 +64,7 @@ jobs:
           cd run; set +e
           timeout 420 java -Xmx2G -Dsmoke.phase=1 -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../smoke1.log 2>&1
           echo "exit=$?"
-          echo "== resultado fase 1"; head -45 compat-smoke-phase1.txt 2>&1
+          echo "== resultado fase 1: PASS=$(grep -c ^PASS compat-smoke-phase1.txt) FAIL=$(grep -c ^FAIL compat-smoke-phase1.txt)"; grep -v -E "^PASS (getById|getByItem)|^plugin " compat-smoke-phase1.txt | head -40
           echo "== log servidor fase 1"
           grep -E "Enabling|Disabling|Done \(|HybridNative|SEVERE|ERROR" ../smoke1.log | cut -c1-170 | head -40
           tail -12 ../smoke1.log | cut -c1-170
@@ -74,7 +74,7 @@ jobs:
           cd run; set +e
           timeout 420 java -Xmx2G -Dsmoke.phase=2 -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../smoke2.log 2>&1
           echo "exit=$?"
-          echo "== resultado fase 2"; head -45 compat-smoke-phase2.txt 2>&1
+          echo "== resultado fase 2: PASS=$(grep -c ^PASS compat-smoke-phase2.txt) FAIL=$(grep -c ^FAIL compat-smoke-phase2.txt)"; grep -v -E "^PASS (getById|getByItem)|^plugin " compat-smoke-phase2.txt | head -40
           echo "== log servidor fase 2"
           grep -E "Enabling|Disabling|Done \(|HybridNative|SEVERE|ERROR" ../smoke2.log | cut -c1-170 | head -40
           tail -12 ../smoke2.log | cut -c1-170
