@@ -1,17 +1,36 @@
-# Matriz de compatibilidad
+# Matriz de compatibilidad (actualizada 2026-11-06, fase 3)
 
-Leyenda: OK = verificado en esta sesion · NV = no verificado (requiere build/servidor/cliente) · N/A
+Leyenda: **OK** = verificado con ejecucion real en CI · **PARCIAL** · **NV** = no verificado · N/A
 
+## Servidor de pruebas Slimefun + StarSuites (workflow `hybrid-compat.yml`, run 8, commit `8035a1c`)
+Entorno: GitHub Actions, JDK 25, DrakesPurpur Hybrid construido desde esta rama + `libdrakes_hybrid_ffi.so`, `native.hybrid.enabled=true, bits=true`. Repos de terceros usados **solo en lectura** (checkout en CI): `SlimefunNewHorizons/Slimefun4-Drake@port-26x` (Maven, produce `Slimefun v11.0-Universal-26.x-SNAPSHOT`) y `SlimefunNewHorizons/Drakes-Suites@26.x` (Maven reactor, Java 25, MC 26.2). Ambos compilan sin tocar su codigo.
+
+| Area | Estado | Evidencia |
+|---|---|---|
+| Compilar Slimefun4-Drake (port-26x) y Drakes-Suites (26.x) | **OK** | `mvn package`, exit 0 |
+| Cargar Slimefun + DrakesCore/Combat/Tech/Utility/Multiverse/Server/Generators/Bio/Magic con Hybrid ON | **OK** | `Enabling ...` de las 10 piezas, `Done (9-15 s)`, sin excepciones |
+| Registro de Slimefun | **OK** | 713 items registrados |
+| Ida y vuelta `SlimefunItem.getById` y `getByItem(ItemStack)` (60 items) | **OK** | PASS=123, FAIL=0 (fase 2) |
+| Colocar bloques Slimefun con `BlockStorage` y leerlos | **OK** | fase 1 |
+| **Persistencia tras reinicio** (BlockStorage guardado y releido en un segundo arranque) | **OK** | "PERSISTENCIA tras reinicio: 17 bloques con datos de la fase 1" |
+| Apagado normal (`Bukkit.shutdown`, guarda mundos) | **OK** | log de fase 2 |
+| Maquinas en ejecucion (tickers, energia, cargo), GUIs/inventarios | **NV** | el smoke no simula un jugador |
+| Recetas/Research/Custom Items en uso real, PersistentDataContainer de addons | **NV** | solo se prueba registro e identidad de items |
+| Sistemas de bosses, progresion, SAORI, DrakesProfiler, RyzenWorkerPool, Geyser Companion | **NV** | cargan sin error, sin prueba funcional |
+| Bedrock/Geyser, Horizon Client | **NV** | sin cliente |
+| Modulo `drakes-onechunk` | **Problema preexistente** | su jar no contiene `plugin.yml`/`paper-plugin.yml`: Paper lo rechaza con ERROR (`Directory 'plugins/drakes-onechunk-...jar' does not contain a paper-plugin.yml or plugin.yml`). Es de Drakes-Suites; **no se modifico**. Separar y corregir en ese repo |
+
+Nota: que los plugins carguen y pasen estas operaciones **no** prueba que el motor hibrido los beneficie ni que cada addon funcione; solo que no los rompe en estas rutas y que Rust no interviene en ellas (el unico enganche, `PalettedContainer`, es transparente y esta probado por paridad).
+
+## Resto de la matriz
 | Area | Estado | Nota |
 |---|---|---|
-| Motor hibrido OFF (defecto) | OK (logica) / NV (servidor) | `HybridNative.init` con `enabled=false` no carga nada; probado en `HybridCheck` |
-| Fallback a Java si falta .so | OK (logica) | `find()` nulo -> warning + Java |
-| Bukkit/Paper/Purpur API, eventos, scheduler | OK por construccion / NV | No se toca ninguna API ni hilo; la rama solo anade una clase y 15 lineas de config |
-| Slimefun y addons, StarSuites (9), Geyser Companion, SAORI, DrakesProfiler, RyzenWorkerPool | NV | No modificados. Sin servidor construido no hay prueba funcional; **no se afirma** que funcionen mas alla de no haber sido tocados |
-| Mundos / activar-desactivar sin corrupcion | OK por diseno | Rust no escribe archivos ni estado; sin integracion en el pipeline no hay efecto en disco |
-| Java vanilla 26.2 | NV | Sin cambios de protocolo |
-| Horizon Client (26.3) -> servidor 26.2 | NV | El cliente trae adaptador `older-servers` con 26.2 (leido en codigo). Probar: cliente Horizon en `mc.drakescraft.cl` de pruebas |
-| Slimefun en Horizon Client | NV / probable fallo parcial | Depende de resource pack y paquetes custom; un cliente no-vanilla puede no renderizar modelos custom igual |
-| Bedrock via Geyser | NV | Sin cambios |
-| Mods Forge/Fabric/NeoForge | N/A | No se promete; mods de cliente != plugins de servidor |
-| FPS / render | N/A | Pertenece al cliente Horizon, no al servidor |
+| Motor hibrido OFF (defecto) | **OK** | servidor completo + autotest, control Java |
+| Fallback a Java si falta la biblioteca | **OK** (logica) | `HybridNative.find()` nulo -> Java |
+| Paridad de generacion/guardado de chunks | **PARCIAL** | NBT identico en 13 872 contenedores reales (bits); NormalNoise nativo bit a bit en 3 ruidos reales; **no** se ha demostrado paridad de chunks completos generados con un grafo nativo (no existe) |
+| Bukkit/Paper/Purpur, eventos, scheduler | **OK** por construccion | Build Paper/Purpur en verde; el parche 0023 solo toca `PalettedContainer` |
+| Mundos / activar-desactivar sin corrupcion | **PARCIAL** | persistencia de BlockStorage y mundos tras reinicio con Hybrid ON verificada; no se ha hecho A/B de regiones entre ON/OFF byte a byte |
+| Java vanilla 26.2 | NV | sin cambios de protocolo |
+| Horizon Client (26.3) -> servidor 26.2 | NV | el cliente trae adaptador 26.2; ver CLIENTE_HORIZON.md |
+| Mods Forge/Fabric/NeoForge | N/A | no se promete |
+| FPS / render | N/A | cliente |

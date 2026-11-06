@@ -15,3 +15,12 @@
 11. Runners de CI compartidos: el control Java varia 12-23 % entre corridas; cualquier mejora menor que eso no es concluyente.
 12. Horizon Client no se probo contra el servidor.
 13. El autotest termina con `Runtime.halt` (mundo desechable): no usarlo en servidores con datos.
+
+## Fase 3 (2026-11-06)
+14. **Port del grafo completo de density functions: no realizado.** Se implemento y se demostro (bit a bit) la primitiva `NormalNoise` y se midio su velocidad: sin ganancia. Con el perfil JFR (ruido propio ~14 %, resto del grafo con estado de `NoiseChunk`) y la nota de Horizon de que su propia compilacion de density functions no cubre el grafo completo ni tiene mejora medida, no hay evidencia que justifique portar el resto. Si se retoma, el siguiente paso medible es un evaluador del grafo de `NoiseInterpolator.fillSlice` por lotes con paridad de bloques por semilla.
+15. `HybridDensity` usa reflexion sobre campos privados de Mojang: debe sustituirse por accesores via parche antes de cualquier uso real.
+16. **Smoke de Slimefun/StarSuites** cubre registro, identidad de items, `BlockStorage` y persistencia; **no** maquinas en ejecucion, GUIs, bosses, Geyser, SAORI/DrakesProfiler/RyzenWorkerPool ni jugadores.
+17. `drakes-onechunk` (Drakes-Suites) se rechaza por falta de `plugin.yml`: problema preexistente en ese repo, no corregido aqui.
+18. Benchmarks por chunk completo contra Purpur original, multiples jugadores, Elytra y Horizon Server **no se han hecho**.
+19. Plataformas nativas: solo Linux x86_64 (CI). Windows/macOS/ARM sin construir ni probar.
+20. Rollback: poner `native.hybrid.enabled: false` (o retirar `libdrakes_hybrid_ffi`) y reiniciar; el parche 0023 delega al codigo original de Mojang sin la biblioteca. No hay migracion de datos que revertir (formato de disco identico, verificado).

@@ -12,15 +12,16 @@ Java (DrakesPurpur) sigue siendo la unica autoridad del mundo; Rust solo calcula
 | [DESPLIEGUE.md](DESPLIEGUE.md) | Compilar, servidor de pruebas, plan de despliegue seguro |
 | [bench_hybrid_2026-11-06.txt](bench_hybrid_2026-11-06.txt) | Salida cruda de paridad + benchmark |
 
-## Estado (2026-11-06, segunda fase)
+## Estado (2026-11-06, fase 3)
 
 | Pieza | Estado | Evidencia |
 |---|---|---|
-| Servidor completo compilado con la rama (parche 0023) | OK | CI `Build` + `Hybrid Engine CI` en verde |
-| Kernel de bits **integrado** en `PalettedContainer.pack()/reencodeContents()` con fallback Java | OK, **apagado por defecto** | [RESULTADOS.md](RESULTADOS.md) |
-| Paridad dentro del servidor (13 872 contenedores reales x2 corridas) | 0 diferencias | autotest |
-| Rendimiento Rust vs Java | **Sin mejora demostrable** (0-6 %, bajo el ruido) | RESULTADOS.md |
-| Ruido de Perlin nativo | Sin ganancia (0.77-1.02x); no integrado | bench |
+| Servidor completo compilado con la rama | OK | CI `Build`, `Hybrid Engine CI`, `Hybrid compat` en verde |
+| Kernel de bits integrado en `PalettedContainer` (parche 0023), con fallback Java | OK, **apagado por defecto** | [RESULTADOS.md](RESULTADOS.md) |
+| NormalNoise nativo (base de density functions) | Implementado y con **paridad bit a bit**; **sin ganancia de velocidad** (0.98-1.21x, dentro del ruido). **No enlazado a la generacion** | RESULTADOS.md, fase 3 |
+| Port del grafo completo de density functions | **NO realizado**: ver analisis de decision en RESULTADOS.md | - |
+| Rendimiento Rust vs Java (bits) | Sin mejora demostrable | RESULTADOS.md |
 | Instrumentacion (gen/guardar/cargar/envio, JFR, `perf-status.json`) | OK | RESULTADOS.md |
-| Investigacion Horizon Client / protocolo 776 vs 777 | Documentada, **no probada con cliente real** | [CLIENTE_HORIZON.md](CLIENTE_HORIZON.md) |
-| Slimefun / StarSuites ejecutando sobre la rama | **NO verificado** (ver LIMITACIONES.md) | - |
+| Slimefun + 9 modulos StarSuites con Hybrid ON | **Cargan, 123/123 comprobaciones, persistencia tras reinicio OK** (solo smoke, no uso real) | [COMPATIBILIDAD.md](COMPATIBILIDAD.md) |
+| Horizon Client / protocolo 776 vs 777 | Investigado, no probado con cliente | [CLIENTE_HORIZON.md](CLIENTE_HORIZON.md) |
+| Listo para produccion | **NO** | LIMITACIONES.md |
