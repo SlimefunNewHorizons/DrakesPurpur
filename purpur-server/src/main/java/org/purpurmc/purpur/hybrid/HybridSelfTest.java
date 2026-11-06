@@ -221,7 +221,7 @@ public final class HybridSelfTest {
                         long t0 = System.nanoTime();
                         // Paper marca ese constructor como "bad call" (paperweight scanJarForBadCalls) fuera del propio servidor;
                         // el autotest es solo diagnostico, asi que se invoca por reflexion.
-                        packetCtor.newInstance(c, level.getLightEngine(), null, null);
+                        buildPacket(packetCtor, c, level.getLightEngine());
                         res.add((System.nanoTime() - t0) / 1e3);
                     }
                     return res;
@@ -259,6 +259,15 @@ public final class HybridSelfTest {
             }
         }
         Runtime.getRuntime().halt(exit); // salida inmediata y con codigo; el mundo de prueba es desechable
+    }
+
+    private static void buildPacket(java.lang.reflect.Constructor<ClientboundLevelChunkWithLightPacket> ctor, LevelChunk c,
+                                    net.minecraft.world.level.lighting.LevelLightEngine light) {
+        try {
+            ctor.newInstance(c, light, null, null);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static void line(StringBuilder sb, String s) {
