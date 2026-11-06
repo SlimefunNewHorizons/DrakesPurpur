@@ -36,8 +36,11 @@ public class HybridCheck {
             HybridNative.unpackBits(bits, n, nat, back);
             check(same && Arrays.equals(back, v), "bits=" + bits + " pack/unpack identico a Java");
         }
-        try { HybridNative.packBits(4, new int[] {16, 0}, new long[1]); check(false, "valor fuera de rango debe lanzar"); }
-        catch (IllegalArgumentException e) { check(true, "valor fuera de rango lanza IAE"); }
+        {
+            int[] big = {0x1F, 0xFF3, -1, 7}; long[] a1 = new long[1], a2 = new long[1];
+            HybridNative.packBits(4, big, a1); JavaRef.pack(4, big, a2);
+            check(a1[0] == a2[0] && a1[0] == 0x7F3FL, "enmascarado como vanilla: " + Long.toHexString(a1[0]) + " == " + Long.toHexString(a2[0]));
+        }
 
         // 2) noise: bit a bit
         byte[] perm = new byte[256];

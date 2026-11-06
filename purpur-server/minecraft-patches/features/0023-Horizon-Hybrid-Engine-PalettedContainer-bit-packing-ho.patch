@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: DrakesPurpur <noreply@drakescraft.cl>
+Date: Fri, 6 Nov 2026 21:30:00 +0000
+Subject: [PATCH] Horizon Hybrid Engine: PalettedContainer bit-packing hooks
+
+
+diff --git a/net/minecraft/world/level/chunk/PalettedContainer.java b/net/minecraft/world/level/chunk/PalettedContainer.java
+--- a/net/minecraft/world/level/chunk/PalettedContainer.java
++++ b/net/minecraft/world/level/chunk/PalettedContainer.java
+@@ -237,8 +237,7 @@ public class PalettedContainer<T> implements PaletteResize<T>, PalettedContainer
+             int bitsOnDisc = storedConfiguration.bitsInStorage();
+             Optional<LongStream> values;
+             if (bitsOnDisc != 0) {
+-                SimpleBitStorage storage = new SimpleBitStorage(bitsOnDisc, entryCount, newContents);
+-                values = Optional.of(Arrays.stream(storage.getRaw()));
++                values = Optional.of(Arrays.stream(org.purpurmc.purpur.hybrid.HybridChunkOps.packRaw(bitsOnDisc, entryCount, newContents))); // DrakesPurpur - Horizon Hybrid Engine (same bytes as new SimpleBitStorage(..).getRaw(); Java fallback)
+             } else {
+                 values = Optional.empty();
+             }
+@@ -251,7 +250,7 @@ public class PalettedContainer<T> implements PaletteResize<T>, PalettedContainer
+ 
+     private static <T> int[] reencodeContents(final BitStorage storage, final Palette<T> oldPalette, final Palette<T> newPalette) {
+         int[] buffer = new int[storage.getSize()];
+-        storage.unpack(buffer);
++        org.purpurmc.purpur.hybrid.HybridChunkOps.unpackInto(storage, buffer); // DrakesPurpur - Horizon Hybrid Engine (== storage.unpack(buffer); Java fallback)
+         PaletteResize<T> dummyResizer = PaletteResize.noResizeExpected();
+         int lastReadId = -1;
+         int lastWrittenId = -1;

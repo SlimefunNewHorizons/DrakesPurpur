@@ -1,7 +1,7 @@
 //! Vanilla `SimpleBitStorage` layout: `64 / bits` values per long, values never span longs,
 //! value `i` lives in long `i / vpl` at bit offset `(i % vpl) * bits`. Used by chunk sections
 //! (PalettedContainer) and heightmaps.
-use crate::{ERR_ARG, ERR_RANGE};
+use crate::ERR_RANGE;
 
 #[inline]
 pub fn values_per_long(bits: u32) -> usize { (64 / bits) as usize }
@@ -21,8 +21,8 @@ pub fn pack(bits: u32, values: &[u32], out: &mut [u64]) -> i32 {
         let mut w = 0u64;
         let mut shift = 0u32;
         for &v in chunk {
-            if (v as u64) > mask { return ERR_ARG; }
-            w |= (v as u64) << shift;
+            // Vanilla `SimpleBitStorage(bits, size, int[])` masks (`values[i] & mask`); it never rejects.
+            w |= ((v as u64) & mask) << shift;
             shift += bits;
         }
         *word = w;
@@ -67,9 +67,10 @@ mod tests {
         assert_eq!(l[0], 0x321);
     }
     #[test]
-    fn rejects_overflowing_value_and_short_buffer() {
+    fn masks_like_vanilla_and_rejects_short_buffer() {
         let mut l = [0u64; 1];
-        assert_eq!(pack(4, &[16], &mut l), ERR_ARG);
+        assert_eq!(pack(4, &[0x1F, 0xFF3], &mut l), 1); // 0x1F -> 0xF, 0xFF3 -> 0x3
+        assert_eq!(l[0], 0x3F);
         assert_eq!(pack(4, &[0; 17], &mut l), ERR_RANGE);
     }
 }

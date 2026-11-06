@@ -73,6 +73,17 @@ public final class HybridNative {
         }
     }
 
+    /** Solo auto-test/benchmarks dentro del servidor: conmuta la ruta de bits si la biblioteca esta cargada. */
+    public static boolean forceBits(boolean on) {
+        if (natives == null) return false;
+        bitsOn = on;
+        return true;
+    }
+
+    public static boolean libraryLoaded() {
+        return natives != null;
+    }
+
     /** Solo para tests/benchmarks: permite re-inicializar. */
     public static synchronized void resetForTests() {
         initialized = false;
@@ -107,10 +118,7 @@ public final class HybridNative {
             try {
                 int r = n.pack(bits, values, out);
                 if (r >= 0) return r;
-                if (r == -3 || r == -2) throw new IllegalArgumentException("pack rechazado por la biblioteca (" + r + ")");
                 fail("bits", r);
-            } catch (IllegalArgumentException e) {
-                throw e;
             } catch (Throwable t) {
                 bitsOn = false;
                 LOG.warning("[Hybrid] bits nativo fallo (" + t + "); Java hasta reiniciar.");
@@ -126,10 +134,7 @@ public final class HybridNative {
             try {
                 int r = n.unpack(bits, count, longs, out);
                 if (r >= 0) return r;
-                if (r == -3 || r == -2) throw new IllegalArgumentException("unpack rechazado por la biblioteca (" + r + ")");
                 fail("bits", r);
-            } catch (IllegalArgumentException e) {
-                throw e;
             } catch (Throwable t) {
                 bitsOn = false;
                 LOG.warning("[Hybrid] bits nativo fallo (" + t + "); Java hasta reiniciar.");
@@ -173,6 +178,15 @@ public final class HybridNative {
         return JavaRef.region(header, fileLen);
     }
 
+    /** true si una operacion de bits de {@code n} valores iria a Rust ahora mismo. */
+    public static boolean bitsActive(int n) {
+        return bitsOn && natives != null && n >= minBatch;
+    }
+
+    public static boolean noiseActive(int n) {
+        return noiseOn && natives != null && n >= minBatch;
+    }
+
     private static void fail(String what, int code) {
         throw new IllegalStateException(what + " devolvio " + code);
     }
@@ -196,12 +210,14 @@ public final class HybridNative {
             Linker l = Linker.nativeLinker();
             var A = ValueLayout.ADDRESS;
             var I = ValueLayout.JAVA_INT;
+            // critical(true): llamadas cortas, sin upcalls, aceptan segmentos de heap => cero copias ni asignaciones.
+            var crit = Linker.Option.critical(true);
             abi = l.downcallHandle(lk.find("drakes_hybrid_abi_version").orElseThrow(), FunctionDescriptor.of(I));
-            pack = l.downcallHandle(lk.find("drakes_bits_pack").orElseThrow(), FunctionDescriptor.of(I, I, I, A, A, I));
-            unpack = l.downcallHandle(lk.find("drakes_bits_unpack").orElseThrow(), FunctionDescriptor.of(I, I, I, A, I, A));
-            noise = l.downcallHandle(lk.find("drakes_noise_improved_batch").orElseThrow(), FunctionDescriptor.of(I, A, A, I, A));
+            pack = l.downcallHandle(lk.find("drakes_bits_pack").orElseThrow(), FunctionDescriptor.of(I, I, I, A, A, I), crit);
+            unpack = l.downcallHandle(lk.find("drakes_bits_unpack").orElseThrow(), FunctionDescriptor.of(I, I, I, A, I, A), crit);
+            noise = l.downcallHandle(lk.find("drakes_noise_improved_batch").orElseThrow(), FunctionDescriptor.of(I, A, A, I, A), crit);
             region = l.downcallHandle(lk.find("drakes_region_scan_header").orElseThrow(),
-                FunctionDescriptor.of(I, A, I, ValueLayout.JAVA_LONG, A));
+                FunctionDescriptor.of(I, A, I, ValueLayout.JAVA_LONG, A), crit);
         }
 
         int abi() throws Throwable {
@@ -209,45 +225,20 @@ public final class HybridNative {
         }
 
         int pack(int bits, int[] v, long[] out) throws Throwable {
-            try (Arena a = Arena.ofConfined()) {
-                MemorySegment in = a.allocateFrom(ValueLayout.JAVA_INT, v);
-                MemorySegment o = a.allocate((long) out.length * 8, 8);
-                int r = (int) pack.invokeExact(bits, v.length, in, o, out.length);
-                if (r >= 0) MemorySegment.copy(o, ValueLayout.JAVA_LONG, 0, out, 0, r);
-                return r;
-            }
+            return (int) pack.invokeExact(bits, v.length, MemorySegment.ofArray(v), MemorySegment.ofArray(out), out.length);
         }
 
         int unpack(int bits, int count, long[] longs, int[] out) throws Throwable {
-            try (Arena a = Arena.ofConfined()) {
-                MemorySegment in = a.allocateFrom(ValueLayout.JAVA_LONG, longs);
-                MemorySegment o = a.allocate((long) count * 4, 4);
-                int r = (int) unpack.invokeExact(bits, count, in, longs.length, o);
-                if (r >= 0) MemorySegment.copy(o, ValueLayout.JAVA_INT, 0, out, 0, r);
-                return r;
-            }
+            if (out.length < count) return -2;
+            return (int) unpack.invokeExact(bits, count, MemorySegment.ofArray(longs), longs.length, MemorySegment.ofArray(out));
         }
 
         int noise(byte[] perm, double[] xyz, int n, double[] out) throws Throwable {
-            try (Arena a = Arena.ofConfined()) {
-                MemorySegment p = a.allocateFrom(ValueLayout.JAVA_BYTE, perm);
-                MemorySegment c = a.allocate((long) n * 24, 8);
-                MemorySegment.copy(xyz, 0, c, ValueLayout.JAVA_DOUBLE, 0, n * 3);
-                MemorySegment o = a.allocate((long) n * 8, 8);
-                int r = (int) noise.invokeExact(p, c, n, o);
-                if (r == n) MemorySegment.copy(o, ValueLayout.JAVA_DOUBLE, 0, out, 0, n);
-                return r;
-            }
+            return (int) noise.invokeExact(MemorySegment.ofArray(perm), MemorySegment.ofArray(xyz), n, MemorySegment.ofArray(out));
         }
 
         int region(byte[] header, long fileLen, long[] out) throws Throwable {
-            try (Arena a = Arena.ofConfined()) {
-                MemorySegment h = a.allocateFrom(ValueLayout.JAVA_BYTE, header);
-                MemorySegment o = a.allocate(40, 8);
-                int r = (int) region.invokeExact(h, header.length, fileLen, o);
-                if (r >= 0) MemorySegment.copy(o, ValueLayout.JAVA_LONG, 0, out, 0, 5);
-                return r;
-            }
+            return (int) region.invokeExact(MemorySegment.ofArray(header), header.length, fileLen, MemorySegment.ofArray(out));
         }
     }
 
@@ -265,9 +256,8 @@ public final class HybridNative {
             for (int w = 0, i = 0; w < need; w++) {
                 long word = 0;
                 for (int s = 0; s < vpl && i < values.length; s++, i++) {
-                    long v = values[i] & 0xFFFFFFFFL;
-                    if (v > mask) throw new IllegalArgumentException("valor " + v + " no cabe en " + bits + " bits");
-                    word |= v << (s * bits);
+                    // Igual que vanilla SimpleBitStorage(bits, size, int[]): enmascara, no rechaza.
+                    word |= (values[i] & mask) << (s * bits);
                 }
                 out[w] = word;
             }

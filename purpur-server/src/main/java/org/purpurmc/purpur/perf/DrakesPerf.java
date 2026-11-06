@@ -76,6 +76,7 @@ public final class DrakesPerf {
             bits: false            # empaquetado SimpleBitStorage por lotes
             noise: false           # ruido de Perlin por lotes
             region: false          # analisis (solo lectura) de cabeceras .mca
+            stats: false           # contadores por etapa (pack/unpack Java vs Rust) en el log del autotest
         # Copia de seguridad 7z: no compite con el tick ni con la red.
         backup:
           throttle: true           # nice 19 + ionice idle + hilos limitados
@@ -165,6 +166,8 @@ public final class DrakesPerf {
                 cfg.getBoolean("native.hybrid.enabled", false), cfg.getString("native.dir", "natives"),
                 cfg.getBoolean("native.hybrid.bits", false), cfg.getBoolean("native.hybrid.noise", false),
                 cfg.getBoolean("native.hybrid.region", false), cfg.getInt("native.hybrid.min-batch", 2048)));
+            org.purpurmc.purpur.hybrid.HybridStats.enabled = cfg.getBoolean("native.hybrid.stats", false);
+            org.purpurmc.purpur.hybrid.HybridSelfTest.maybeStart(); // solo con -Ddrakes.hybrid.selftest=<radio>
         } catch (Throwable t) {
             LOGGER.log(Level.WARNING, "[Hybrid] init fallo (" + t + "); todo en Java.");
         }
