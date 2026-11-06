@@ -62,14 +62,22 @@ jobs:
         if: steps.bsf.outcome == 'success'
         run: |
           cd run; set +e
-          timeout 900 java -Xmx2G -Dsmoke.phase=1 -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../smoke1.log 2>&1
-          echo "exit=$?"; cat compat-smoke-phase1.txt | head -40
+          timeout 420 java -Xmx2G -Dsmoke.phase=1 -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../smoke1.log 2>&1
+          echo "exit=$?"
+          echo "== resultado fase 1"; head -45 compat-smoke-phase1.txt 2>&1
+          echo "== log servidor fase 1"
+          grep -E "Enabling|Disabling|Done \(|HybridNative|SEVERE|ERROR" ../smoke1.log | cut -c1-170 | head -40
+          tail -12 ../smoke1.log | cut -c1-170
       - name: Smoke fase 2 (persistencia tras reinicio)
         if: steps.bsf.outcome == 'success'
         run: |
           cd run; set +e
-          timeout 900 java -Xmx2G -Dsmoke.phase=2 -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../smoke2.log 2>&1
-          echo "exit=$?"; cat compat-smoke-phase2.txt | head -30
+          timeout 420 java -Xmx2G -Dsmoke.phase=2 -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../smoke2.log 2>&1
+          echo "exit=$?"
+          echo "== resultado fase 2"; head -45 compat-smoke-phase2.txt 2>&1
+          echo "== log servidor fase 2"
+          grep -E "Enabling|Disabling|Done \(|HybridNative|SEVERE|ERROR" ../smoke2.log | cut -c1-170 | head -40
+          tail -12 ../smoke2.log | cut -c1-170
       - name: Errores en logs
         if: always()
         run: grep -h -E "ERROR|SEVERE|Exception" smoke1.log smoke2.log 2>/dev/null | cut -c1-200 | sort | uniq -c | sort -rn | head -15
