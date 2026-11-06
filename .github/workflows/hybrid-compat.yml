@@ -51,7 +51,8 @@ jobs:
           rm -f plugins/*sources*.jar plugins/original-*.jar; ls plugins
           # primer arranque solo para extraer el servidor parcheado (cache/patched_*.jar)
           (timeout 600 java -Xmx2G -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../boot0.log 2>&1 &) ; sleep 150; pkill -f server.jar || true; sleep 3
-          CP=$(ls cache/patched_*.jar | head -1):$(ls plugins/*.jar | tr '\n' ':')
+          CP=$(find cache libraries -name '*.jar' | tr '\n' ':')$(ls plugins/*.jar | tr '\n' ':')
+          echo "classpath jars: $(echo $CP | tr ':' '\n' | wc -l)"
           mkdir -p ../smoke-out && javac -proc:none -cp "$CP" -d ../smoke-out ../tools/compat-smoke/src/HybridCompatSmoke.java
           cp ../tools/compat-smoke/plugin.yml ../smoke-out/ && (cd ../smoke-out && jar cf ../run/plugins/HybridCompatSmoke.jar .)
       - name: Smoke fase 1
