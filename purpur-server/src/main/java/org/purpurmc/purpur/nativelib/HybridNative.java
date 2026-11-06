@@ -1,0 +1,359 @@
+package org.purpurmc.purpur.nativelib;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.FunctionDescriptor;
+import java.lang.foreign.Linker;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SymbolLookup;
+import java.lang.foreign.ValueLayout;
+import java.lang.invoke.MethodHandle;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.Logger;
+
+/**
+ * DrakesPurpur Horizon Hybrid Engine: puente Panama (FFM, sin JNI) a {@code libdrakes_hybrid_ffi} (ABI 1).
+ * <p>
+ * Reglas: Java sigue siendo la unica autoridad del mundo; Rust solo calcula sobre buffers que Java le presta
+ * durante la llamada. Cada operacion tiene una implementacion Java de referencia con la MISMA semantica y se usa
+ * cuando: el motor esta apagado (por defecto), falta la biblioteca, la ABI no coincide, el tamano del lote es menor
+ * que el umbral, o una llamada nativa falla (esa ruta se apaga hasta el reinicio). Ver docs/hybrid/.
+ * <p>
+ * Seguridad de hilos: las operaciones son puras y sin estado, se pueden llamar desde cualquier hilo.
+ */
+public final class HybridNative {
+    private static final Logger LOG = Logger.getLogger("HybridNative");
+    public static final int ABI = 1;
+
+    public record Settings(boolean enabled, String dir, boolean bits, boolean noise, boolean region,
+                           int minBatch) {
+        public static Settings off() {
+            return new Settings(false, "natives", false, false, false, 2048);
+        }
+    }
+
+    private static volatile boolean bitsOn, noiseOn, regionOn;
+    private static volatile int minBatch = 2048;
+    private static volatile Natives natives;
+    private static volatile boolean initialized;
+
+    private HybridNative() {}
+
+    public static synchronized void init(Settings s) {
+        if (initialized) return;
+        initialized = true;
+        if (!s.enabled()) {
+            LOG.info("[Hybrid] apagado (native.hybrid.enabled=false): todo corre en Java.");
+            return;
+        }
+        if (Runtime.version().feature() < 22) {
+            LOG.warning("[Hybrid] requiere Java 22+ (FFM); se usa Java.");
+            return;
+        }
+        Path lib = find(s.dir());
+        if (lib == null) {
+            LOG.warning("[Hybrid] libdrakes_hybrid_ffi no encontrada; se usa Java.");
+            return;
+        }
+        try {
+            Natives n = new Natives(lib);
+            int abi = n.abi();
+            if (abi != ABI) {
+                LOG.warning("[Hybrid] " + lib + " ABI " + abi + " != " + ABI + "; se usa Java.");
+                return;
+            }
+            natives = n;
+            minBatch = Math.max(1, s.minBatch());
+            bitsOn = s.bits();
+            noiseOn = s.noise();
+            regionOn = s.region();
+            LOG.info("[Hybrid] " + status() + " lib=" + lib);
+        } catch (Throwable t) {
+            LOG.warning("[Hybrid] no se pudo enlazar (" + t + "); se usa Java.");
+        }
+    }
+
+    /** Solo para tests/benchmarks: permite re-inicializar. */
+    public static synchronized void resetForTests() {
+        initialized = false;
+        bitsOn = noiseOn = regionOn = false;
+        natives = null;
+    }
+
+    public static String status() {
+        return "bits=" + bitsOn + " noise=" + noiseOn + " region=" + regionOn + " minBatch=" + minBatch;
+    }
+
+    private static Path find(String dir) {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        String base = "drakes_hybrid_ffi";
+        String file = os.contains("win") ? base + ".dll" : os.contains("mac") ? "lib" + base + ".dylib" : "lib" + base + ".so";
+        for (String d : new String[] {System.getProperty("drakes.native.dir"), System.getenv("DRAKES_NATIVE_DIR"), dir,
+            "drakes-data/natives", "natives"}) {
+            if (d == null || d.isBlank()) continue;
+            Path p = Path.of(d, file);
+            if (Files.isRegularFile(p)) return p.toAbsolutePath();
+        }
+        return null;
+    }
+
+    // ---- API publica (siempre funciona; nativo solo si esta activo y el lote lo justifica) ----------------
+
+    /** Empaqueta valores al formato SimpleBitStorage de vanilla. Devuelve los longs necesarios ({@code out.length >= longCount}). */
+    public static int packBits(int bits, int[] values, long[] out) {
+        checkBits(bits);
+        Natives n = natives;
+        if (bitsOn && n != null && values.length >= minBatch) {
+            try {
+                int r = n.pack(bits, values, out);
+                if (r >= 0) return r;
+                if (r == -3 || r == -2) throw new IllegalArgumentException("pack rechazado por la biblioteca (" + r + ")");
+                fail("bits", r);
+            } catch (IllegalArgumentException e) {
+                throw e;
+            } catch (Throwable t) {
+                bitsOn = false;
+                LOG.warning("[Hybrid] bits nativo fallo (" + t + "); Java hasta reiniciar.");
+            }
+        }
+        return JavaRef.pack(bits, values, out);
+    }
+
+    public static int unpackBits(int bits, int count, long[] longs, int[] out) {
+        checkBits(bits);
+        Natives n = natives;
+        if (bitsOn && n != null && count >= minBatch) {
+            try {
+                int r = n.unpack(bits, count, longs, out);
+                if (r >= 0) return r;
+                if (r == -3 || r == -2) throw new IllegalArgumentException("unpack rechazado por la biblioteca (" + r + ")");
+                fail("bits", r);
+            } catch (IllegalArgumentException e) {
+                throw e;
+            } catch (Throwable t) {
+                bitsOn = false;
+                LOG.warning("[Hybrid] bits nativo fallo (" + t + "); Java hasta reiniciar.");
+            }
+        }
+        return JavaRef.unpack(bits, count, longs, out);
+    }
+
+    /** Ruido mejorado de Perlin por lote. {@code perm}: 256 entradas (ImprovedNoise.p); {@code xyz}: 3n doubles; {@code out}: n doubles. */
+    public static void improvedNoiseBatch(byte[] perm, double[] xyz, int n, double[] out) {
+        if (perm.length < 256 || xyz.length < n * 3 || out.length < n) throw new IllegalArgumentException("buffers cortos");
+        Natives nat = natives;
+        if (noiseOn && nat != null && n >= minBatch) {
+            try {
+                int r = nat.noise(perm, xyz, n, out);
+                if (r == n) return;
+                fail("noise", r);
+            } catch (Throwable t) {
+                noiseOn = false;
+                LOG.warning("[Hybrid] noise nativo fallo (" + t + "); Java hasta reiniciar.");
+            }
+        }
+        JavaRef.noise(perm, xyz, n, out);
+    }
+
+    /** Analiza la cabecera de un .mca (solo lectura). {@code -> [presentes, corruptas, solapadas, maxSector, timestampMax]}. */
+    public static long[] scanRegionHeader(byte[] header, long fileLen) {
+        if (header.length < 8192) throw new IllegalArgumentException("cabecera < 8192");
+        long[] out = new long[5];
+        Natives n = natives;
+        if (regionOn && n != null) {
+            try {
+                int r = n.region(header, fileLen, out);
+                if (r >= 0) return out;
+                fail("region", r);
+            } catch (Throwable t) {
+                regionOn = false;
+                LOG.warning("[Hybrid] region nativo fallo (" + t + "); Java hasta reiniciar.");
+            }
+        }
+        return JavaRef.region(header, fileLen);
+    }
+
+    private static void fail(String what, int code) {
+        throw new IllegalStateException(what + " devolvio " + code);
+    }
+
+    private static void checkBits(int bits) {
+        if (bits < 1 || bits > 32) throw new IllegalArgumentException("bits fuera de 1..32: " + bits);
+    }
+
+    public static int longCount(int bits, int count) {
+        int vpl = 64 / bits;
+        return (count + vpl - 1) / vpl;
+    }
+
+    // ---- Implementacion nativa ------------------------------------------------------------------
+
+    private static final class Natives {
+        private final MethodHandle abi, pack, unpack, noise, region;
+
+        Natives(Path lib) {
+            SymbolLookup lk = SymbolLookup.libraryLookup(lib, Arena.global());
+            Linker l = Linker.nativeLinker();
+            var A = ValueLayout.ADDRESS;
+            var I = ValueLayout.JAVA_INT;
+            abi = l.downcallHandle(lk.find("drakes_hybrid_abi_version").orElseThrow(), FunctionDescriptor.of(I));
+            pack = l.downcallHandle(lk.find("drakes_bits_pack").orElseThrow(), FunctionDescriptor.of(I, I, I, A, A, I));
+            unpack = l.downcallHandle(lk.find("drakes_bits_unpack").orElseThrow(), FunctionDescriptor.of(I, I, I, A, I, A));
+            noise = l.downcallHandle(lk.find("drakes_noise_improved_batch").orElseThrow(), FunctionDescriptor.of(I, A, A, I, A));
+            region = l.downcallHandle(lk.find("drakes_region_scan_header").orElseThrow(),
+                FunctionDescriptor.of(I, A, I, ValueLayout.JAVA_LONG, A));
+        }
+
+        int abi() throws Throwable {
+            return (int) abi.invokeExact();
+        }
+
+        int pack(int bits, int[] v, long[] out) throws Throwable {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment in = a.allocateFrom(ValueLayout.JAVA_INT, v);
+                MemorySegment o = a.allocate((long) out.length * 8, 8);
+                int r = (int) pack.invokeExact(bits, v.length, in, o, out.length);
+                if (r >= 0) MemorySegment.copy(o, ValueLayout.JAVA_LONG, 0, out, 0, r);
+                return r;
+            }
+        }
+
+        int unpack(int bits, int count, long[] longs, int[] out) throws Throwable {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment in = a.allocateFrom(ValueLayout.JAVA_LONG, longs);
+                MemorySegment o = a.allocate((long) count * 4, 4);
+                int r = (int) unpack.invokeExact(bits, count, in, longs.length, o);
+                if (r >= 0) MemorySegment.copy(o, ValueLayout.JAVA_INT, 0, out, 0, r);
+                return r;
+            }
+        }
+
+        int noise(byte[] perm, double[] xyz, int n, double[] out) throws Throwable {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment p = a.allocateFrom(ValueLayout.JAVA_BYTE, perm);
+                MemorySegment c = a.allocate((long) n * 24, 8);
+                MemorySegment.copy(xyz, 0, c, ValueLayout.JAVA_DOUBLE, 0, n * 3);
+                MemorySegment o = a.allocate((long) n * 8, 8);
+                int r = (int) noise.invokeExact(p, c, n, o);
+                if (r == n) MemorySegment.copy(o, ValueLayout.JAVA_DOUBLE, 0, out, 0, n);
+                return r;
+            }
+        }
+
+        int region(byte[] header, long fileLen, long[] out) throws Throwable {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment h = a.allocateFrom(ValueLayout.JAVA_BYTE, header);
+                MemorySegment o = a.allocate(40, 8);
+                int r = (int) region.invokeExact(h, header.length, fileLen, o);
+                if (r >= 0) MemorySegment.copy(o, ValueLayout.JAVA_LONG, 0, out, 0, 5);
+                return r;
+            }
+        }
+    }
+
+    // ---- Referencia Java (misma semantica que el nucleo Rust) ----------------------------------------
+
+    /** Implementacion Java de referencia y de fallback. Publica para que los tests/benchmarks la contrasten. */
+    public static final class JavaRef {
+        private JavaRef() {}
+
+        public static int pack(int bits, int[] values, long[] out) {
+            int vpl = 64 / bits;
+            int need = longCount(bits, values.length);
+            if (out.length < need) throw new IllegalArgumentException("out corto: " + out.length + " < " + need);
+            long mask = bits == 32 ? 0xFFFFFFFFL : (1L << bits) - 1;
+            for (int w = 0, i = 0; w < need; w++) {
+                long word = 0;
+                for (int s = 0; s < vpl && i < values.length; s++, i++) {
+                    long v = values[i] & 0xFFFFFFFFL;
+                    if (v > mask) throw new IllegalArgumentException("valor " + v + " no cabe en " + bits + " bits");
+                    word |= v << (s * bits);
+                }
+                out[w] = word;
+            }
+            return need;
+        }
+
+        public static int unpack(int bits, int count, long[] longs, int[] out) {
+            int vpl = 64 / bits;
+            if (longs.length < longCount(bits, count) || out.length < count) throw new IllegalArgumentException("buffers cortos");
+            long mask = bits == 32 ? 0xFFFFFFFFL : (1L << bits) - 1;
+            for (int i = 0; i < count; i++) {
+                out[i] = (int) ((longs[i / vpl] >>> ((i % vpl) * bits)) & mask);
+            }
+            return count;
+        }
+
+        private static final int[][] GRAD = {{1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0}, {1, 0, 1}, {-1, 0, 1}, {1, 0, -1},
+            {-1, 0, -1}, {0, 1, 1}, {0, -1, 1}, {0, 1, -1}, {0, -1, -1}, {1, 1, 0}, {0, -1, 1}, {-1, 1, 0}, {0, -1, -1}};
+
+        private static double fade(double t) {
+            return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+        }
+
+        private static double lerp(double t, double a, double b) {
+            return a + t * (b - a);
+        }
+
+        private static int floor(double v) {
+            int i = (int) v;
+            return v < i ? i - 1 : i;
+        }
+
+        public static double noise(byte[] p, double x, double y, double z) {
+            int x0 = floor(x), y0 = floor(y), z0 = floor(z);
+            double xr = x - x0, yr = y - y0, zr = z - z0;
+            int a = p[x0 & 255] & 255, b = p[(x0 + 1) & 255] & 255;
+            int aa = p[(a + y0) & 255] & 255, ab = p[(a + y0 + 1) & 255] & 255;
+            int ba = p[(b + y0) & 255] & 255, bb = p[(b + y0 + 1) & 255] & 255;
+            double d000 = dot(p[(aa + z0) & 255], xr, yr, zr);
+            double d100 = dot(p[(ba + z0) & 255], xr - 1, yr, zr);
+            double d010 = dot(p[(ab + z0) & 255], xr, yr - 1, zr);
+            double d110 = dot(p[(bb + z0) & 255], xr - 1, yr - 1, zr);
+            double d001 = dot(p[(aa + z0 + 1) & 255], xr, yr, zr - 1);
+            double d101 = dot(p[(ba + z0 + 1) & 255], xr - 1, yr, zr - 1);
+            double d011 = dot(p[(ab + z0 + 1) & 255], xr, yr - 1, zr - 1);
+            double d111 = dot(p[(bb + z0 + 1) & 255], xr - 1, yr - 1, zr - 1);
+            double fx = fade(xr), fy = fade(yr), fz = fade(zr);
+            return lerp(fz, lerp(fy, lerp(fx, d000, d100), lerp(fx, d010, d110)),
+                lerp(fy, lerp(fx, d001, d101), lerp(fx, d011, d111)));
+        }
+
+        private static double dot(byte h, double x, double y, double z) {
+            int[] g = GRAD[h & 15];
+            return g[0] * x + g[1] * y + g[2] * z;
+        }
+
+        public static void noise(byte[] perm, double[] xyz, int n, double[] out) {
+            for (int i = 0; i < n; i++) out[i] = noise(perm, xyz[i * 3], xyz[i * 3 + 1], xyz[i * 3 + 2]);
+        }
+
+        public static long[] region(byte[] h, long fileLen) {
+            long sectors = (fileLen + 4095) / 4096;
+            boolean[] owner = new boolean[(int) Math.max(sectors, 2)];
+            owner[0] = owner[1] = true;
+            long present = 0, corrupt = 0, overlap = 0, maxS = 0, newest = 0;
+            for (int i = 0; i < 1024; i++) {
+                long off = ((h[i * 4] & 255L) << 16) | ((h[i * 4 + 1] & 255L) << 8) | (h[i * 4 + 2] & 255L);
+                long cnt = h[i * 4 + 3] & 255L;
+                if (off == 0 && cnt == 0) continue;
+                present++;
+                if (off < 2 || cnt == 0 || off + cnt > sectors) {
+                    corrupt++;
+                    continue;
+                }
+                boolean bad = false;
+                for (long s = off; s < off + cnt; s++) {
+                    if (owner[(int) s]) bad = true;
+                    owner[(int) s] = true;
+                }
+                if (bad) overlap++;
+                maxS = Math.max(maxS, off + cnt - 1);
+                long t = ((h[4096 + i * 4] & 255L) << 24) | ((h[4096 + i * 4 + 1] & 255L) << 16)
+                    | ((h[4096 + i * 4 + 2] & 255L) << 8) | (h[4096 + i * 4 + 3] & 255L);
+                newest = Math.max(newest, t);
+            }
+            return new long[] {present, corrupt, overlap, maxS, newest};
+        }
+    }
+}

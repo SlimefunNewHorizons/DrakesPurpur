@@ -1,0 +1,59 @@
+
+running 6 tests
+......
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+ok   apagado: packBits funciona en Java
+ok   biblioteca nativa cargada: bits=true noise=true region=true minBatch=1
+ok   bits=1 pack/unpack identico a Java
+ok   bits=2 pack/unpack identico a Java
+ok   bits=3 pack/unpack identico a Java
+ok   bits=4 pack/unpack identico a Java
+ok   bits=5 pack/unpack identico a Java
+ok   bits=6 pack/unpack identico a Java
+ok   bits=7 pack/unpack identico a Java
+ok   bits=8 pack/unpack identico a Java
+ok   bits=9 pack/unpack identico a Java
+ok   bits=10 pack/unpack identico a Java
+ok   bits=11 pack/unpack identico a Java
+ok   bits=12 pack/unpack identico a Java
+ok   bits=13 pack/unpack identico a Java
+ok   bits=14 pack/unpack identico a Java
+ok   bits=15 pack/unpack identico a Java
+ok   bits=16 pack/unpack identico a Java
+ok   bits=17 pack/unpack identico a Java
+ok   bits=18 pack/unpack identico a Java
+ok   bits=19 pack/unpack identico a Java
+ok   bits=20 pack/unpack identico a Java
+ok   bits=21 pack/unpack identico a Java
+ok   bits=22 pack/unpack identico a Java
+ok   bits=23 pack/unpack identico a Java
+ok   bits=24 pack/unpack identico a Java
+ok   bits=25 pack/unpack identico a Java
+ok   bits=26 pack/unpack identico a Java
+ok   bits=27 pack/unpack identico a Java
+ok   bits=28 pack/unpack identico a Java
+ok   bits=29 pack/unpack identico a Java
+ok   bits=30 pack/unpack identico a Java
+ok   bits=31 pack/unpack identico a Java
+ok   bits=32 pack/unpack identico a Java
+ok   valor fuera de rango lanza IAE
+ok   noise 100000 puntos: 0 difieren (max |d|=0.0)
+ok   region [3, 1, 1, 3, 9]
+
+== BENCH (mediana de 9 rondas, ns por llamada; mismo hilo, JIT caliente) ==
+bits pack+unpack bits= 4 n=  256  Java      1532 ns   Rust/FFM      7185 ns   x0.21
+bits pack+unpack bits= 4 n= 4096  Java     14430 ns   Rust/FFM      6697 ns   x2.15
+bits pack+unpack bits= 8 n=  256  Java       920 ns   Rust/FFM      1600 ns   x0.58
+bits pack+unpack bits= 8 n= 4096  Java     14847 ns   Rust/FFM      6626 ns   x2.24
+bits pack+unpack bits=15 n=  256  Java      1278 ns   Rust/FFM      1509 ns   x0.85
+bits pack+unpack bits=15 n= 4096  Java     19504 ns   Rust/FFM      9566 ns   x2.04
+noise improved   n=  256          Java      6722 ns   Rust/FFM      8709 ns   x0.77
+noise improved   n= 4096          Java    105068 ns   Rust/FFM    114115 ns   x0.92
+noise improved   n=65536          Java   1757351 ns   Rust/FFM   1948156 ns   x0.90
+TODO OK

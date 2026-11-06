@@ -69,6 +69,13 @@ public final class DrakesPerf {
             sum: false             # suma saturada
             price: false           # precio de DrakesSlimeMarket
             tick-engine: false     # SlimefunRustEngine (solo cuenta ticks; sin logica real)
+          # Horizon Hybrid Engine (EXPERIMENTAL, docs/hybrid/). Apagado: nada cambia. Java sigue siendo la autoridad del mundo.
+          hybrid:
+            enabled: false         # interruptor maestro del puente libdrakes_hybrid_ffi
+            min-batch: 2048        # bajo este tamano de lote se usa Java (el coste de la llamada FFM no compensa)
+            bits: false            # empaquetado SimpleBitStorage por lotes
+            noise: false           # ruido de Perlin por lotes
+            region: false          # analisis (solo lectura) de cabeceras .mca
         # Copia de seguridad 7z: no compite con el tick ni con la red.
         backup:
           throttle: true           # nice 19 + ionice idle + hilos limitados
@@ -152,6 +159,14 @@ public final class DrakesPerf {
                 cfg.getInt("native.ring-capacity", 64), cfg.getInt("native.max-entries", 8192)));
         } catch (Throwable t) {
             LOGGER.log(Level.WARNING, "[Native] init fallo (" + t + "); todo en Java.");
+        }
+        try {
+            org.purpurmc.purpur.nativelib.HybridNative.init(new org.purpurmc.purpur.nativelib.HybridNative.Settings(
+                cfg.getBoolean("native.hybrid.enabled", false), cfg.getString("native.dir", "natives"),
+                cfg.getBoolean("native.hybrid.bits", false), cfg.getBoolean("native.hybrid.noise", false),
+                cfg.getBoolean("native.hybrid.region", false), cfg.getInt("native.hybrid.min-batch", 2048)));
+        } catch (Throwable t) {
+            LOGGER.log(Level.WARNING, "[Hybrid] init fallo (" + t + "); todo en Java.");
         }
     }
 
