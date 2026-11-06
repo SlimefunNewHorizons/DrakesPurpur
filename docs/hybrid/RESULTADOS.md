@@ -42,3 +42,33 @@ Perfil JFR de la generacion (radio 12, Hybrid OFF, 4 292 muestras; incluye los b
 1. El cuello de botella real del streaming de chunks nuevos es la **generacion de terreno por density functions/ruido** (>50 %), no el empaquetado, la serializacion ni el paquete.
 2. Un kernel Rust de Perlin suelto tampoco ayuda (bench: 0.77-1.02x): la HotSpot ya compila bien el bucle; el coste esta en miles de llamadas virtuales por punto del grafo `DensityFunction`. Solo un **grafo de density functions completo en Rust** (el enfoque de Horizon, con paridad diferencial por semilla) podria cambiar esa cifra. Es el siguiente trabajo con potencial real y es grande.
 3. Lo integrado aqui es una base correcta y verificada (build, patch, ABI, fallback, paridad, instrumentacion), no una aceleracion.
+
+---
+
+# Fase 3 — NormalNoise nativo (base de las density functions)
+
+Commit `359c72d`; CI `Hybrid Engine CI` y `Build` en verde. Implementacion: `native/drakes-hybrid/src/density.rs` (ImprovedNoise -> PerlinNoise -> NormalNoise con el **mismo orden de operaciones** que la fuente de Mojang 26.2; f64 sin FMA; `Mth.floor` = cast saturante) + `hybrid/HybridDensity` (exporta las tablas de una instancia real de `NormalNoise`: Java conserva la semilla y los parametros).
+
+## Paridad (dentro del servidor, instancias reales de Mojang, 200 000 puntos por ruido, incluyendo ±1e9 y la frontera del wrap 3.3554432E7)
+| Ruido | Puntos | Diferencias bit a bit | Max ULP |
+|---|---|---|---|
+| temperature(-10; 1.5,0,1,0,0,0) | 200 000 | **0** | 0 |
+| continentalness(-9; 9 octavas) | 200 000 | **0** | 0 |
+| shift(-3; 4 octavas) | 200 000 | **0** | 0 |
+
+Esto demuestra paridad bit a bit **solo para esta primitiva** (no para el grafo completo, ni para generacion de chunks).
+
+## Rendimiento por punto (Java `NormalNoise.getValue` en bucle vs Rust por lotes via FFM, mediana de 9)
+| Ruido | Lote 4096 | Lote 65536 |
+|---|---|---|
+| temperature | Java 218.8 / Rust 180.3 ns -> x1.21 | 194.7 / 180.5 -> x1.08 |
+| continentalness (9 octavas) | 798.2 / 772.8 -> x1.03 | 793.3 / 774.2 -> x1.02 |
+| shift (4 octavas) | 266.5 / 270.8 -> x0.98 | 267.6 / 271.9 -> x0.98 |
+
+Ruido de la corrida en este runner: el control Java vario 12-23 % entre ejecuciones. **Las diferencias (0.98-1.21x) estan dentro del ruido: no hay mejora demostrable del ruido nativo.** El ruido no tiene un coste dominado por llamadas FFM (el lote lo amortiza): Rust y HotSpot ejecutan practicamente la misma aritmetica de doble precision.
+
+## Que implica para el port del grafo completo (decision basada en datos)
+- Perfil JFR de generacion (10 516 muestras): tiempo propio — `SimplexNoise.dot` 7.0 %, `PerlinNoise.getValue` 6.4 %, `Climate$RTree.search` 3.5 %, `NoiseChunk$NoiseInterpolator.updateForZ` 3.0 %, `Aquifer.computeSubstance` 2.4 %, `DensityFunctions$Ap2.compute` 2.0 %, `PureTransformer.compute` 1.6 %. Inclusivo: ruido/density 48.3 %, features/estructuras 24.3 %, superficie/carvers 7.9 %.
+- Aunque el ruido fuese infinitamente rapido, el tiempo propio de las funciones de ruido (~14 %) acota la ganancia; el resto del grafo (interpoladores, caches, splines, aquifer, Climate) es codigo con muchas ramas y estado de `NoiseChunk` que Rust no acelera de forma evidente.
+- Horizon documenta que su compilacion de density functions **no cubre aun el grafo completo** y que no ha medido mejora de juego completo (`docs/density-functions.md`).
+- **Conclusion:** no hay evidencia de que portar el resto del grafo a Rust dé un beneficio a nivel de chunk que justifique el coste y el riesgo de paridad. No se enlaza `NormalNoise` nativo al pipeline de generacion (no se activa nada que no haya demostrado ganancia). El camino con mas potencial medible sigue siendo arquitectonico (paralelismo/colas), no el lenguaje del kernel.
