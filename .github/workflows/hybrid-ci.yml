@@ -54,7 +54,7 @@ jobs:
           set +e
           timeout 1500 java -Xms1G -Xmx3G --enable-native-access=ALL-UNNAMED -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib -Ddrakes.hybrid.selftest=8 -jar server.jar --nogui > ../server-on.log 2>&1
           rc=$?; echo "exit=$rc"; cp drakes-data/hybrid-selftest.txt ../selftest-on.txt || true
-          echo "$rc" > ../exit-on.txt
+          grep -q "RESULTADO: OK" ../selftest-on.txt && echo 0 > ../exit-on.txt || echo 1 > ../exit-on.txt
       - name: Profile world generation with JFR (Hybrid OFF)
         run: |
           cd run && rm -rf world drakes-data

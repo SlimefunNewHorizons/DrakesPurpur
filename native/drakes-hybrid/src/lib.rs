@@ -15,6 +15,7 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::slice;
 
 pub mod bitstorage;
+pub mod density;
 pub mod noise;
 pub mod region;
 
@@ -103,5 +104,39 @@ pub unsafe extern "C" fn drakes_region_scan_header(header: *const u8, header_len
         let r = region::scan(h, file_len as u64);
         o.copy_from_slice(&r);
         r[0] as i32
+    })
+}
+
+/// Crea un evaluador de NormalNoise a partir del volcado de Java (ver density.rs). Devuelve handle > 0 o un `ERR_*` (< 0).
+///
+/// # Safety
+/// `buf` debe ser valido para `len` lecturas.
+#[no_mangle]
+pub unsafe extern "C" fn drakes_noise_create(buf: *const u8, len: i32) -> i64 {
+    match catch_unwind(AssertUnwindSafe(|| {
+        if len < 0 { return ERR_ARG as i64; }
+        let Some(b) = rd(buf, len as usize) else { return ERR_NULL as i64 };
+        density::create(b)
+    })) { Ok(v) => v, Err(_) => ERR_PANIC as i64 }
+}
+
+#[no_mangle]
+pub extern "C" fn drakes_noise_free(handle: i64) {
+    let _ = catch_unwind(|| density::free(handle));
+}
+
+/// Evalua `n` puntos (xyz intercalados) del NormalNoise `handle`. Devuelve `n` o `ERR_*`.
+///
+/// # Safety
+/// `xyz` valido para 3n lecturas y `out` para n escrituras.
+#[no_mangle]
+pub unsafe extern "C" fn drakes_normal_noise_batch(handle: i64, xyz: *const f64, n: i32, out: *mut f64) -> i32 {
+    guard(|| {
+        if n < 0 { return ERR_ARG; }
+        let n = n as usize;
+        let (Some(c), Some(o)) = (rd(xyz, n * 3), wr(out, n)) else { return ERR_NULL };
+        let Some(noise) = density::get(handle) else { return ERR_ARG };
+        noise.batch(c, o);
+        n as i32
     })
 }

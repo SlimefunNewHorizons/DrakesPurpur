@@ -230,7 +230,10 @@ public final class HybridSelfTest {
             }
             line(out, "[envio: construir ClientboundLevelChunkWithLightPacket] us/chunk " + pct(sendUs));
 
-            if (diffs != 0 || roundTripDiffs != 0) {
+
+            // 6) Density functions: NormalNoise nativo vs Java (puerta de decision antes de portar mas nodos)
+            densityParity(out, level);
+            if (diffs != 0 || roundTripDiffs != 0 || densityMismatches != 0) {
                 exit = 3;
                 line(out, "RESULTADO: FALLO DE PARIDAD");
             } else {
@@ -258,7 +261,10 @@ public final class HybridSelfTest {
                 LOG.warning("no se pudo volcar JFR: " + t);
             }
         }
-        Runtime.getRuntime().halt(exit); // salida inmediata y con codigo; el mundo de prueba es desechable
+        if (Boolean.getBoolean("drakes.hybrid.selftest.halt")) {
+            Runtime.getRuntime().halt(exit); // SOLO entornos desechables y solo si se pide explicitamente
+        }
+        org.bukkit.Bukkit.shutdown(); // ruta normal: guarda y apaga con los hooks de Paper
     }
 
     private static void buildPacket(java.lang.reflect.Constructor<ClientboundLevelChunkWithLightPacket> ctor, LevelChunk c,
@@ -268,6 +274,87 @@ public final class HybridSelfTest {
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private static long densityMismatches;
+
+    private static void densityParity(StringBuilder out, ServerLevel level) {
+        if (!HybridNative.libraryLoaded()) {
+            line(out, "[density] omitido: biblioteca nativa no cargada");
+            return;
+        }
+        // Instancias reales de Mojang: parametros de un ruido tipo overworld y de uno de pocas octavas, semilla fija.
+        var cases = new java.util.LinkedHashMap<String, net.minecraft.world.level.levelgen.synth.NormalNoise>();
+        cases.put("temperature(-10;1,1)", net.minecraft.world.level.levelgen.synth.NormalNoise.create(
+            new net.minecraft.world.level.levelgen.XoroshiroRandomSource(12345L), -10, 1.5, 0.0, 1.0, 0.0, 0.0, 0.0));
+        cases.put("continentalness(-9;9 oct)", net.minecraft.world.level.levelgen.synth.NormalNoise.create(
+            new net.minecraft.world.level.levelgen.XoroshiroRandomSource(777L), -9, 1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0));
+        cases.put("shift(-3;4 oct)", net.minecraft.world.level.levelgen.synth.NormalNoise.create(
+            new net.minecraft.world.level.levelgen.XoroshiroRandomSource(-42L), -3, 1.0, 1.0, 1.0, 0.0));
+        java.util.Random r = new java.util.Random(99);
+        final int N = 200_000;
+        double[] xyz = new double[N * 3];
+        for (int i = 0; i < N; i++) {
+            int mode = i % 4;
+            for (int k = 0; k < 3; k++) {
+                double v = switch (mode) {
+                    case 0 -> (r.nextDouble() - 0.5) * 4096;            // zona cercana
+                    case 1 -> (r.nextDouble() - 0.5) * 6.0e7;           // frontera del wrap de 3.3554432E7
+                    case 2 -> Math.floor((r.nextDouble() - 0.5) * 2000); // coordenadas enteras (puntos de malla)
+                    default -> (r.nextInt(2) == 0 ? -1 : 1) * r.nextDouble() * 1.0e9;
+                };
+                xyz[i * 3 + k] = v;
+            }
+        }
+        for (var e : cases.entrySet()) {
+            var jn = e.getValue();
+            byte[] blob = HybridDensity.export(jn);
+            long h = blob == null ? -1 : HybridNative.normalNoiseCreate(blob);
+            if (h <= 0) {
+                line(out, "[density] " + e.getKey() + ": NO exportable (se usaria Java)");
+                densityMismatches++;
+                continue;
+            }
+            double[] nat = new double[N];
+            HybridNative.normalNoiseBatch(h, xyz, N, nat);
+            long mism = 0, maxUlp = 0;
+            int firstBad = -1;
+            for (int i = 0; i < N; i++) {
+                double j = jn.getValue(xyz[i * 3], xyz[i * 3 + 1], xyz[i * 3 + 2]);
+                long a = Double.doubleToLongBits(j), b = Double.doubleToLongBits(nat[i]);
+                if (a != b && !(Double.isNaN(j) && Double.isNaN(nat[i]))) {
+                    mism++;
+                    maxUlp = Math.max(maxUlp, Math.abs(a - b));
+                    if (firstBad < 0) firstBad = i;
+                }
+            }
+            densityMismatches += mism;
+            line(out, String.format("[density] %s puntos=%d diferencias_bit_a_bit=%d max_ulp=%d%s", e.getKey(), N, mism, maxUlp,
+                firstBad < 0 ? "" : " primer=(" + xyz[firstBad * 3] + "," + xyz[firstBad * 3 + 1] + "," + xyz[firstBad * 3 + 2] + ")"));
+            // rendimiento: por punto, lotes de 4096 y 65536 (mediana de 7 rondas)
+            for (int batch : new int[] {4096, 65536}) {
+                double[] bx = java.util.Arrays.copyOf(xyz, batch * 3), bo = new double[batch];
+                double javaNs = medianNs(() -> {
+                    for (int i = 0; i < batch; i++) bo[i] = jn.getValue(bx[i * 3], bx[i * 3 + 1], bx[i * 3 + 2]);
+                }) / batch;
+                final long fh = h;
+                double natNs = medianNs(() -> HybridNative.normalNoiseBatch(fh, bx, batch, bo)) / batch;
+                line(out, String.format("[density-bench] %s lote=%d Java %.1f ns/punto  Rust %.1f ns/punto  => x%.2f", e.getKey(), batch, javaNs, natNs, javaNs / natNs));
+            }
+            HybridNative.normalNoiseFree(h);
+        }
+    }
+
+    private static double medianNs(Runnable f) {
+        for (int i = 0; i < 20; i++) f.run();
+        double[] t = new double[9];
+        for (int k = 0; k < t.length; k++) {
+            long s0 = System.nanoTime();
+            f.run();
+            t[k] = System.nanoTime() - s0;
+        }
+        java.util.Arrays.sort(t);
+        return t[t.length / 2];
     }
 
     private static void line(StringBuilder sb, String s) {

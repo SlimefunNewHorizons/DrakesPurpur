@@ -178,6 +178,40 @@ public final class HybridNative {
         return JavaRef.region(header, fileLen);
     }
 
+    // ---- NormalNoise nativo (density functions) --------------------------------------------------
+
+    /** Registra un NormalNoise (blob de {@code HybridDensity.export}) en Rust. Devuelve handle &gt; 0, o &lt;= 0 si no disponible. */
+    public static long normalNoiseCreate(byte[] blob) {
+        Natives n = natives;
+        if (n == null) return -1;
+        try {
+            return n.normalCreate(blob);
+        } catch (Throwable t) {
+            LOG.warning("[Hybrid] normalNoiseCreate fallo (" + t + ")");
+            return -1;
+        }
+    }
+
+    public static void normalNoiseFree(long handle) {
+        Natives n = natives;
+        if (n == null || handle <= 0) return;
+        try {
+            n.normalFree(handle);
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /** Evalua n puntos; devuelve false si no hay biblioteca o falla (el llamador usa Java). */
+    public static boolean normalNoiseBatch(long handle, double[] xyz, int n, double[] out) {
+        Natives nat = natives;
+        if (nat == null || handle <= 0 || xyz.length < n * 3 || out.length < n) return false;
+        try {
+            return nat.normalBatch(handle, xyz, n, out) == n;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
     /** true si una operacion de bits de {@code n} valores iria a Rust ahora mismo. */
     public static boolean bitsActive(int n) {
         return bitsOn && natives != null && n >= minBatch;
@@ -203,7 +237,7 @@ public final class HybridNative {
     // ---- Implementacion nativa ------------------------------------------------------------------
 
     private static final class Natives {
-        private final MethodHandle abi, pack, unpack, noise, region;
+        private final MethodHandle abi, pack, unpack, noise, region, nCreate, nFree, nBatch;
 
         Natives(Path lib) {
             SymbolLookup lk = SymbolLookup.libraryLookup(lib, Arena.global());
@@ -218,6 +252,22 @@ public final class HybridNative {
             noise = l.downcallHandle(lk.find("drakes_noise_improved_batch").orElseThrow(), FunctionDescriptor.of(I, A, A, I, A), crit);
             region = l.downcallHandle(lk.find("drakes_region_scan_header").orElseThrow(),
                 FunctionDescriptor.of(I, A, I, ValueLayout.JAVA_LONG, A), crit);
+            var L = ValueLayout.JAVA_LONG;
+            nCreate = l.downcallHandle(lk.find("drakes_noise_create").orElseThrow(), FunctionDescriptor.of(L, A, I), crit);
+            nFree = l.downcallHandle(lk.find("drakes_noise_free").orElseThrow(), FunctionDescriptor.ofVoid(L), crit);
+            nBatch = l.downcallHandle(lk.find("drakes_normal_noise_batch").orElseThrow(), FunctionDescriptor.of(I, L, A, I, A), crit);
+        }
+
+        long normalCreate(byte[] blob) throws Throwable {
+            return (long) nCreate.invokeExact(MemorySegment.ofArray(blob), blob.length);
+        }
+
+        void normalFree(long h) throws Throwable {
+            nFree.invokeExact(h);
+        }
+
+        int normalBatch(long h, double[] xyz, int n, double[] out) throws Throwable {
+            return (int) nBatch.invokeExact(h, MemorySegment.ofArray(xyz), n, MemorySegment.ofArray(out));
         }
 
         int abi() throws Throwable {
