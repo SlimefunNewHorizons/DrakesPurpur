@@ -248,6 +248,16 @@ public final class HybridSelfTest {
         } catch (Throwable ignored) {
         }
         System.out.println(out);
+        String jfr = System.getProperty("drakes.hybrid.selftest.jfr");
+        if (jfr != null && !jfr.isBlank()) { // halt() se salta los shutdown hooks: volcamos la grabacion JFR a mano
+            try {
+                java.lang.management.ManagementFactory.getPlatformMBeanServer().invoke(
+                    new javax.management.ObjectName("com.sun.management:type=DiagnosticCommand"), "jfrDump",
+                    new Object[] {new String[] {"filename=" + jfr, "name=1"}}, new String[] {String[].class.getName()});
+            } catch (Throwable t) {
+                LOG.warning("no se pudo volcar JFR: " + t);
+            }
+        }
         Runtime.getRuntime().halt(exit); // salida inmediata y con codigo; el mundo de prueba es desechable
     }
 

@@ -60,7 +60,7 @@ jobs:
           cd run && rm -rf world drakes-data
           mkdir drakes-data && printf 'native:\n  hybrid:\n    enabled: false\n' > drakes-data/perf.yml
           set +e
-          timeout 1500 java -Xms1G -Xmx3G -XX:StartFlightRecording=filename=gen.jfr,settings=profile --enable-native-access=ALL-UNNAMED -Ddrakes.hybrid.selftest=12 -jar server.jar --nogui > ../server-jfr.log 2>&1
+          timeout 1500 java -Xms1G -Xmx3G -XX:StartFlightRecording=filename=gen.jfr,settings=profile --enable-native-access=ALL-UNNAMED -Ddrakes.hybrid.selftest=12 -Ddrakes.hybrid.selftest.jfr=$PWD/gen.jfr -jar server.jar --nogui > ../server-jfr.log 2>&1
           echo "exit=$?"
           python3 ../tools/hybrid-bench/jfr_top.py gen.jfr 30 | tee ../jfr-top.txt
       - name: Summary
