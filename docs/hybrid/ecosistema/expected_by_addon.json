@@ -1,0 +1,5005 @@
+{
+ "source": {
+  "schema": 1,
+  "generated_at": "2026-10-14T21:51:50.686568200Z",
+  "server": "1.21.11-132-c5eb079 (MC: 1.21.11)",
+  "slimefun": "11.0-Drake-1.21.11-SNAPSHOT",
+  "item_errors": 0
+ },
+ "totals": {
+  "items": 15986,
+  "addons_with_items": 64,
+  "addons_in_groups": 65,
+  "groups": 274,
+  "researches": 440,
+  "unique_ids": 15986,
+  "items_with_research": 9410,
+  "items_with_energy": 595,
+  "items_with_machine_recipes": 159,
+  "items_disabled": 0
+ },
+ "addons": {
+  "ColoredEnderChests": {
+   "name": "ColoredEnderChests",
+   "n_items": 8192,
+   "pct_of_total": 51.245,
+   "ids_sha256": "b1cf7a3c672806ca330badb0357053c67679a81f3a5308dd41ee8cdfacc48ac0",
+   "groups_by_dump_group_addon": [
+    "coloredenderchests:colored_enderchests"
+   ],
+   "groups_used_by_items": {
+    "coloredenderchests:colored_enderchests": 8192
+   },
+   "researches_of_items": [
+    "coloredenderchests:big_colored_enderchests",
+    "coloredenderchests:colored_enderchests"
+   ],
+   "n_researches_of_items": 2,
+   "items_with_research": 8192,
+   "classes": {
+    "ColoredEnderChest": 8192
+   },
+   "recipe_types": {
+    "slimefun:ancient_altar": 8192
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "COLORED",
+     8192
+    ],
+    [
+     "COLORED_ENDER",
+     8192
+    ],
+    [
+     "COLORED_ENDER_CHEST",
+     8192
+    ]
+   ],
+   "sample_ids": [
+    "COLORED_ENDER_CHEST_BIG_0_0_0",
+    "COLORED_ENDER_CHEST_BIG_0_0_1",
+    "COLORED_ENDER_CHEST_BIG_0_0_10",
+    "COLORED_ENDER_CHEST_BIG_0_0_11",
+    "COLORED_ENDER_CHEST_BIG_0_0_12"
+   ]
+  },
+  "Cultivation": {
+   "name": "Cultivation",
+   "n_items": 1401,
+   "pct_of_total": 8.764,
+   "ids_sha256": "5e7346b275daf1c1ee18dc7b4c520d3614a484bc2b77a84edcaace4a5ec60bf9",
+   "groups_by_dump_group_addon": [
+    "cultivation:bushes",
+    "cultivation:by-products",
+    "cultivation:crafting",
+    "cultivation:foods",
+    "cultivation:hidden",
+    "cultivation:machines",
+    "cultivation:main",
+    "cultivation:plants",
+    "cultivation:produce",
+    "cultivation:tools",
+    "cultivation:trees"
+   ],
+   "groups_used_by_items": {
+    "cultivation:by-products": 1034,
+    "cultivation:produce": 97,
+    "cultivation:plants": 89,
+    "cultivation:bushes": 82,
+    "cultivation:foods": 50,
+    "cultivation:hidden": 16,
+    "cultivation:trees": 15,
+    "cultivation:machines": 12,
+    "cultivation:tools": 5,
+    "cultivation:crafting": 1
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "ByProduct": 1033,
+    "ProduceCore": 98,
+    "HarvestableBush": 82,
+    "HarvestablePlant": 80,
+    "Food": 50,
+    "CultivationLeaves": 15,
+    "CultivationTree": 15,
+    "NothingPlant": 9,
+    "RightClickKitchenMachine": 6,
+    "PoweredKitchenMachineSimple": 2,
+    "SlimefunItem": 1,
+    "CropSticks": 1,
+    "HarvestingTool": 1,
+    "TrimmingTool": 1,
+    "PlantAnalyser": 1,
+    "SeedPack": 1,
+    "RecipeUnlock": 1,
+    "GardenCloche": 1,
+    "DoNothingKitchenObject": 1,
+    "PoweredKitchenMachineComplex": 1,
+    "CraftingKitchenMachine": 1
+   },
+   "recipe_types": {
+    "cultivation:grilled": 128,
+    "cultivation:chopped": 127,
+    "cultivation:mashed": 127,
+    "cultivation:sliced": 127,
+    "cultivation:ground": 127,
+    "cultivation:blended": 127,
+    "cultivation:boiled": 127,
+    "cultivation:fried": 127,
+    "cultivation:trading_farmer": 82,
+    "cultivation:plant_breeding": 82,
+    "cultivation:bush_harvest": 82,
+    "cultivation:finishing": 45,
+    "cultivation:baking": 22,
+    "slimefun:enhanced_crafting_table": 17,
+    "slimefun:null": 16,
+    "cultivation:tree_harvest": 15,
+    "cultivation:trading_fletcher": 15,
+    "cultivation:mob": 4,
+    "cultivation:bucketing": 2,
+    "slimefun:ancient_altar": 1,
+    "cultivation:vanilla_block_drop": 1
+   },
+   "energy_components": 4,
+   "energy_types": {
+    "CONSUMER": 4
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 294,
+   "id_prefixes": [
+    [
+     "CLT",
+     1401
+    ]
+   ],
+   "sample_ids": [
+    "CLT_APRICOT",
+    "CLT_ARTICHOKE",
+    "CLT_ASPARAGUS",
+    "CLT_AUBERGINE",
+    "CLT_AVOCADO"
+   ]
+  },
+  "SlimeTinker": {
+   "name": "SlimeTinker",
+   "n_items": 1376,
+   "pct_of_total": 8.608,
+   "ids_sha256": "18abfcb9523d23f37ea7e02c8b455b6245482c389e298e57418ab2514911ca0c",
+   "groups_by_dump_group_addon": [
+    "slimetinker:slime-tinker",
+    "slimetinker:slime-tinker-alloys",
+    "slimetinker:slime-tinker-armour",
+    "slimetinker:slime-tinker-casts",
+    "slimetinker:slime-tinker-dummy",
+    "slimetinker:slime-tinker-materials",
+    "slimetinker:slime-tinker-modifications",
+    "slimetinker:slime-tinker-molten",
+    "slimetinker:slime-tinker-part-dict",
+    "slimetinker:slime-tinker-parts",
+    "slimetinker:slime-tinker-properties",
+    "slimetinker:slime-tinker-tools",
+    "slimetinker:slime-tinker-workstations"
+   ],
+   "groups_used_by_items": {
+    "slimetinker:slime-tinker-part-dict": 749,
+    "slimetinker:slime-tinker-properties": 266,
+    "slimetinker:slime-tinker-materials": 131,
+    "slimetinker:slime-tinker-molten": 83,
+    "slimetinker:slime-tinker-dummy": 50,
+    "slimetinker:slime-tinker-casts": 29,
+    "slimetinker:slime-tinker-alloys": 29,
+    "slimetinker:slime-tinker-parts": 15,
+    "slimetinker:slime-tinker-workstations": 7,
+    "slimetinker:slime-tinker-tools": 6,
+    "slimetinker:slime-tinker-modifications": 6,
+    "slimetinker:slime-tinker-armour": 5
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "PartTemplate": 784,
+    "SlimefunItem": 381,
+    "UnplaceableBlock": 189,
+    "ToolTemplate": 5,
+    "ToolTemplateExplosive": 5,
+    "ArmourTemplate": 4,
+    "TinkersSmeltery": 1,
+    "RepairkitTemplate": 1,
+    "Workbench": 1,
+    "ToolTable": 1,
+    "ArmourTable": 1,
+    "RepairBench": 1,
+    "SwappingStation": 1,
+    "ModificationStation": 1
+   },
+   "recipe_types": {
+    "slimetinker:dummy-smeltery": 914,
+    "slimetinker:dummy-smeltery-alloy": 296,
+    "slimetinker:dummy-smeltery-molten": 83,
+    "slimetinker:tinkers-workbench": 48,
+    "slimetinker:dummy-table": 31,
+    "slimetinker:dummy-workbench": 2,
+    "slimefun:smeltery": 1,
+    "slimefun:enhanced_crafting_table": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 34,
+   "id_prefixes": [
+    [
+     "PART",
+     800
+    ],
+    [
+     "PART_HEAD",
+     305
+    ],
+    [
+     "PART_PLATES",
+     260
+    ]
+   ],
+   "sample_ids": [
+    "10_YEARS_OF_(SLIME)FUN!_TRAIT_PROP_PLATES_INGOT_CAST_ANNIVERSARIUM",
+    "ABRA_TRAIT_PROP_HEAD_ALUMINUM_BRASS_INGOT",
+    "ACUPUNCTURE_II_TRAIT_PROP_LINKS_ZINC_SINGULARITY",
+    "ACUPUNCTURE_TRAIT_PROP_LINKS_ZINC_DUST",
+    "ADAMANTITE_LIQUID"
+   ]
+  },
+  "Slimefun": {
+   "name": "Slimefun",
+   "n_items": 554,
+   "pct_of_total": 3.466,
+   "ids_sha256": "992b5337251747e1349d5114baa751b1e4f209031b1418fb2286ce7d7138cbd3",
+   "groups_by_dump_group_addon": [
+    "slimefun:androids",
+    "slimefun:armor",
+    "slimefun:basic_machines",
+    "slimefun:cargo",
+    "slimefun:christmas",
+    "slimefun:easter",
+    "slimefun:electricity",
+    "slimefun:ender_talismans",
+    "slimefun:food",
+    "slimefun:gps",
+    "slimefun:halloween",
+    "slimefun:items",
+    "slimefun:magical_armor",
+    "slimefun:magical_gadgets",
+    "slimefun:magical_items",
+    "slimefun:misc",
+    "slimefun:resources",
+    "slimefun:rick",
+    "slimefun:talismans",
+    "slimefun:tech_misc",
+    "slimefun:technical_gadgets",
+    "slimefun:tools",
+    "slimefun:valentines_day",
+    "slimefun:weapons"
+   ],
+   "groups_used_by_items": {
+    "slimefun:electricity": 77,
+    "slimefun:resources": 66,
+    "slimefun:misc": 42,
+    "slimefun:basic_machines": 33,
+    "slimefun:magical_gadgets": 31,
+    "slimefun:magical_armor": 31,
+    "slimefun:armor": 28,
+    "slimefun:technical_gadgets": 28,
+    "slimefun:magical_items": 27,
+    "slimefun:tech_misc": 20,
+    "slimefun:food": 19,
+    "slimefun:christmas": 19,
+    "slimefun:gps": 17,
+    "slimefun:items": 16,
+    "slimefun:tools": 16,
+    "slimefun:talismans": 16,
+    "slimefun:ender_talismans": 16,
+    "slimefun:androids": 15,
+    "slimefun:cargo": 12,
+    "slimefun:weapons": 10,
+    "slimefun:valentines_day": 6,
+    "slimefun:halloween": 6,
+    "slimefun:easter": 3
+   },
+   "researches_of_items": [
+    "slimefun:24k_gold_block",
+    "slimefun:advanced_android",
+    "slimefun:advanced_butcher_android",
+    "slimefun:advanced_circuit_board",
+    "slimefun:advanced_electric_smeltery",
+    "slimefun:advanced_farmer_android",
+    "slimefun:advanced_fisherman_android",
+    "slimefun:advanced_industrial_miner",
+    "slimefun:advanced_output_node",
+    "slimefun:alloys",
+    "slimefun:ancient_altar",
+    "slimefun:ancient_runes",
+    "slimefun:android_interfaces",
+    "slimefun:android_memory_core",
+    "slimefun:angel_talisman",
+    "slimefun:animal_growth_accelerator",
+    "slimefun:anvil_talisman",
+    "slimefun:armor_forge",
+    "slimefun:armored_jetboots",
+    "slimefun:armored_jetpack",
+    "slimefun:auto_anvil",
+    "slimefun:auto_breeder",
+    "slimefun:auto_brewer",
+    "slimefun:auto_crafting",
+    "slimefun:auto_drier",
+    "slimefun:auto_enchanting",
+    "slimefun:automated_panning_machine",
+    "slimefun:automatic_ignition_chamber",
+    "slimefun:backpacks",
+    "slimefun:basic_circuit_board",
+    "slimefun:battery",
+    "slimefun:bee_armor",
+    "slimefun:better_carbon_press",
+    "slimefun:better_crop_growth_accelerator",
+    "slimefun:better_electric_crucibles",
+    "slimefun:better_electric_furnace",
+    "slimefun:better_food_fabricator",
+    "slimefun:better_freezer",
+    "slimefun:better_gps_transmitters",
+    "slimefun:better_heated_pressure_chamber",
+    "slimefun:better_solar_generators",
+    "slimefun:bio_reactor",
+    "slimefun:blade_of_vampires",
+    "slimefun:blistering_ingots",
+    "slimefun:block_placer",
+    "slimefun:book_binder",
+    "slimefun:boosted_uranium",
+    "slimefun:boots_of_the_stomper",
+    "slimefun:bound_armor",
+    "slimefun:bound_backpack",
+    "slimefun:bound_tools",
+    "slimefun:bound_weapons",
+    "slimefun:bronze",
+    "slimefun:butcher_androids",
+    "slimefun:cactus_armor",
+    "slimefun:capacitors",
+    "slimefun:carbon_press",
+    "slimefun:carbonado",
+    "slimefun:carbonado_furnace",
+    "slimefun:carbonado_tools",
+    "slimefun:cargo_basics",
+    "slimefun:cargo_nodes",
+    "slimefun:caveman_talisman",
+    "slimefun:chainmail_armor",
+    "slimefun:charging_bench",
+    "slimefun:climbing_pick",
+    "slimefun:coal_generator",
+    "slimefun:cobalt_pickaxe",
+    "slimefun:combustion_reactor",
+    "slimefun:common_talisman",
+    "slimefun:composter",
+    "slimefun:compressor_and_carbon",
+    "slimefun:cooler",
+    "slimefun:copper_wire",
+    "slimefun:crop_growth_accelerator",
+    "slimefun:crucible",
+    "slimefun:crushed_ore",
+    "slimefun:damascus_steel",
+    "slimefun:damascus_steel_armor",
+    "slimefun:diet_cookie",
+    "slimefun:duct_tape",
+    "slimefun:electric_crucible",
+    "slimefun:electric_furnaces",
+    "slimefun:electric_ingot_machines",
+    "slimefun:electric_motor",
+    "slimefun:electric_ore_grinding",
+    "slimefun:electric_press",
+    "slimefun:electric_smeltery",
+    "slimefun:elemental_staff",
+    "slimefun:elevator",
+    "slimefun:elytra",
+    "slimefun:elytra_cap",
+    "slimefun:empowered_android",
+    "slimefun:empowered_butcher_android",
+    "slimefun:empowered_fisherman_android",
+    "slimefun:enchantment_rune",
+    "slimefun:ender_armor",
+    "slimefun:ender_backpack",
+    "slimefun:ender_talismans",
+    "slimefun:energized_gps_transmitter",
+    "slimefun:energized_solar_generator",
+    "slimefun:energy_connectors",
+    "slimefun:energy_regulator",
+    "slimefun:enhanced_furnace",
+    "slimefun:essence_of_afterlife",
+    "slimefun:even_higher_tier_capacitors",
+    "slimefun:explosive_tools",
+    "slimefun:farmer_shoes",
+    "slimefun:farmer_talisman",
+    "slimefun:fire_staff",
+    "slimefun:fire_talisman",
+    "slimefun:first_aid",
+    "slimefun:flask_of_knowledge",
+    "slimefun:fluid_pump",
+    "slimefun:fortune_cookie",
+    "slimefun:freezer",
+    "slimefun:fuel",
+    "slimefun:geo_miner",
+    "slimefun:geo_scanner",
+    "slimefun:gilded_backpack",
+    "slimefun:gilded_iron",
+    "slimefun:gilded_iron_armor",
+    "slimefun:glowstone_armor",
+    "slimefun:gold_armor",
+    "slimefun:gold_carats",
+    "slimefun:gold_pan",
+    "slimefun:golden_apple_juice",
+    "slimefun:gps_emergency_transmitter",
+    "slimefun:gps_setup",
+    "slimefun:grappling_hook",
+    "slimefun:grind_stone",
+    "slimefun:hardened_glass",
+    "slimefun:hazmat_suit",
+    "slimefun:heated_pressure_chamber",
+    "slimefun:high_tier_capacitors",
+    "slimefun:high_tier_carbon_press",
+    "slimefun:high_tier_electric_ingot_machines",
+    "slimefun:high_tier_enhanced_furnaces",
+    "slimefun:hologram_projector",
+    "slimefun:hunter_talisman",
+    "slimefun:improved_generators",
+    "slimefun:industrial_miner",
+    "slimefun:infernal_bonemeal",
+    "slimefun:infused_hopper",
+    "slimefun:infused_magnet",
+    "slimefun:ingredients_and_cheese",
+    "slimefun:iron_golem_assembler",
+    "slimefun:jetboots",
+    "slimefun:jetpacks",
+    "slimefun:juicer",
+    "slimefun:kelp_cookie",
+    "slimefun:knight_talisman",
+    "slimefun:lava_crystal",
+    "slimefun:lava_generator",
+    "slimefun:lava_talisman",
+    "slimefun:lead_clothing",
+    "slimefun:lightning_rune",
+    "slimefun:lumber_axe",
+    "slimefun:lumps",
+    "slimefun:magic_eye_of_ender",
+    "slimefun:magic_sugar",
+    "slimefun:magic_workbench",
+    "slimefun:magical_book_cover",
+    "slimefun:magical_zombie_pills",
+    "slimefun:magician_talisman",
+    "slimefun:magnesium_generator",
+    "slimefun:magnet",
+    "slimefun:makeshift_smeltery",
+    "slimefun:meat_jerky",
+    "slimefun:medium_tier_auto_enchanting",
+    "slimefun:medium_tier_electric_ingot_machines",
+    "slimefun:miner_talisman",
+    "slimefun:misc_power_items",
+    "slimefun:monster_jerky",
+    "slimefun:more_enhanced_furnaces",
+    "slimefun:multimeter",
+    "slimefun:multitools",
+    "slimefun:nether_gold_pan",
+    "slimefun:nether_ice",
+    "slimefun:nether_star_reactor",
+    "slimefun:nickel_and_cobalt",
+    "slimefun:night_vision_googles",
+    "slimefun:nuclear_reactor",
+    "slimefun:oil",
+    "slimefun:ore_crusher",
+    "slimefun:ore_washer",
+    "slimefun:organic_fertilizer",
+    "slimefun:organic_food",
+    "slimefun:output_chest",
+    "slimefun:parachute",
+    "slimefun:pickaxe_of_containment",
+    "slimefun:pickaxe_of_the_seeker",
+    "slimefun:pickaxe_of_vein_mining",
+    "slimefun:plastic_sheet",
+    "slimefun:portable_crafter",
+    "slimefun:portable_dustbin",
+    "slimefun:portable_teleporter",
+    "slimefun:pressure_chamber",
+    "slimefun:produce_collector",
+    "slimefun:programmable_androids",
+    "slimefun:radiant_backpack",
+    "slimefun:rainbow_armor",
+    "slimefun:rainbow_blocks",
+    "slimefun:reactor_access_port",
+    "slimefun:reactor_essentials",
+    "slimefun:redstone_alloy",
+    "slimefun:reinforced_alloy",
+    "slimefun:reinforced_armor",
+    "slimefun:reinforced_furnace",
+    "slimefun:repaired_spawner",
+    "slimefun:scroll_of_dimensional_teleposition",
+    "slimefun:seismic_axe",
+    "slimefun:shulker_shell",
+    "slimefun:silicon",
+    "slimefun:slime_armor",
+    "slimefun:slime_steel_armor",
+    "slimefun:slimefun_metals",
+    "slimefun:smelters_pickaxe",
+    "slimefun:smeltery",
+    "slimefun:solar_generators",
+    "slimefun:solar_panel_and_helmet",
+    "slimefun:special_bows",
+    "slimefun:special_elytras",
+    "slimefun:special_runes",
+    "slimefun:steel",
+    "slimefun:steel_plate",
+    "slimefun:steel_thruster",
+    "slimefun:storm_staff",
+    "slimefun:sword_of_beheading",
+    "slimefun:synthetic_diamond",
+    "slimefun:synthetic_emerald",
+    "slimefun:synthetic_sapphire",
+    "slimefun:table_saw",
+    "slimefun:tape_measure",
+    "slimefun:teleporter",
+    "slimefun:teleporter_activation_plates",
+    "slimefun:tome_of_knowledge_sharing",
+    "slimefun:totem_of_undying",
+    "slimefun:trash_can",
+    "slimefun:traveller_talisman",
+    "slimefun:tree_growth_accelerator",
+    "slimefun:trident",
+    "slimefun:uranium",
+    "slimefun:villager_rune",
+    "slimefun:walking_sticks",
+    "slimefun:warrior_talisman",
+    "slimefun:water_staff",
+    "slimefun:water_talisman",
+    "slimefun:whirlwind_talisman",
+    "slimefun:wind_staff",
+    "slimefun:wise_talisman",
+    "slimefun:wither_assembler",
+    "slimefun:wither_proof_glass",
+    "slimefun:wither_proof_obsidian",
+    "slimefun:wizard_talisman",
+    "slimefun:woven_backpack",
+    "slimefun:xp_collector"
+   ],
+   "n_researches_of_items": 257,
+   "items_with_research": 505,
+   "classes": {
+    "SlimefunItem": 99,
+    "RainbowBlock": 24,
+    "UnplaceableBlock": 20,
+    "EnderTalisman": 16,
+    "Talisman": 15,
+    "AlloyIngot": 14,
+    "EnhancedFurnace": 13,
+    "SoulboundItem": 12,
+    "Juice": 12,
+    "SlimefunArmorPiece": 11,
+    "GoldIngot": 11,
+    "RadioactiveItem": 11,
+    "OrganicFood": 11,
+    "OrganicFertilizer": 11,
+    "Jetpack": 8,
+    "VanillaItem": 8,
+    "JetBoots": 8,
+    "ElementalRune": 8,
+    "MultiTool": 7,
+    "MeatJerky": 6,
+    "SlimefunBackpack": 6,
+    "Capacitor": 6,
+    "RainbowArmorPiece": 4,
+    "HazmatArmorPiece": 4,
+    "SolarGenerator": 4,
+    "LongFallBoots": 3,
+    "ElectricFurnace": 3,
+    "ElectricGoldPan": 3,
+    "ElectricDustWasher": 3,
+    "ElectricIngotFactory": 3,
+    "ElectrifiedCrucible": 3,
+    "ElectricOreGrinder": 3,
+    "ProgrammableAndroid": 3,
+    "FishermanAndroid": 3,
+    "ButcherAndroid": 3,
+    "Freezer": 3,
+    "CarbonPress": 3,
+    "Bandage": 2,
+    "WitherProofBlock": 2,
+    "HeatedPressureChamber": 2,
+    "CoalGenerator": 2,
+    "ElectricPress": 2,
+    "AutoEnchanter": 2,
+    "AutoDisenchanter": 2,
+    "AutoAnvil": 2,
+    "AndroidInterface": 2,
+    "FarmerAndroid": 2,
+    "LavaGenerator": 2,
+    "FoodFabricator": 2,
+    "FoodComposter": 2,
+    "CoolantCell": 2,
+    "ElectricSmeltery": 2,
+    "PortableCrafter": 1,
+    "FortuneCookie": 1,
+    "DietCookie": 1,
+    "OutputChest": 1,
+    "EnhancedCraftingTable": 1,
+    "PortableDustbin": 1,
+    "GrindStone": 1,
+    "ArmorForge": 1,
+    "OreCrusher": 1,
+    "Compressor": 1,
+    "EnderBackpack": 1,
+    "EnderBoots": 1,
+    "MagicEyeOfEnder": 1,
+    "MagicSugar": 1,
+    "MonsterJerky": 1,
+    "SwordOfBeheading": 1,
+    "BasicCircuitBoard": 1,
+    "GoldPan": 1,
+    "NetherGoldPan": 1,
+    "MakeshiftSmeltery": 1,
+    "Smeltery": 1,
+    "IgnitionChamber": 1,
+    "PressureChamber": 1,
+    "SteelThruster": 1,
+    "Parachute": 1,
+    "HologramProjector": 1,
+    "GrapplingHook": 1,
+    "MagicWorkbench": 1,
+    "WindStaff": 1,
+    "WaterStaff": 1,
+    "EnchantedItem": 1,
+    "OreWasher": 1,
+    "SolarHelmet": 1,
+    "StormStaff": 1,
+    "MagicalZombiePills": 1,
+    "SmeltersPickaxe": 1,
+    "MagicianTalisman": 1,
+    "SyntheticEmerald": 1,
+    "LumberAxe": 1,
+    "HeavyCream": 1,
+    "Splint": 1,
+    "Vitamins": 1,
+    "Medicine": 1,
+    "PickaxeOfContainment": 1,
+    "TableSaw": 1,
+    "VampireBlade": 1,
+    "Composter": 1,
+    "FarmerShoes": 1,
+    "ExplosivePickaxe": 1,
+    "ExplosiveShovel": 1,
+    "AutomatedPanningMachine": 1,
+    "IndustrialMiner": 1,
+    "AdvancedIndustrialMiner": 1,
+    "StomperBoots": 1,
+    "PickaxeOfTheSeeker": 1,
+    "Crucible": 1,
+    "RestoredBackpack": 1,
+    "InfusedMagnet": 1,
+    "SoulboundBackpack": 1,
+    "SeismicAxe": 1,
+    "PickaxeOfVeinMining": 1,
+    "ClimbingPick": 1,
+    "Juicer": 1,
+    "BrokenSpawner": 1,
+    "RepairedSpawner": 1,
+    "BlockPlacer": 1,
+    "TelepositionScroll": 1,
+    "ExplosiveBow": 1,
+    "IcyBow": 1,
+    "KnowledgeTome": 1,
+    "KnowledgeFlask": 1,
+    "HiddenItem": 1,
+    "ChristmasPresent": 1,
+    "EasterEgg": 1,
+    "HardenedGlass": 1,
+    "Cooler": 1,
+    "AncientPedestal": 1,
+    "AncientAltar": 1,
+    "EnergyRegulator": 1,
+    "EnergyConnector": 1,
+    "ChargingBench": 1,
+    "ElectricIngotPulverizer": 1,
+    "BioGenerator": 1,
+    "AutoDrier": 1,
+    "AutoBrewer": 1,
+    "MagnesiumGenerator": 1,
+    "BookBinder": 1,
+    "Multimeter": 1,
+    "SlimefunItemSetup$1": 1,
+    "SlimefunItemSetup$2": 1,
+    "SlimefunItemSetup$3": 1,
+    "SlimefunItemSetup$4": 1,
+    "GPSControlPanel": 1,
+    "GPSMarkerTool": 1,
+    "MinerAndroid": 1,
+    "WoodcutterAndroid": 1,
+    "SoulboundRune": 1,
+    "EnchantmentRune": 1,
+    "InfernalBonemeal": 1,
+    "GEOScanner": 1,
+    "PortableGEOScanner": 1,
+    "OilPump": 1,
+    "GEOMiner": 1,
+    "Refinery": 1,
+    "CombustionGenerator": 1,
+    "TeleporterPylon": 1,
+    "Teleporter": 1,
+    "PortableTeleporter": 1,
+    "SharedActivationPlate": 1,
+    "PersonalActivationPlate": 1,
+    "InfusedHopper": 1,
+    "ElevatorPlate": 1,
+    "AutoBreeder": 1,
+    "AnimalGrowthAccelerator": 1,
+    "TreeGrowthAccelerator": 1,
+    "ExpCollector": 1,
+    "SlimefunItemSetup$5": 1,
+    "SlimefunItemSetup$6": 1,
+    "SlimefunItemSetup$7": 1,
+    "SlimefunItemSetup$8": 1,
+    "CargoManager": 1,
+    "CargoConnectorNode": 1,
+    "CargoInputNode": 1,
+    "CargoOutputNode": 1,
+    "AdvancedCargoOutputNode": 1,
+    "ReactorAccessPort": 1,
+    "FluidPump": 1,
+    "TrashCan": 1,
+    "IronGolemAssembler": 1,
+    "WitherAssembler": 1,
+    "TapeMeasure": 1,
+    "BeeWings": 1,
+    "VillagerRune": 1,
+    "StrangeNetherGoo": 1,
+    "ElytraCap": 1,
+    "VanillaAutoCrafter": 1,
+    "EnhancedAutoCrafter": 1,
+    "ArmorAutoCrafter": 1,
+    "ProduceCollector": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 247,
+    "slimefun:magic_workbench": 72,
+    "slimefun:armor_forge": 56,
+    "slimefun:ancient_altar": 48,
+    "slimefun:smeltery": 42,
+    "slimefun:multiblock": 15,
+    "slimefun:food_fabricator": 11,
+    "slimefun:food_composter": 11,
+    "slimefun:ore_washer": 10,
+    "slimefun:heated_pressure_chamber": 8,
+    "slimefun:juicer": 7,
+    "slimefun:ore_crusher": 6,
+    "slimefun:compressor": 4,
+    "slimefun:grind_stone": 3,
+    "slimefun:pressure_chamber": 2,
+    "slimefun:nuclear_reactor": 2,
+    "slimefun:mob_drop": 1,
+    "slimefun:gold_pan": 1,
+    "slimefun:null": 1,
+    "slimefun:pickaxe_of_containment": 1,
+    "slimefun:interact": 1,
+    "slimefun:oil_pump": 1,
+    "slimefun:refinery": 1,
+    "slimefun:geo_miner": 1,
+    "slimefun:freezer": 1,
+    "slimefun:barter_drop": 1
+   },
+   "energy_components": 85,
+   "energy_types": {
+    "CONNECTOR": 1,
+    "CAPACITOR": 6,
+    "GENERATOR": 13,
+    "CONSUMER": 65
+   },
+   "items_with_machine_recipes": 31,
+   "disabled": 0,
+   "items_without_recipe": 2,
+   "id_prefixes": [],
+   "sample_ids": [
+    "ADVANCED_CIRCUIT_BOARD",
+    "ADVANCED_INDUSTRIAL_MINER",
+    "ALUMINUM_BRASS_INGOT",
+    "ALUMINUM_BRONZE_INGOT",
+    "ALUMINUM_DUST"
+   ]
+  },
+  "Supreme": {
+   "name": "Supreme",
+   "n_items": 510,
+   "pct_of_total": 3.19,
+   "ids_sha256": "22f46ab55bd61b1970396e4cebba817fcce05f39b15878b5e493eb830c8cb3f0",
+   "groups_by_dump_group_addon": [
+    "supreme:supreme_armor",
+    "supreme:supreme_cards",
+    "supreme:supreme_components",
+    "supreme:supreme_electric",
+    "supreme:supreme_machines",
+    "supreme:supreme_main",
+    "supreme:supreme_resource",
+    "supreme:supreme_techmob",
+    "supreme:supreme_tools",
+    "supreme:supreme_weapons"
+   ],
+   "groups_used_by_items": {
+    "supreme:supreme_techmob": 162,
+    "supreme:supreme_cards": 69,
+    "supreme:supreme_components": 64,
+    "supreme:supreme_resource": 54,
+    "supreme:supreme_machines": 54,
+    "supreme:supreme_armor": 36,
+    "supreme:supreme_tools": 30,
+    "supreme:supreme_weapons": 21,
+    "supreme:supreme_electric": 20
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "UnplaceableBlock": 181,
+    "MobTech": 165,
+    "AbstractArmor": 36,
+    "AbstractTools": 27,
+    "AbstractWeapons": 21,
+    "EnergyGenerator": 12,
+    "AbstractQuarry": 7,
+    "EnergyCapacitor": 5,
+    "SlimefunItem": 3,
+    "ElectricCoreFabricator": 3,
+    "ElectricMagicalFabricator": 3,
+    "ElectricGearFabricator": 3,
+    "MobCollector": 3,
+    "VirtualGarden": 3,
+    "ForgeIngot": 3,
+    "ForgeMagical": 3,
+    "MagicAltar": 3,
+    "Foundry": 3,
+    "ElectricCrafter": 3,
+    "VirtualAquarium": 3,
+    "MobTechCollector": 3,
+    "TechMutation": 3,
+    "TechRobotic": 3,
+    "GeneratorMob": 3,
+    "MobCollectorTools": 3,
+    "MultiBlockCoreFabricator": 1,
+    "MultiBlockMagicalFabricator": 1,
+    "MultiBlockGearFabricator": 1,
+    "TechGenerator": 1,
+    "CheckInventory": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 180,
+    "slimefun:null": 161,
+    "supreme:supreme_multiblock_gear_key": 84,
+    "supreme:supreme_multiblock_core_key": 54,
+    "supreme:supreme_multiblock_magical_key": 17,
+    "slimefun:smeltery": 8,
+    "slimefun:grind_stone": 3,
+    "slimefun:multiblock": 3
+   },
+   "energy_components": 70,
+   "energy_types": {
+    "CONSUMER": 50,
+    "GENERATOR": 15,
+    "CAPACITOR": 5
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 2,
+   "id_prefixes": [
+    [
+     "SUPREME",
+     509
+    ],
+    [
+     "SUPREME_CARD",
+     69
+    ],
+    [
+     "SUPREME_CORE",
+     60
+    ]
+   ],
+   "sample_ids": [
+    "MOB_TECH_COLLECTOR_MACHINE",
+    "SUPREME_ACCELERATION_BEE_I",
+    "SUPREME_ACCELERATION_BEE_II",
+    "SUPREME_ACCELERATION_BEE_III",
+    "SUPREME_ACCELERATION_BEE_IV"
+   ]
+  },
+  "FoxyMachines": {
+   "name": "FoxyMachines",
+   "n_items": 452,
+   "pct_of_total": 2.827,
+   "ids_sha256": "16f73fa2690d3d5f1382309bd6e668f098c0fb92fe0b6aa3d252f58ef5050bd7",
+   "groups_by_dump_group_addon": [
+    "foxymachines:bosses",
+    "foxymachines:foxy_machines",
+    "foxymachines:ghost_blocks",
+    "foxymachines:machines",
+    "foxymachines:materials",
+    "foxymachines:sacrificial_altars",
+    "foxymachines:tools",
+    "foxymachines:weapons_and_armors"
+   ],
+   "groups_used_by_items": {
+    "foxymachines:ghost_blocks": 376,
+    "foxymachines:materials": 29,
+    "foxymachines:tools": 15,
+    "foxymachines:sacrificial_altars": 13,
+    "foxymachines:weapons_and_armors": 9,
+    "foxymachines:machines": 6,
+    "foxymachines:bosses": 4
+   },
+   "researches_of_items": [
+    "foxymachines:acri_arcum",
+    "foxymachines:armor",
+    "foxymachines:armor_frame",
+    "foxymachines:berry_bush_trimmer",
+    "foxymachines:blood_infused_skull",
+    "foxymachines:bloody_bucket",
+    "foxymachines:boosted_rail",
+    "foxymachines:build_wands",
+    "foxymachines:chunk_loader",
+    "foxymachines:compressed_sponge",
+    "foxymachines:demonic_plate",
+    "foxymachines:electric_fire_staffs",
+    "foxymachines:electric_gold_refinery",
+    "foxymachines:electric_wind_staff",
+    "foxymachines:equanimous_gem",
+    "foxymachines:fishing_materials",
+    "foxymachines:forcefield_dome",
+    "foxymachines:forcefield_materials",
+    "foxymachines:ghost_block_remover",
+    "foxymachines:headless_horseman",
+    "foxymachines:healing_bow",
+    "foxymachines:improvement_core",
+    "foxymachines:improvement_forge",
+    "foxymachines:ingots",
+    "foxymachines:magic_lumps",
+    "foxymachines:nuclear_salt",
+    "foxymachines:pixie_dust",
+    "foxymachines:pixie_queen",
+    "foxymachines:poseidons_fishing_rod",
+    "foxymachines:potion_mixer",
+    "foxymachines:purified_bone",
+    "foxymachines:reinforced_string",
+    "foxymachines:remote_controller",
+    "foxymachines:sacrificial_altar",
+    "foxymachines:sacrificial_altar_drops",
+    "foxymachines:stabilized_blistering_block",
+    "foxymachines:swords",
+    "foxymachines:ultimate_sword",
+    "foxymachines:unbreakable_rune",
+    "foxymachines:vile_seeds",
+    "foxymachines:wireless_transmitter"
+   ],
+   "n_researches_of_items": 41,
+   "items_with_research": 74,
+   "classes": {
+    "GhostBlock": 376,
+    "SimpleMaterial": 34,
+    "SacrificialAltarPiece": 4,
+    "SlimefunArmorPiece": 4,
+    "BoostedRail": 4,
+    "SlimefunItem": 3,
+    "SimpleConsumable": 2,
+    "ShardMaterial": 2,
+    "CustomMobSpawnEgg": 2,
+    "SimpleRadioactiveMaterial": 1,
+    "SacrificialAltarPressurePlate": 1,
+    "UnbreakableRune": 1,
+    "ElectricWindStaff": 1,
+    "ElectricFireStaff": 1,
+    "ElectricFireStaffII": 1,
+    "HealingBow": 1,
+    "CursedSword": 1,
+    "CelestialSword": 1,
+    "Elucidator": 1,
+    "ImprovementForge": 1,
+    "PotionMixer": 1,
+    "ElectricGoldRefinery": 1,
+    "ChunkLoader": 1,
+    "BerryBushTrimmer": 1,
+    "GhostBlockRemover": 1,
+    "ForcefieldDome": 1,
+    "RemoteController": 1,
+    "PositionSelector": 1,
+    "FillWand": 1,
+    "SpongeWand": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 409,
+    "slimefun:ancient_altar": 14,
+    "foxymachines:sacrificial_altar": 8,
+    "slimefun:smeltery": 5,
+    "slimefun:armor_forge": 4,
+    "slimefun:compressor": 3,
+    "slimefun:magic_workbench": 2,
+    "slimefun:grind_stone": 2,
+    "foxymachines:mob_drop": 2,
+    "foxymachines:quest": 2,
+    "foxymachines:fishing": 1
+   },
+   "energy_components": 4,
+   "energy_types": {
+    "CONSUMER": 4
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "GHOST",
+     377
+    ],
+    [
+     "GHOST_BLOCK",
+     377
+    ]
+   ],
+   "sample_ids": [
+    "ACRI_ARCUM",
+    "AQUATIC_HELMET",
+    "AQUATIC_NETHERITE_INGOT",
+    "BERRY_BUSH_TRIMMER",
+    "BLOOD"
+   ]
+  },
+  "CrystamaeHistoria": {
+   "name": "CrystamaeHistoria",
+   "n_items": 319,
+   "pct_of_total": 1.995,
+   "ids_sha256": "62494c9c2fa47506fbfee5b9aa1da535de992cbca8c115eae5a175956b5a8a19",
+   "groups_by_dump_group_addon": [
+    "crystamaehistoria:art",
+    "crystamaehistoria:crystals",
+    "crystamaehistoria:dummy",
+    "crystamaehistoria:exalted",
+    "crystamaehistoria:gadgets",
+    "crystamaehistoria:guide",
+    "crystamaehistoria:main",
+    "crystamaehistoria:materials",
+    "crystamaehistoria:mechanisms",
+    "crystamaehistoria:runes",
+    "crystamaehistoria:tools",
+    "crystamaehistoria:uniques"
+   ],
+   "groups_used_by_items": {
+    "crystamaehistoria:crystals": 54,
+    "netheopoiesis:seeds": 45,
+    "crystamaehistoria:gadgets": 41,
+    "crystamaehistoria:art": 36,
+    "crystamaehistoria:tools": 32,
+    "crystamaehistoria:materials": 30,
+    "crystamaehistoria:runes": 26,
+    "crystamaehistoria:mechanisms": 17,
+    "crystamaehistoria:exalted": 11,
+    "crystamaehistoria:uniques": 10,
+    "crystamaehistoria:dummy": 9,
+    "crystamaehistoria:guide": 8
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "Crystal": 63,
+    "HarvestableSeed": 45,
+    "UnplaceableBlock": 42,
+    "BasicPaintbrush": 32,
+    "SlimefunItem": 21,
+    "Trophy": 10,
+    "CrystamageSatchel": 6,
+    "MysteriousTicker": 6,
+    "ChroniclerPanel": 5,
+    "RealisationAltar": 5,
+    "LiquefactionBasin": 5,
+    "LuminescenceScoop": 4,
+    "MobMat": 4,
+    "MobCandle": 4,
+    "Stave": 3,
+    "BalmySponge": 3,
+    "MobLamp": 3,
+    "MobFan": 3,
+    "CursedEarth": 3,
+    "ExpCollector": 3,
+    "GreenHouseGlass": 3,
+    "SpiritualSilken": 2,
+    "Displacer": 2,
+    "BlockVeil": 2,
+    "EnderInhibitor": 2,
+    "FragmentedVoid": 2,
+    "ExaltedBeacon": 2,
+    "ExaltedFertilityPharo": 2,
+    "ExaltedHarvester": 2,
+    "ExaltedTime": 2,
+    "ExaltedWeather": 2,
+    "PowderedEssence": 1,
+    "StaveConfigurator": 1,
+    "PrismaticGilder": 1,
+    "ChargedPlate": 1,
+    "BlankPlate": 1,
+    "RefactingLens": 1,
+    "ThaumaturgicSalt": 1,
+    "RecallingCrystaLattice": 1,
+    "EphemeralCraftingTable": 1,
+    "EphemeralWorkBench": 1,
+    "ConnectingCompass": 1,
+    "SleepingBag": 1,
+    "DisplacedVoid": 1,
+    "MobTrap": 1,
+    "MysteriousTickerNoInteraction": 1,
+    "TrophyDisplay": 1,
+    "ExaltationStand": 1,
+    "Waystone": 1,
+    "AngelBlock": 1,
+    "PhilosophersSpray": 1,
+    "GlassOfMilk": 1,
+    "InfinitePaintbrush": 1,
+    "ImbuedStand": 1,
+    "PoseChanger": 1,
+    "PoseCloner": 1,
+    "ExaltedSeaBreeze": 1
+   },
+   "recipe_types": {
+    "crystamaehistoria:l_d_c": 88,
+    "crystamaehistoria:r_d_c": 64,
+    "slimefun:enhanced_crafting_table": 48,
+    "netheopoiesis:plant_breeding": 45,
+    "slimefun:magic_workbench": 33,
+    "slimefun:ancient_altar": 26,
+    "crystamaehistoria:guide": 8,
+    "slimefun:smeltery": 6,
+    "crystamaehistoria:nether_draining": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 117,
+   "id_prefixes": [
+    [
+     "CRY",
+     319
+    ],
+    [
+     "CRY_CRYSTAL",
+     68
+    ],
+    [
+     "CRY_BRUSH",
+     33
+    ]
+   ],
+   "sample_ids": [
+    "CRY_ALCHEMICAL_COMMON_SEED",
+    "CRY_ALCHEMICAL_EPIC_SEED",
+    "CRY_ALCHEMICAL_MYTHICAL_SEED",
+    "CRY_ALCHEMICAL_RARE_SEED",
+    "CRY_ALCHEMICAL_UNCOMMON_SEED"
+   ]
+  },
+  "Netheopoiesis": {
+   "name": "Netheopoiesis",
+   "n_items": 273,
+   "pct_of_total": 1.708,
+   "ids_sha256": "4758d20e2917d52f2db238e58e4090c64435e990099e455a60c816cb7cdc9833",
+   "groups_by_dump_group_addon": [
+    "netheopoiesis:crafting",
+    "netheopoiesis:crux",
+    "netheopoiesis:main",
+    "netheopoiesis:netheo-balls",
+    "netheopoiesis:pastes",
+    "netheopoiesis:seeds",
+    "netheopoiesis:tools"
+   ],
+   "groups_used_by_items": {
+    "netheopoiesis:pastes": 122,
+    "netheopoiesis:seeds": 73,
+    "netheopoiesis:netheo-balls": 35,
+    "netheopoiesis:crafting": 18,
+    "netheopoiesis:tools": 13,
+    "netheopoiesis:crux": 12
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "Paste": 122,
+    "NetheoBall": 35,
+    "HarvestableSeed": 22,
+    "EntitySpawningSeed": 21,
+    "SlimefunItem": 18,
+    "NetherCrux": 11,
+    "DroppingSeed": 9,
+    "GenericTickingSeed": 8,
+    "BiomeSpreadingSeed": 6,
+    "CruxSpreadingSeed": 4,
+    "BeaconSiphoningBlock": 3,
+    "HarvestingTool": 2,
+    "Analyser": 2,
+    "CrystallineCrux": 1,
+    "UnplaceableBlock": 1,
+    "PurificationBarometer": 1,
+    "PurificationScanner": 1,
+    "MixingQuartz": 1,
+    "EnderCake": 1,
+    "NetherBeacon": 1,
+    "PurificationSeed": 1,
+    "WetSeed": 1,
+    "DoNothingSeed": 1
+   },
+   "recipe_types": {
+    "netheopoiesis:crushing": 122,
+    "netheopoiesis:plant_breeding": 72,
+    "netheopoiesis:netheo-mixing": 35,
+    "netheopoiesis:piglin-trade": 13,
+    "netheopoiesis:nether_purification": 12,
+    "slimefun:enhanced_crafting_table": 12,
+    "slimefun:magic_workbench": 3,
+    "netheopoiesis:plant_harvest": 1,
+    "slimefun:ore_crusher": 1,
+    "slimefun:ancient_altar": 1,
+    "netheopoiesis:vanilla_block_drop": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 120,
+   "id_prefixes": [
+    [
+     "NPS",
+     273
+    ],
+    [
+     "NPS_PASTE",
+     122
+    ],
+    [
+     "NPS_PASTE_CRY",
+     45
+    ],
+    [
+     "NPS_NETHEO",
+     35
+    ],
+    [
+     "NPS_NETHEO_BALL",
+     35
+    ]
+   ],
+   "sample_ids": [
+    "NPS_ADDON_BERRY",
+    "NPS_ADDON_BERRY_SEED",
+    "NPS_ADDON_JAM",
+    "NPS_BARTERED_SEED",
+    "NPS_BASIC_PURIFIED_NETHERRACK"
+   ]
+  },
+  "ExoticGarden": {
+   "name": "ExoticGarden",
+   "n_items": 264,
+   "pct_of_total": 1.651,
+   "ids_sha256": "a1f6cadc1db4abadd0dfd7fcb62d36e7cdb197191ccfa34ea8af576cd9579942",
+   "groups_by_dump_group_addon": [
+    "exoticgarden:drinks",
+    "exoticgarden:food",
+    "exoticgarden:magical_crops",
+    "exoticgarden:misc",
+    "exoticgarden:parent_category",
+    "exoticgarden:plants_and_fruits"
+   ],
+   "groups_used_by_items": {
+    "exoticgarden:food": 105,
+    "exoticgarden:plants_and_fruits": 67,
+    "exoticgarden:drinks": 42,
+    "exoticgarden:magical_crops": 38,
+    "exoticgarden:misc": 12
+   },
+   "researches_of_items": [
+    "exoticgarden:kitchen"
+   ],
+   "n_researches_of_items": 1,
+   "items_with_research": 1,
+   "classes": {
+    "CustomFood": 108,
+    "BonemealableItem": 52,
+    "Juice": 39,
+    "ExoticGardenFruit": 33,
+    "MagicalEssence": 19,
+    "SlimefunItem": 10,
+    "Kitchen": 1,
+    "Crook": 1,
+    "GrassSeeds": 1
+   },
+   "recipe_types": {
+    "exoticgarden:kitchen": 108,
+    "slimefun:enhanced_crafting_table": 63,
+    "exoticgarden:breaking_grass": 34,
+    "exoticgarden:harvest_bush": 22,
+    "slimefun:juicer": 21,
+    "exoticgarden:harvest_tree": 11,
+    "slimefun:grind_stone": 4,
+    "slimefun:multiblock": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [],
+   "sample_ids": [
+    "ALUMINUM_ESSENCE",
+    "ALUMINUM_PLANT",
+    "APPLE_PEAR_CAKE",
+    "BACON",
+    "BACON_BURGER"
+   ]
+  },
+  "FNAmplifications": {
+   "name": "FNAmplifications",
+   "n_items": 193,
+   "pct_of_total": 1.207,
+   "ids_sha256": "84250db52265af1933f374c4833641d8317d95f04dbc367728e8087c057e22c7",
+   "groups_by_dump_group_addon": [
+    "fnamplifications:fn_gears",
+    "fnamplifications:fn_gems",
+    "fnamplifications:fn_items",
+    "fnamplifications:fn_misc",
+    "fnamplifications:fn_quivers",
+    "fnamplifications:fn_staffs",
+    "fnamplifications:machinery",
+    "fnamplifications:machinery_items",
+    "fnamplifications:magical_items",
+    "fnamplifications:material_generators",
+    "fnamplifications:material_generators_upgrades",
+    "fnamplifications:metal_scrap_recipes",
+    "fnamplifications:multiblock",
+    "fnamplifications:mystery_sticks",
+    "fnamplifications:power_generators",
+    "fnamplifications:solar_generators"
+   ],
+   "groups_used_by_items": {
+    "fnamplifications:fn_gems": 41,
+    "fnamplifications:material_generators": 21,
+    "fnamplifications:machinery_items": 19,
+    "fnamplifications:machinery": 19,
+    "fnamplifications:fn_staffs": 19,
+    "fnamplifications:magical_items": 13,
+    "fnamplifications:power_generators": 12,
+    "fnamplifications:mystery_sticks": 11,
+    "fnamplifications:solar_generators": 8,
+    "fnamplifications:metal_scrap_recipes": 7,
+    "fnamplifications:multiblock": 7,
+    "fnamplifications:fn_misc": 6,
+    "fnamplifications:fn_gears": 4,
+    "fnamplifications:fn_quivers": 4,
+    "fnamplifications:material_generators_upgrades": 2
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "UnplaceableBlock": 39,
+    "CustomPowerGen": 12,
+    "CustomBrokenGenerator": 10,
+    "CustomMaterialGenerator": 10,
+    "CustomSolarGen": 8,
+    "ElectricBlockBreaker": 3,
+    "ElectricCompressor": 3,
+    "ElectricIngotCondenser": 3,
+    "ElectricRecycler": 3,
+    "ElectricTransformer": 3,
+    "ElectricJukebox": 3,
+    "SlimefunItem": 2,
+    "FnAssemblyStation": 1,
+    "FnScrapRecycler": 1,
+    "FnMagicAltar": 1,
+    "ElectricMachineDowngrader": 1,
+    "ArmorImpairGem": 1,
+    "AxeThrowieGem": 1,
+    "BlindBindGem": 1,
+    "DamnationGem": 1,
+    "HastyGem": 1,
+    "ImpostorGem": 1,
+    "InfernoGem": 1,
+    "PsychokinesisGem": 1,
+    "RetaliateGem": 1,
+    "TelepathyGem": 1,
+    "ThornAwayGem": 1,
+    "ThunderBoltGem": 1,
+    "TriSwordGem": 1,
+    "GuardianGem": 1,
+    "DisruptedGem": 1,
+    "ArrowAvertGem": 1,
+    "DeberserkGem": 1,
+    "ParryGem": 1,
+    "StoutGem": 1,
+    "AdamantineGem": 1,
+    "AwakenGem": 1,
+    "AvengeGem": 1,
+    "AchillesHeelGem": 1,
+    "DisarmorGem": 1,
+    "DisarmGem": 1,
+    "SmokeCriminalGem": 1,
+    "LifestealGem": 1,
+    "AtrohpyGem": 1,
+    "BaneGem": 1,
+    "SedateGem": 1,
+    "DecrepitGem": 1,
+    "DeceptionGem": 1,
+    "CelerityGem": 1,
+    "ShockwaveGem": 1,
+    "BerserkGem": 1,
+    "FlawlessUnbindGem": 1,
+    "PreciousUnbindGem": 1,
+    "BlemishedUnbindGem": 1,
+    "DamagedUnbindGem": 1,
+    "FnGemAltar": 1,
+    "FnGemUpgrader": 1,
+    "FnGemDowngrader": 1,
+    "FnBoots": 1,
+    "FnChestPlate": 1,
+    "FnHelmet": 1,
+    "FnLeggings": 1,
+    "MysteryStick": 1,
+    "MysteryStick2": 1,
+    "MysteryStick3": 1,
+    "MysteryStick4": 1,
+    "MysteryStick5": 1,
+    "MysteryStick6": 1,
+    "MysteryStick7": 1,
+    "MysteryStick8": 1,
+    "MysteryStick9": 1,
+    "MysteryStick10": 1,
+    "MysteryStick11": 1,
+    "FnMysteryStickAltar": 1,
+    "StaffOfAirStrider": 1,
+    "StaffOfAwareness": 1,
+    "StaffOfConfusion": 1,
+    "StaffOfDeepFreeze": 1,
+    "StaffOfExplosion": 1,
+    "StaffOfFangs": 1,
+    "StaffOfForce": 1,
+    "StaffOfGravitationalPull": 1,
+    "StaffOfHealing": 1,
+    "StaffOfHellFire": 1,
+    "StaffOfInvisibility": 1,
+    "StaffOfInvulnerability": 1,
+    "StaffOfLocomotion": 1,
+    "StaffOfMinerals": 1,
+    "StaffOfMuster": 1,
+    "StaffOfSkulls": 1,
+    "StaffOfStallion": 1,
+    "StaffOfTeleportation": 1,
+    "StaffOfWebs": 1,
+    "Quiver": 1,
+    "SpectralQuiver": 1,
+    "UpgradedQuiver": 1,
+    "UpgradedSpectralQuiver": 1,
+    "FnHoe": 1,
+    "FnHoeAutoPlant": 1,
+    "BlockRotator": 1,
+    "AutoLadder": 1,
+    "OrientPearl": 1,
+    "ThrowableTorch": 1,
+    "CustomGeneratorMultiblock": 1,
+    "RepairItem": 1,
+    "FastProduce": 1
+   },
+   "recipe_types": {
+    "fnamplifications:fn_assembly_station": 76,
+    "fnamplifications:fn_gem_altar": 40,
+    "slimefun:enhanced_crafting_table": 36,
+    "fnamplifications:fn_magic_altar": 12,
+    "fnamplifications:fn_mystery_stick_altar": 11,
+    "slimefun:multiblock": 8,
+    "fnamplifications:fn_scrap_recycler": 7,
+    "fnamplifications:fn_fal_downgrader": 1,
+    "fnamplifications:fn_gem_upgrader": 1,
+    "fnamplifications:fn_gem_downgrader": 1
+   },
+   "energy_components": 39,
+   "energy_types": {
+    "CONSUMER": 19,
+    "GENERATOR": 20
+   },
+   "items_with_machine_recipes": 13,
+   "disabled": 0,
+   "items_without_recipe": 1,
+   "id_prefixes": [
+    [
+     "FN",
+     172
+    ],
+    [
+     "FN_GEM",
+     45
+    ],
+    [
+     "FN_MACHINERY",
+     25
+    ],
+    [
+     "FMG",
+     21
+    ],
+    [
+     "FMG_GENERATOR",
+     21
+    ]
+   ],
+   "sample_ids": [
+    "FMG_GENERATOR_AMETHYST",
+    "FMG_GENERATOR_AMETHYST_BROKEN",
+    "FMG_GENERATOR_BONE",
+    "FMG_GENERATOR_BONE_BROKEN",
+    "FMG_GENERATOR_CLAY"
+   ]
+  },
+  "SlimeFrame": {
+   "name": "SlimeFrame",
+   "n_items": 178,
+   "pct_of_total": 1.113,
+   "ids_sha256": "b654e4cb8450322ce51580a08ff60799b9d744eddbe35110448dd01ef9e85ce5",
+   "groups_by_dump_group_addon": [
+    "slimeframe:wf_axi",
+    "slimeframe:wf_gear",
+    "slimeframe:wf_generators",
+    "slimeframe:wf_lith",
+    "slimeframe:wf_machines",
+    "slimeframe:wf_main",
+    "slimeframe:wf_meso",
+    "slimeframe:wf_multiblocks",
+    "slimeframe:wf_neo",
+    "slimeframe:wf_parts",
+    "slimeframe:wf_relics",
+    "slimeframe:wf_resources",
+    "slimeframe:wf_utils"
+   ],
+   "groups_used_by_items": {
+    "slimeframe:wf_parts": 48,
+    "slimeframe:wf_resources": 46,
+    "slimeframe:wf_machines": 43,
+    "slimeframe:wf_generators": 10,
+    "slimeframe:wf_utils": 10,
+    "slimeframe:wf_lith": 4,
+    "slimeframe:wf_meso": 4,
+    "slimeframe:wf_neo": 4,
+    "slimeframe:wf_axi": 4,
+    "slimeframe:wf_gear": 4,
+    "slimeframe:wf_multiblocks": 1
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "Component": 48,
+    "Relic": 16,
+    "Resource": 10,
+    "CumulativeGenerator": 10,
+    "SpecialOre": 9,
+    "AlloyIngot": 9,
+    "SlimefunItem": 9,
+    "MobDropItem": 4,
+    "CryogenicArmorPiece": 4,
+    "RadioactiveItem": 3,
+    "ArtificialMangrove": 3,
+    "BasaltGenerator": 3,
+    "ChunkEater": 3,
+    "ConcreteGenerator": 3,
+    "CryoticExtractor": 3,
+    "DustGenerator": 3,
+    "FlowerGenerator": 3,
+    "GlassGenerator": 3,
+    "Putrifier": 3,
+    "SulfateProducer": 3,
+    "TerracottaGenerator": 3,
+    "TreePeeler": 3,
+    "WoolGenerator": 3,
+    "NosamPick": 3,
+    "OrokinWand": 2,
+    "Foundry": 1,
+    "Cryotic": 1,
+    "CoolantCanister": 1,
+    "AutoTrader": 1,
+    "Recycler": 1,
+    "TelluriumFragmentsSynthesizer": 1,
+    "ThermiaExtractor": 1,
+    "MerchantSoulContract": 1,
+    "InputConfigurator": 1,
+    "SelectorConfigurator": 1,
+    "ItemProjector": 1,
+    "EnergyCentral": 1
+   },
+   "recipe_types": {
+    "slimeframe:foundry_recipe": 54,
+    "slimeframe:prime_component_reward": 48,
+    "slimefun:enhanced_crafting_table": 22,
+    "slimeframe:ores_recipe": 9,
+    "slimefun:smeltery": 9,
+    "slimeframe:mob_drop_recipe": 5,
+    "slimeframe:lith_recipe": 4,
+    "slimeframe:meso_recipe": 4,
+    "slimeframe:neo_recipe": 4,
+    "slimeframe:axi_recipe": 4,
+    "slimefun:armor_forge": 4,
+    "slimefun:ancient_altar": 4,
+    "slimeframe:recycler_recipe": 2,
+    "slimefun:multiblock": 1,
+    "slimeframe:cryotic_recipe": 1,
+    "slimeframe:thermia_extractor_recipe": 1,
+    "slimeframe:tellurium_frags_recipe": 1,
+    "slimefun:magic_workbench": 1
+   },
+   "energy_components": 53,
+   "energy_types": {
+    "CONSUMER": 43,
+    "GENERATOR": 10
+   },
+   "items_with_machine_recipes": 28,
+   "disabled": 0,
+   "items_without_recipe": 79,
+   "id_prefixes": [
+    [
+     "WF",
+     178
+    ]
+   ],
+   "sample_ids": [
+    "WF_ADRAMALIUM",
+    "WF_ADRAMAL_ALLOY",
+    "WF_ADRAMAL_ALLOY_PLATE",
+    "WF_ARCANE_FLUX_DYNAMO",
+    "WF_ARGON_CRYSTAL"
+   ]
+  },
+  "DrakesNanotech": {
+   "name": "DrakesNanotech",
+   "n_items": 158,
+   "pct_of_total": 0.988,
+   "ids_sha256": "998c0193f3a27452de10b424cb6a8f4e892386d906bc16b45e4ccc929f37604f",
+   "groups_by_dump_group_addon": [
+    "drakesnanotech:nanotech"
+   ],
+   "groups_used_by_items": {
+    "drakesnanotech:nanotech": 158
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SlimefunItem": 140,
+    "NanotechPoweredMachine": 14,
+    "StarkStorageBlock": 3,
+    "UniversalAutomationAI": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 158
+   },
+   "energy_components": 15,
+   "energy_types": {
+    "CONSUMER": 15
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [],
+   "sample_ids": [
+    "ANTI_GRAVITON_PROJECTOR",
+    "ARC_CONTAINMENT_PYLON",
+    "ARC_POWER_BUS",
+    "ARC_REACTOR_CORE",
+    "ARMOR_ASSEMBLY_BENCH"
+   ]
+  },
+  "InfinityExpansion": {
+   "name": "InfinityExpansion",
+   "n_items": 156,
+   "pct_of_total": 0.976,
+   "ids_sha256": "deabb234bd240ffc09f832a37706cad8f38d1cbb01b93466d132dcf948b3b464",
+   "groups_by_dump_group_addon": [
+    "infinityexpansion:advanced_machines",
+    "infinityexpansion:basic_machines",
+    "infinityexpansion:infinity_cheat",
+    "infinityexpansion:infinity_materials",
+    "infinityexpansion:infinity_recipes",
+    "infinityexpansion:main",
+    "infinityexpansion:main_materials",
+    "infinityexpansion:mob_simulation",
+    "infinityexpansion:storage"
+   ],
+   "groups_used_by_items": {
+    "infinityexpansion:main_materials": 36,
+    "infinityexpansion:advanced_machines": 34,
+    "infinityexpansion:infinity_cheat": 27,
+    "infinityexpansion:mob_simulation": 22,
+    "infinityexpansion:infinity_materials": 19,
+    "infinityexpansion:basic_machines": 10,
+    "infinityexpansion:storage": 6,
+    "infinityexpansion:infinity_recipes": 2
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SlimefunItem": 26,
+    "MobDataCard": 19,
+    "Singularity": 17,
+    "GrowingMachine": 9,
+    "EnergyGenerator": 9,
+    "MachineBlock": 8,
+    "Oscillator": 5,
+    "InfinityTool": 5,
+    "StorageUnit": 5,
+    "MaterialGenerator": 4,
+    "Quarry": 4,
+    "LaserLens": 4,
+    "InfinityArmor": 4,
+    "Strainer": 3,
+    "VoidHarvester": 2,
+    "SingularityConstructor": 2,
+    "Capacitor": 2,
+    "ChargingBench": 2,
+    "MobSimulationChamber": 1,
+    "MobDataInfuser": 1,
+    "EnderEssence": 1,
+    "WitherProofBlock": 1,
+    "HardenedGlass": 1,
+    "StoneworksFactory": 1,
+    "ResourceSynthesizer": 1,
+    "PoweredBedrock": 1,
+    "GearTransformer": 1,
+    "GeoQuarry": 1,
+    "LaserExcavator": 1,
+    "InfinityBow": 1,
+    "InfinityMatrix": 1,
+    "VeinMinerRune": 1,
+    "StrainerBase": 1,
+    "AdvancedAnvil": 1,
+    "InfinityWorkbench": 1,
+    "StorageForge": 1,
+    "InfinityReactor": 1,
+    "SlimefunExtension$1": 1,
+    "SlimefunExtension$2": 1,
+    "SlimefunExtension$3": 1,
+    "SlimefunExtension$4": 1,
+    "GEOMiner": 1,
+    "SlimefunExtension$5": 1,
+    "ElectricSmeltery": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 72,
+    "infinityexpansion:infinity_forge": 29,
+    "infinityexpansion:mob_data_infuser": 19,
+    "infinityexpansion:singularity_constructor": 17,
+    "slimefun:smeltery": 10,
+    "infinityexpansion:storage_forge": 5,
+    "slimefun:magic_workbench": 2,
+    "slimefun:geo_miner": 1,
+    "infinityexpansion:void_harvester": 1
+   },
+   "energy_components": 60,
+   "energy_types": {
+    "CONSUMER": 47,
+    "GENERATOR": 11,
+    "CAPACITOR": 2
+   },
+   "items_with_machine_recipes": 1,
+   "disabled": 0,
+   "items_without_recipe": 2,
+   "id_prefixes": [
+    [
+     "INFINITY",
+     27
+    ]
+   ],
+   "sample_ids": [
+    "ADAMANTITE",
+    "ADVANCED_ANVIL",
+    "ADVANCED_CHARGER",
+    "ADVANCED_COBBLE_GEN",
+    "ADVANCED_DISENCHANTER"
+   ]
+  },
+  "SoulJars": {
+   "name": "SoulJars",
+   "n_items": 130,
+   "pct_of_total": 0.813,
+   "ids_sha256": "7bd931411c1fedf5b9749a008a6a5d014cd3a62f137e87f65beae422fda9fbf3",
+   "groups_by_dump_group_addon": [
+    "souljars:soul_jars"
+   ],
+   "groups_used_by_items": {
+    "souljars:soul_jars": 130
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SlimefunItem": 44,
+    "UnplaceableBlock": 43,
+    "FilledJar": 43
+   },
+   "recipe_types": {
+    "souljars:mob_killing": 86,
+    "slimefun:ancient_altar": 44
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "FILLED",
+     43
+    ]
+   ],
+   "sample_ids": [
+    "BLAZE_BROKEN_SPAWNER",
+    "BLAZE_SOUL_JAR",
+    "CAVE_SPIDER_BROKEN_SPAWNER",
+    "CAVE_SPIDER_SOUL_JAR",
+    "CHICKEN_BROKEN_SPAWNER"
+   ]
+  },
+  "ElementManipulation": {
+   "name": "ElementManipulation",
+   "n_items": 126,
+   "pct_of_total": 0.788,
+   "ids_sha256": "24e17e55bb05d267628a22192210a590437fac2ced61b1e506496f93aa1f6e9f",
+   "groups_by_dump_group_addon": [
+    "elementmanipulation:em_elements",
+    "elementmanipulation:em_machines",
+    "elementmanipulation:em_main",
+    "elementmanipulation:em_misc",
+    "elementmanipulation:junction_category",
+    "elementmanipulation:junction_cheat"
+   ],
+   "groups_used_by_items": {
+    "elementmanipulation:em_elements": 85,
+    "elementmanipulation:junction_cheat": 33,
+    "elementmanipulation:em_misc": 5,
+    "elementmanipulation:em_machines": 3
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "ChemicalElements": 74,
+    "Item": 30,
+    "WaterReactiveElement": 6,
+    "UnplaceableBlock": 4,
+    "MultiOutputItem": 3,
+    "Oxygen": 1,
+    "Nitrogen": 1,
+    "Helium": 1,
+    "Neon": 1,
+    "Radon": 1,
+    "Deconstructor": 1,
+    "JunctionTable": 1,
+    "RockAnalyzer": 1,
+    "SlimefunItem": 1
+   },
+   "recipe_types": {
+    "elementmanipulation:em_deconstructor_recipetype": 85,
+    "elementmanipulation:em_junction_table": 33,
+    "slimefun:enhanced_crafting_table": 4,
+    "slimefun:smeltery": 4
+   },
+   "energy_components": 3,
+   "energy_types": {
+    "CONSUMER": 3
+   },
+   "items_with_machine_recipes": 2,
+   "disabled": 0,
+   "items_without_recipe": 85,
+   "id_prefixes": [
+    [
+     "EM",
+     125
+    ]
+   ],
+   "sample_ids": [
+    "EM_ALUMINUM",
+    "EM_ANTIMONY",
+    "EM_APPLE",
+    "EM_ARGON",
+    "EM_ARSENIC"
+   ]
+  },
+  "DynaTech": {
+   "name": "DynaTech",
+   "n_items": 123,
+   "pct_of_total": 0.769,
+   "ids_sha256": "8efd69f2420fc49b92f7399ddb004e4d91421b499c8eca5a25c5cceec3d3161c",
+   "groups_by_dump_group_addon": [
+    "dynatech:apiaries",
+    "dynatech:experimental",
+    "dynatech:general",
+    "dynatech:generators",
+    "dynatech:machines",
+    "dynatech:resources",
+    "dynatech:tools"
+   ],
+   "groups_used_by_items": {
+    "dynatech:apiaries": 36,
+    "dynatech:experimental": 36,
+    "dynatech:machines": 24,
+    "dynatech:resources": 11,
+    "dynatech:tools": 11,
+    "dynatech:generators": 3,
+    "infinityexpansion:mob_simulation": 2
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "MineralizedApiary": 36,
+    "SlimefunItem": 17,
+    "UnplaceableBlock": 7,
+    "LiquidContainerItem": 4,
+    "Bee": 3,
+    "ItemBand": 2,
+    "MobDataCard": 2,
+    "WaterMill": 2,
+    "WindMill": 2,
+    "EggMill": 2,
+    "VexGem": 1,
+    "StarDustMeteor": 1,
+    "MobDropItem": 1,
+    "PicnicBasket": 1,
+    "SoulboundPicnicBacket": 1,
+    "ElectricalStimulator": 1,
+    "AngelGem": 1,
+    "Scoop": 1,
+    "DimensionalHome": 1,
+    "TesseractBinder": 1,
+    "WitherGolem": 1,
+    "KitchenAutoCrafter": 1,
+    "GrowthChamber": 1,
+    "GrowthChamberMK2": 1,
+    "GrowthChamberEnd": 1,
+    "GrowthChamberEndMK2": 1,
+    "GrowthChamberNether": 1,
+    "GrowthChamberNetherMK2": 1,
+    "GrowthChamberOcean": 1,
+    "GrowthChamberOceanMK2": 1,
+    "AntigravityBubble": 1,
+    "WeatherController": 1,
+    "PotionSprinkler": 1,
+    "BarbedWire": 1,
+    "MaterialHive": 1,
+    "WirelessCharger": 1,
+    "SeedPlucker": 1,
+    "BandaidManager": 1,
+    "Orechid": 1,
+    "WirelessEnergyBank": 1,
+    "WirelessEnergyPoint": 1,
+    "WirelessItemInput": 1,
+    "WirelessItemOutput": 1,
+    "Tesseract": 1,
+    "FurnaceController": 1,
+    "PetalApothecary": 1,
+    "LiquidTank": 1,
+    "ChippingGenerator": 1,
+    "CulinaryGenerator": 1,
+    "StardustReactor": 1,
+    "InventoryFilter": 1,
+    "RecipeBook": 1,
+    "AutoOutputUpgrade": 1,
+    "AutoInputUpgrade": 1,
+    "FluidTank": 1,
+    "CokeOvenController": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 81,
+    "slimefun:magic_workbench": 12,
+    "slimefun:null": 8,
+    "dynatech:block_drop": 6,
+    "slimefun:grind_stone": 3,
+    "slimefun:mob_drop": 2,
+    "slimefun:ancient_altar": 2,
+    "infinityexpansion:mob_data_infuser": 2,
+    "dynatech:orechid": 2,
+    "slimefun:geo_miner": 1,
+    "dynatech:scooping": 1,
+    "slimefun:multiblock": 1,
+    "slimefun:smeltery": 1,
+    "dynatech:ovening": 1
+   },
+   "energy_components": 69,
+   "energy_types": {
+    "CONSUMER": 57,
+    "CAPACITOR": 1,
+    "GENERATOR": 11
+   },
+   "items_with_machine_recipes": 46,
+   "disabled": 0,
+   "items_without_recipe": 9,
+   "id_prefixes": [
+    [
+     "DYNATECH",
+     120
+    ]
+   ],
+   "sample_ids": [
+    "DYNATECH_ADVANCED_MACHINE_SCRAP",
+    "DYNATECH_ADVANCED_ROBOTIC_BEE",
+    "DYNATECH_ALUMINUMMINERALIZED_APIARY",
+    "DYNATECH_ALUMINUM_BRASSMINERALIZED_APIARY",
+    "DYNATECH_ALUMINUM_BRONZEMINERALIZED_APIARY"
+   ]
+  },
+  "GeneticChickengineering": {
+   "name": "GeneticChickengineering",
+   "n_items": 104,
+   "pct_of_total": 0.651,
+   "ids_sha256": "a4bba6992e3b6d97bf52c0260301d7a4b2c01db1f2645aa9a213c01b1816eb6a",
+   "groups_by_dump_group_addon": [
+    "geneticchickengineering:genetic_chickengineering",
+    "geneticchickengineering:genetic_chickengineering_biotech",
+    "geneticchickengineering:genetic_chickengineering_chickens"
+   ],
+   "groups_used_by_items": {
+    "geneticchickengineering:genetic_chickengineering_chickens": 85,
+    "geneticchickengineering:genetic_chickengineering": 10,
+    "geneticchickengineering:genetic_chickengineering_biotech": 9
+   },
+   "researches_of_items": [
+    "geneticchickengineering:genetic_chickengineering",
+    "geneticchickengineering:genetic_chickengineering_biotech"
+   ],
+   "n_researches_of_items": 2,
+   "items_with_research": 18,
+   "classes": {
+    "PocketChicken": 86,
+    "SlimefunItem": 5,
+    "ExcitationChamber": 4,
+    "ResourceEgg": 2,
+    "ChickenNet": 1,
+    "GeneticSequencer": 1,
+    "BioCloningVat": 1,
+    "MutagenicSplicer": 1,
+    "IndustrialRoost": 1,
+    "PrivateCoop": 1,
+    "GrowthChamber": 1
+   },
+   "recipe_types": {
+    "geneticchickengineering:from_chicken": 66,
+    "geneticchickengineering:mutagenic_splicing": 21,
+    "slimefun:enhanced_crafting_table": 16,
+    "geneticchickengineering:from_net": 1
+   },
+   "energy_components": 10,
+   "energy_types": {
+    "CONSUMER": 10
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 1,
+   "id_prefixes": [
+    [
+     "GCE",
+     104
+    ]
+   ],
+   "sample_ids": [
+    "GCE_ALUMINUM_DUST_CHICKEN_ICON",
+    "GCE_ANCIENT_DEBRIS_ICON",
+    "GCE_ANDESITE_CHICKEN_ICON",
+    "GCE_BASALT_CHICKEN_ICON",
+    "GCE_BIO_CLONING_VAT"
+   ]
+  },
+  "Galaxyfun": {
+   "name": "Galaxyfun",
+   "n_items": 100,
+   "pct_of_total": 0.626,
+   "ids_sha256": "721956ff24c1c939df6d493e4d1abc4e5cd1f2a015ba6639d8ef1c0cf0ab7663",
+   "groups_by_dump_group_addon": [
+    "galactifun-drake:assembly_flex",
+    "galactifun-drake:galactic_flex",
+    "galaxyfun:blocks",
+    "galaxyfun:components",
+    "galaxyfun:equipment",
+    "galaxyfun:items",
+    "galaxyfun:machines",
+    "galaxyfun:main",
+    "galaxyfun:relics"
+   ],
+   "groups_used_by_items": {
+    "galaxyfun:components": 31,
+    "galaxyfun:items": 27,
+    "galaxyfun:machines": 23,
+    "galaxyfun:blocks": 10,
+    "galaxyfun:equipment": 7,
+    "galaxyfun:relics": 2
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SlimefunItem": 50,
+    "UnplaceableBlock": 9,
+    "SpaceSuitUpgrade": 3,
+    "SpaceSuit": 3,
+    "ChemicalRocket": 3,
+    "CoolingUnit": 3,
+    "SpaceHeater": 3,
+    "IonDisperser": 2,
+    "Relic": 2,
+    "MoonCheese": 1,
+    "OxygenFiller": 1,
+    "SpaceSuitUpgrader": 1,
+    "SpaceSuitHelmet": 1,
+    "CircuitPress": 1,
+    "AssemblyTable": 1,
+    "StargateRing": 1,
+    "StargateController": 1,
+    "LaunchPadFloor": 1,
+    "LaunchPadCore": 1,
+    "Observatory": 1,
+    "PlanetaryAnalyzer": 1,
+    "DiamondAnvil": 1,
+    "OxygenSealer": 1,
+    "AutomaticDoor": 1,
+    "ForcefieldGenerator": 1,
+    "FusionReactor": 1,
+    "AtmosphericHarvester": 1,
+    "IonRocket": 1,
+    "MachineBlock": 1,
+    "Electrolyzer": 1,
+    "TechnologicalSalvager": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 39,
+    "galactifun-drake:world_gen": 13,
+    "galaxyfun:assembly_table": 13,
+    "galactifun-drake:atmospheric_harvester": 9,
+    "slimefun:smeltery": 5,
+    "slimefun:compressor": 4,
+    "galaxyfun:circuit_press": 4,
+    "galaxyfun:diamond_anvil": 4,
+    "slimefun:armor_forge": 4,
+    "galactifun-drake:chemical_reactor": 1,
+    "slimefun:heated_pressure_chamber": 1,
+    "galactifun-drake:alien_drop": 1,
+    "slimefun:ore_crusher": 1,
+    "slimefun:multiblock": 1
+   },
+   "energy_components": 20,
+   "energy_types": {
+    "CONSUMER": 19,
+    "GENERATOR": 1
+   },
+   "items_with_machine_recipes": 3,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "ATMOSPHERIC",
+     11
+    ],
+    [
+     "ATMOSPHERIC_GAS",
+     10
+    ]
+   ],
+   "sample_ids": [
+    "ADVANCED_PROCESSING_UNIT",
+    "AIR_FILTER",
+    "ALUMINUM_COMPOSITE",
+    "ALUMINUM_COMPOSITE_SHEET",
+    "ASSEMBLY_TABLE"
+   ]
+  },
+  "SlimefunWarfare": {
+   "name": "SlimefunWarfare",
+   "n_items": 98,
+   "pct_of_total": 0.613,
+   "ids_sha256": "43f585831e0aaf2904f19db9fa71e73ea58c54c4554fb148a8d4ddd4c786d230",
+   "groups_by_dump_group_addon": [
+    "slimefunwarfare:slimefunwarfare",
+    "slimefunwarfare:slimefunwarfare_explosives",
+    "slimefunwarfare:slimefunwarfare_general",
+    "slimefunwarfare:slimefunwarfare_guns",
+    "slimefunwarfare:slimefunwarfare_machines",
+    "slimefunwarfare:slimefunwarfare_melee",
+    "slimefunwarfare:slimefunwarfare_power_suits",
+    "slimefunwarfare:slimefunwarfare_resources"
+   ],
+   "groups_used_by_items": {
+    "slimefunwarfare:slimefunwarfare_general": 25,
+    "slimefunwarfare:slimefunwarfare_power_suits": 19,
+    "slimefunwarfare:slimefunwarfare_explosives": 18,
+    "slimefunwarfare:slimefunwarfare_resources": 17,
+    "slimefunwarfare:slimefunwarfare_guns": 9,
+    "slimefunwarfare:slimefunwarfare_machines": 7,
+    "slimefunwarfare:slimefunwarfare_melee": 3
+   },
+   "researches_of_items": [
+    "slimefunwarfare:alien_metals",
+    "slimefunwarfare:energy_weapons",
+    "slimefunwarfare:i_am_iron_man",
+    "slimefunwarfare:rare_earths",
+    "slimefunwarfare:weapons_of_mass_destruction"
+   ],
+   "n_researches_of_items": 5,
+   "items_with_research": 17,
+   "classes": {
+    "SlimefunItem": 36,
+    "Module$ModuleItem": 11,
+    "Gun": 8,
+    "RareEarth": 7,
+    "Grenade": 6,
+    "Bullet": 5,
+    "PowerSuit": 4,
+    "VanillaItem": 2,
+    "Meteor": 2,
+    "ElementForge": 1,
+    "Radio": 1,
+    "UnplaceableBlock": 1,
+    "EnergyBlade": 1,
+    "Dummy": 1,
+    "BulletPress": 1,
+    "EnergyRifle": 1,
+    "AirLiquefier": 1,
+    "ExplosiveSynthesizer": 1,
+    "Boominator9000": 1,
+    "RadioactiveItem": 1,
+    "NuclearBomb": 1,
+    "IonExchangeSeparator": 1,
+    "Lanthanum": 1,
+    "MeteorAttractor": 1,
+    "ElementalReactor": 1,
+    "ModuleManipulator": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 55,
+    "slimefun:smeltery": 11,
+    "slimefunwarfare:ion_exchange_separator": 8,
+    "slimefunwarfare:bullet_factory": 5,
+    "slimefun:armor_forge": 4,
+    "slimefunwarfare:explosive_synthesizer": 3,
+    "slimefun:geo_miner": 2,
+    "slimefunwarfare:meteor_attractor": 2,
+    "slimefun:ore_crusher": 2,
+    "slimefun:null": 1,
+    "slimefun:multiblock": 1,
+    "slimefunwarfare:air_liquefier": 1,
+    "slimefun:grind_stone": 1,
+    "slimefunwarfare:boominator_9000": 1,
+    "slimefunwarfare:element_forge": 1
+   },
+   "energy_components": 6,
+   "energy_types": {
+    "CONSUMER": 5,
+    "GENERATOR": 1
+   },
+   "items_with_machine_recipes": 4,
+   "disabled": 0,
+   "items_without_recipe": 4,
+   "id_prefixes": [
+    [
+     "GUN",
+     10
+    ]
+   ],
+   "sample_ids": [
+    "ADVANCED_BARREL",
+    "AIR_LIQUEFIER",
+    "AQUAMASK",
+    "ARSENIC",
+    "ARSENIC_GRENADE"
+   ]
+  },
+  "DyedBackpacks": {
+   "name": "DyedBackpacks",
+   "n_items": 96,
+   "pct_of_total": 0.601,
+   "ids_sha256": "a04616d926e66f88751576fde0fd4539acedf0a503a71d7f4c43d9f615dc251c",
+   "groups_by_dump_group_addon": [
+    "dyedbackpacks:dyed_backpacks"
+   ],
+   "groups_used_by_items": {
+    "dyedbackpacks:dyed_backpacks": 96
+   },
+   "researches_of_items": [
+    "dyedbackpacks:dyed_backpacks"
+   ],
+   "n_researches_of_items": 1,
+   "items_with_research": 96,
+   "classes": {
+    "DyedBackpack": 96
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 96
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "DYED",
+     96
+    ],
+    [
+     "DYED_GILDED",
+     16
+    ],
+    [
+     "DYED_GILDED_BACKPACK",
+     16
+    ],
+    [
+     "DYED_LARGE",
+     16
+    ],
+    [
+     "DYED_LARGE_BACKPACK",
+     16
+    ]
+   ],
+   "sample_ids": [
+    "DYED_GILDED_BACKPACK_BLACK",
+    "DYED_GILDED_BACKPACK_BLUE",
+    "DYED_GILDED_BACKPACK_BROWN",
+    "DYED_GILDED_BACKPACK_CYAN",
+    "DYED_GILDED_BACKPACK_DARK_GRAY"
+   ]
+  },
+  "SensibleToolbox": {
+   "name": "SensibleToolbox",
+   "n_items": 88,
+   "pct_of_total": 0.55,
+   "ids_sha256": "4518dd13ed081c623cef6c5e96352a3a6198c2fd9a983068df22eddd04f81dc1",
+   "groups_by_dump_group_addon": [
+    "sensibletoolbox:blocks",
+    "sensibletoolbox:items"
+   ],
+   "groups_used_by_items": {
+    "sensibletoolbox:items": 49,
+    "sensibletoolbox:blocks": 39
+   },
+   "researches_of_items": [
+    "sensibletoolbox:stb_machines",
+    "sensibletoolbox:stb_storage",
+    "sensibletoolbox:stb_tools"
+   ],
+   "n_researches_of_items": 3,
+   "items_with_research": 88,
+   "classes": {
+    "STBSlimefunItem": 85,
+    "STBSlimefunGenerator": 3
+   },
+   "recipe_types": {
+    "minecraft:shaped": 59,
+    "minecraft:shapeless": 21,
+    "minecraft:furnace": 3,
+    "sensibletoolbox:masher": 3,
+    "sensibletoolbox:mob_drop": 1,
+    "sensibletoolbox:fermenter": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "STB",
+     88
+    ]
+   ],
+   "sample_ids": [
+    "STB_ADVANCEDMOISTURECHECKER",
+    "STB_ADVANCEDRECIPEBOOK",
+    "STB_ADVANCEDSENDERMODULE",
+    "STB_ANGELICBLOCK",
+    "STB_AUTOBUILDER"
+   ]
+  },
+  "SlimyBees": {
+   "name": "SlimyBees",
+   "n_items": 83,
+   "pct_of_total": 0.519,
+   "ids_sha256": "fd4f979f5c8a5a6761b041c0ce95785e297008cb444a7b62c7d74d35874ee22b",
+   "groups_by_dump_group_addon": [
+    "slimybees:slimybees_atlas.list",
+    "slimybees:slimybees_items"
+   ],
+   "groups_used_by_items": {
+    "slimybees:slimybees_items": 83
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "Princess": 26,
+    "Drone": 26,
+    "SlimefunItem": 8,
+    "BeeNest": 7,
+    "VanillaItem": 3,
+    "BeeHive": 2,
+    "ElectricCentrifuge": 2,
+    "ItemSetup$1": 1,
+    "ItemSetup$2": 1,
+    "ItemSetup$3": 1,
+    "ItemSetup$4": 1,
+    "UnplaceableBlock": 1,
+    "IndustrialBeeHive": 1,
+    "Centrifuge": 1,
+    "Beealyzer": 1,
+    "TomeOfDiscoverySharing": 1
+   },
+   "recipe_types": {
+    "slimybees:breeding": 52,
+    "slimefun:enhanced_crafting_table": 15,
+    "slimybees:wilderness": 7,
+    "slimybees:bee_product": 5,
+    "slimybees:sbee_centrifuge": 2,
+    "slimefun:multiblock": 1,
+    "slimefun:magic_workbench": 1
+   },
+   "energy_components": 2,
+   "energy_types": {
+    "CONSUMER": 2
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 7,
+   "id_prefixes": [],
+   "sample_ids": [
+    "ADVANCED_FRAME",
+    "AUTO_BEE_HIVE",
+    "BASIC_FRAME",
+    "BEEALYZER",
+    "BEESWAX"
+   ]
+  },
+  "NetworksV6-Drake": {
+   "name": "NetworksV6-Drake",
+   "n_items": 80,
+   "pct_of_total": 0.5,
+   "ids_sha256": "1a6c8899c5cfc0af299845707716f87b2c91101e34f90f00a1e0f55907089952",
+   "groups_by_dump_group_addon": [
+    "networksv6-drake:disabled_items",
+    "networksv6-drake:main",
+    "networksv6-drake:materials",
+    "networksv6-drake:network_items",
+    "networksv6-drake:network_quantums",
+    "networksv6-drake:tools"
+   ],
+   "groups_used_by_items": {
+    "networksv6-drake:network_items": 41,
+    "networksv6-drake:materials": 12,
+    "networksv6-drake:tools": 12,
+    "networksv6-drake:network_quantums": 9,
+    "netheopoiesis:seeds": 5,
+    "networksv6-drake:disabled_items": 1
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "UnplaceableBlock": 12,
+    "NetworkQuantumStorage": 8,
+    "NetworkPowerNode": 4,
+    "NetworkAutoCrafter": 4,
+    "NetworkRemote": 4,
+    "HarvestableSeed": 4,
+    "NetworkRake": 3,
+    "NetworkPowerOutlet": 2,
+    "NetworkController": 1,
+    "NetworkBridge": 1,
+    "NetworkMonitor": 1,
+    "NetworkInputOnlyMonitor": 1,
+    "NetworkOutputOnlyMonitor": 1,
+    "NetworkImport": 1,
+    "NetworkAdvancedImport": 1,
+    "NetworkExport": 1,
+    "NetworkAdvancedExport": 1,
+    "NetworkGrabber": 1,
+    "NetworkAdvancedGrabber": 1,
+    "NetworkPusher": 1,
+    "NetworkAdvancedPusher": 1,
+    "NetworkControlX": 1,
+    "NetworkControlV": 1,
+    "NetworkVacuum": 1,
+    "NetworkAdvancedVacuum": 1,
+    "NetworkVanillaGrabber": 1,
+    "NetworkVanillaPusher": 1,
+    "NetworkWirelessTransmitter": 1,
+    "NetworkWirelessReceiver": 1,
+    "NetworkPurger": 1,
+    "NetworkAdvancedPurger": 1,
+    "NetworkGrid": 1,
+    "NetworkCraftingGrid": 1,
+    "NetworkCell": 1,
+    "NetworkGreedyBlock": 1,
+    "NetworkAdvancedGreedyBlock": 1,
+    "NetworkQuantumWorkbench": 1,
+    "NetworkPowerDisplay": 1,
+    "NetworkEncoder": 1,
+    "NetworkCrafterMatrix": 1,
+    "CraftingBlueprint": 1,
+    "NetworkProbe": 1,
+    "NetworkCrayon": 1,
+    "NetworkConfigurator": 1,
+    "NetworkWirelessConfigurator": 1,
+    "NetworkAdminDebugger": 1,
+    "DoNothingSeed": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 66,
+    "networksv6-drake:quantum-workbench": 8,
+    "netheopoiesis:plant_breeding": 5,
+    "slimefun:null": 1
+   },
+   "energy_components": 4,
+   "energy_types": {
+    "CONSUMER": 4
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 6,
+   "id_prefixes": [
+    [
+     "NTW",
+     80
+    ],
+    [
+     "NTW_ADVANCED",
+     10
+    ],
+    [
+     "NTW_QUANTUM",
+     9
+    ],
+    [
+     "NTW_QUANTUM_STORAGE",
+     8
+    ]
+   ],
+   "sample_ids": [
+    "NTW_ADVANCED_AUTO_CRAFTER",
+    "NTW_ADVANCED_AUTO_CRAFTER_WITHHOLDING",
+    "NTW_ADVANCED_EXPORT",
+    "NTW_ADVANCED_GRABBER",
+    "NTW_ADVANCED_GREEDY_BLOCK"
+   ]
+  },
+  "MobCapturer": {
+   "name": "MobCapturer",
+   "n_items": 78,
+   "pct_of_total": 0.488,
+   "ids_sha256": "79f7c8fd0197fb8d1ae3c28b877a98a8e6d5dec947ea5bc51ab68d30b610693a",
+   "groups_by_dump_group_addon": [
+    "mobcapturer:mob_capturer",
+    "mobcapturer:mob_eggs",
+    "mobcapturer:tools"
+   ],
+   "groups_used_by_items": {
+    "mobcapturer:mob_eggs": 76,
+    "mobcapturer:tools": 2
+   },
+   "researches_of_items": [
+    "mobcapturer:mob_capturing"
+   ],
+   "n_researches_of_items": 1,
+   "items_with_research": 78,
+   "classes": {
+    "MobEgg": 76,
+    "MobPellet": 1,
+    "MobCannon": 1
+   },
+   "recipe_types": {
+    "mobcapturer:mob_capturing": 76,
+    "slimefun:enhanced_crafting_table": 2
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "MOB",
+     78
+    ],
+    [
+     "MOB_EGG",
+     76
+    ]
+   ],
+   "sample_ids": [
+    "MOB_CANNON",
+    "MOB_CAPTURING_PELLET",
+    "MOB_EGG_ALLAY",
+    "MOB_EGG_ARMADILLO",
+    "MOB_EGG_AXOLOTL"
+   ]
+  },
+  "LiteXpansion": {
+   "name": "LiteXpansion",
+   "n_items": 64,
+   "pct_of_total": 0.4,
+   "ids_sha256": "d18ae5242938335f797dd5fa54ab4882b73d334cf6c83d5e382c02beaf323756",
+   "groups_by_dump_group_addon": [
+    "litexpansion:litexpansion",
+    "litexpansion:uumatter_category"
+   ],
+   "groups_used_by_items": {
+    "litexpansion:litexpansion": 64
+   },
+   "researches_of_items": [
+    "litexpansion:casing",
+    "litexpansion:circuits",
+    "litexpansion:coal_mesh",
+    "litexpansion:does_this_even_matter",
+    "litexpansion:machine_blocks",
+    "litexpansion:machinereee",
+    "litexpansion:only_glass",
+    "litexpansion:platings",
+    "litexpansion:reinforcement_is_coming",
+    "litexpansion:sanitizing_foots",
+    "litexpansion:solar_helmets",
+    "litexpansion:super_hot_fire",
+    "litexpansion:superalloys",
+    "litexpansion:the_better_panel",
+    "litexpansion:triple_a",
+    "litexpansion:what_a_configuration",
+    "litexpansion:what_are_these_cables"
+   ],
+   "n_researches_of_items": 17,
+   "items_with_research": 50,
+   "classes": {
+    "UnplaceableBlock": 24,
+    "SlimefunItem": 6,
+    "AdvancedSolarHelmet": 6,
+    "DyeItem": 5,
+    "AdvancedSolarPanel": 3,
+    "MiningDrill": 2,
+    "CargoConfigurator": 1,
+    "GlassCutter": 1,
+    "FoodSynthesizer": 1,
+    "Recycler": 1,
+    "MassFabricator": 1,
+    "RefinedSmeltery": 1,
+    "MetalForge": 1,
+    "MultiFunctionalElectricStorageUnit": 1,
+    "MultiFunctionalStorageUnit": 1,
+    "Generator": 1,
+    "ManualMill": 1,
+    "Macerator": 1,
+    "UUCrafter": 1,
+    "Converter": 1,
+    "MagThor": 1,
+    "Thorium": 1,
+    "NanoBlade": 1,
+    "ElectricChestplate": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 34,
+    "litexpansion:metal_forge": 11,
+    "litexpansion:manual_mill": 8,
+    "slimefun:multiblock": 3,
+    "slimefun:compressor": 2,
+    "litexpansion:refined_smeltery": 1,
+    "slimefun:smeltery": 1,
+    "slimefun:geo_miner": 1,
+    "litexpansion:scrap_machine": 1,
+    "litexpansion:mass_fabricator": 1,
+    "slimefun:ore_crusher": 1
+   },
+   "energy_components": 11,
+   "energy_types": {
+    "CONSUMER": 5,
+    "CAPACITOR": 2,
+    "GENERATOR": 4
+   },
+   "items_with_machine_recipes": 2,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [],
+   "sample_ids": [
+    "ADVANCEDLX_SOLAR_HELMET",
+    "ADVANCED_ALLOY",
+    "ADVANCED_CIRCUIT",
+    "ADVANCED_MACHINE_BLOCK",
+    "ADVANCED_SOLAR_HELMET"
+   ]
+  },
+  "ExtraGear": {
+   "name": "ExtraGear",
+   "n_items": 59,
+   "pct_of_total": 0.369,
+   "ids_sha256": "c094716c35f75fbdffd3ae66d38f855c38c0a2b9d62ef01ec828265367a49a84",
+   "groups_by_dump_group_addon": [
+    "extragear:items"
+   ],
+   "groups_used_by_items": {
+    "extragear:items": 59
+   },
+   "researches_of_items": [
+    "extragear:aluminum_armor",
+    "extragear:aluminum_brass_sword",
+    "extragear:aluminum_bronze_sword",
+    "extragear:aluminum_sword",
+    "extragear:billon_sword",
+    "extragear:brass_sword",
+    "extragear:bronze_sword",
+    "extragear:cobalt_armor",
+    "extragear:cobalt_sword",
+    "extragear:copper_armor",
+    "extragear:copper_sword",
+    "extragear:corinthian_bronze_sword",
+    "extragear:damascus_steel_sword",
+    "extragear:duralumin_sword",
+    "extragear:ferrosilicon_sword",
+    "extragear:gilded_iron_sword",
+    "extragear:hardened_sword",
+    "extragear:lead_armor",
+    "extragear:lead_sword",
+    "extragear:magnesium_armor",
+    "extragear:magnesium_sword",
+    "extragear:nickel_sword",
+    "extragear:reinforced_sword",
+    "extragear:silver_armor",
+    "extragear:silver_sword",
+    "extragear:solder_sword",
+    "extragear:steel_armor",
+    "extragear:steel_sword",
+    "extragear:tin_armor",
+    "extragear:tin_sword",
+    "extragear:zinc_armor",
+    "extragear:zinc_sword"
+   ],
+   "n_researches_of_items": 32,
+   "items_with_research": 59,
+   "classes": {
+    "SlimefunItem": 59
+   },
+   "recipe_types": {
+    "slimefun:armor_forge": 36,
+    "slimefun:enhanced_crafting_table": 23
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "ALUMINUM",
+     7
+    ]
+   ],
+   "sample_ids": [
+    "ALUMINUM_BOOTS",
+    "ALUMINUM_BRASS_SWORD",
+    "ALUMINUM_BRONZE_SWORD",
+    "ALUMINUM_CHESTPLATE",
+    "ALUMINUM_HELMET"
+   ]
+  },
+  "FluffyMachines": {
+   "name": "FluffyMachines",
+   "n_items": 52,
+   "pct_of_total": 0.325,
+   "ids_sha256": "948a4d70b81fb73802056f0adddccdc02dc87359f0fc12846f442eb8270a6b70",
+   "groups_by_dump_group_addon": [
+    "fluffymachines:barrels",
+    "fluffymachines:cargo",
+    "fluffymachines:fluffymachines",
+    "fluffymachines:generators",
+    "fluffymachines:machines",
+    "fluffymachines:misc",
+    "fluffymachines:multiblocks",
+    "fluffymachines:portable_chargers",
+    "fluffymachines:tools",
+    "fluffymachines:wrenches"
+   ],
+   "groups_used_by_items": {
+    "fluffymachines:machines": 16,
+    "fluffymachines:misc": 7,
+    "fluffymachines:barrels": 7,
+    "fluffymachines:tools": 6,
+    "fluffymachines:portable_chargers": 5,
+    "fluffymachines:multiblocks": 3,
+    "fluffymachines:wrenches": 3,
+    "fluffymachines:cargo": 3,
+    "fluffymachines:generators": 2
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "Barrel": 6,
+    "PortableCharger": 5,
+    "FluffyWrench": 3,
+    "SlimefunItem": 2,
+    "CrankGenerator": 1,
+    "Foundry": 1,
+    "ExpDispenser": 1,
+    "WateringCan": 1,
+    "Scythe": 1,
+    "UpgradedLumberAxe": 1,
+    "UpgradedExplosivePickaxe": 1,
+    "UpgradedExplosiveShovel": 1,
+    "Paxel": 1,
+    "WaterSprinkler": 1,
+    "AutoCraftingTable": 1,
+    "AutoAncientAltar": 1,
+    "AutoEnhancedCraftingTable": 1,
+    "AutoTableSaw": 1,
+    "AutoMagicWorkbench": 1,
+    "AutoArmorForge": 1,
+    "AdvancedAutoDisenchanter": 1,
+    "BackpackLoader": 1,
+    "BackpackUnloader": 1,
+    "GeneratorCore": 1,
+    "SuperheatedFurnace": 1,
+    "HelicopterHat": 1,
+    "FireproofRune": 1,
+    "EnderChestInsertionNode": 1,
+    "EnderChestExtractionNode": 1,
+    "Dolly": 1,
+    "WarpPad": 1,
+    "WarpPadConfigurator": 1,
+    "ElectricDustFabricator": 1,
+    "ElectricDustRecycler": 1,
+    "AlternateElevatorPlate": 1,
+    "AdvancedChargingBench": 1,
+    "ACBUpgradeCard": 1,
+    "CargoManipulator": 1,
+    "SmartFactory": 1,
+    "MiniBarrel": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 48,
+    "slimefun:multiblock": 3,
+    "slimefun:ancient_altar": 1
+   },
+   "energy_components": 15,
+   "energy_types": {
+    "CONSUMER": 14,
+    "GENERATOR": 1
+   },
+   "items_with_machine_recipes": 1,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "AUTO",
+     6
+    ]
+   ],
+   "sample_ids": [
+    "ACB_UPGRADE_CARD",
+    "ADVANCED_AUTO_DISENCHANTER",
+    "ADVANCED_CHARGING_BENCH",
+    "ALTERNATE_ELEVATOR_PLATE",
+    "ANCIENT_BOOK"
+   ]
+  },
+  "IDreamOfEasy": {
+   "name": "IDreamOfEasy",
+   "n_items": 52,
+   "pct_of_total": 0.325,
+   "ids_sha256": "4b8f5e091946a10f48bed51746401e98768933bf03515f07bf8985d8ea37a08e",
+   "groups_by_dump_group_addon": [
+    "idreamofeasy:i_dream_of_easy"
+   ],
+   "groups_used_by_items": {
+    "idreamofeasy:i_dream_of_easy": 52
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "ElectricCable": 3,
+    "RadiationAbsorber": 3,
+    "ElectricBlastFurnace": 3,
+    "ElectricSmoker": 3,
+    "ElectricLogStripper": 3,
+    "Terrabore": 1,
+    "AdvancedTerrabore": 1,
+    "EliteTerrabore": 1,
+    "StackDispenser": 1,
+    "PlayerHopper": 1,
+    "SupplyHopper": 1,
+    "FlameheartIdol": 1,
+    "TorrentIdol": 1,
+    "TerranIdol": 1,
+    "DivineIdol": 1,
+    "Magnetoid": 1,
+    "Jawn": 1,
+    "LavaBoat": 1,
+    "TrimVault": 1,
+    "WisterShears": 1,
+    "BiomeCompass": 1,
+    "Chisel": 1,
+    "ElectricExplosivePickaxe": 1,
+    "ElectricExplosiveShovel": 1,
+    "SlimeMeal": 1,
+    "AlarmClock": 1,
+    "TomeOfEnlightenment": 1,
+    "SlimefunItem": 1,
+    "ElectricPoisonExtractor": 1,
+    "ElectricShearer": 1,
+    "ZombieRepeller": 1,
+    "SpiderRepeller": 1,
+    "SkeletonRepeller": 1,
+    "CreeperRepeller": 1,
+    "SlimeRepeller": 1,
+    "ZombieVillagerRepeller": 1,
+    "BatRepeller": 1,
+    "EndermanRepeller": 1,
+    "WitchRepeller": 1,
+    "Setup$1": 1,
+    "Capacitor": 1,
+    "SolarGenerator": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 24,
+    "slimefun:magic_workbench": 21,
+    "slimefun:multiblock": 3,
+    "slimefun:null": 3,
+    "slimefun:juicer": 1
+   },
+   "energy_components": 31,
+   "energy_types": {
+    "CONSUMER": 29,
+    "CAPACITOR": 1,
+    "GENERATOR": 1
+   },
+   "items_with_machine_recipes": 10,
+   "disabled": 0,
+   "items_without_recipe": 3,
+   "id_prefixes": [
+    [
+     "IDOE",
+     52
+    ],
+    [
+     "IDOE_ELECTRIC",
+     16
+    ],
+    [
+     "IDOE_REPELLER",
+     9
+    ]
+   ],
+   "sample_ids": [
+    "IDOE_ALARM_CLOCK",
+    "IDOE_BIOMECOMPASS",
+    "IDOE_CHISEL",
+    "IDOE_CREATIVE_CAPACITOR",
+    "IDOE_CREATIVE_GENERATOR"
+   ]
+  },
+  "RelicsOfCthonia": {
+   "name": "RelicsOfCthonia",
+   "n_items": 38,
+   "pct_of_total": 0.238,
+   "ids_sha256": "fdaf729b59d2628f1811310e256981360408e18097c84362aeb55d49d060ce46",
+   "groups_by_dump_group_addon": [
+    "relicsofcthonia:main_group",
+    "relicsofcthonia:miscellaneous",
+    "relicsofcthonia:relic_items",
+    "relicsofcthonia:relic_items",
+    "relicsofcthonia:relic_items",
+    "relicsofcthonia:relic_items",
+    "relicsofcthonia:relic_items"
+   ],
+   "groups_used_by_items": {
+    "relicsofcthonia:relic_items": 33,
+    "relicsofcthonia:miscellaneous": 5
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "RelicVoider": 5,
+    "CthonianPearl": 1,
+    "FishingSack": 1,
+    "HealingPotion": 1,
+    "LeatherHelmet": 1,
+    "Mushroom": 1,
+    "PettyMarbleBlock": 1,
+    "RingOfSuffering": 1,
+    "AgedWine": 1,
+    "BlueGlowstone": 1,
+    "CthonianToken": 1,
+    "GrayBerry": 1,
+    "PinkSalt": 1,
+    "SkullHat": 1,
+    "TanzaniteBlock": 1,
+    "BlazeAshes": 1,
+    "CeruleanGem": 1,
+    "CrossedSwords": 1,
+    "GoldenJar": 1,
+    "HornOfTaurus": 1,
+    "MarriageRing": 1,
+    "TerracottaPot": 1,
+    "BottleOPower": 1,
+    "FlawlessAquaGem": 1,
+    "LuminousPearl": 1,
+    "ValiantTalisman": 1,
+    "FervorHelmet": 1,
+    "ThunderInABottle": 1,
+    "EyeOfSauron": 1,
+    "MysteriousHolocron": 1,
+    "SkullOfPrometheus": 1,
+    "MagmaGauntlet": 1,
+    "GlazingPearl": 1,
+    "SapphireRing": 1
+   },
+   "recipe_types": {
+    "relicsofcthonia:relic_drop_type_generic": 33,
+    "slimefun:magic_workbench": 5
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 33,
+   "id_prefixes": [
+    [
+     "COMMON",
+     8
+    ],
+    [
+     "COMMON_RELIC",
+     8
+    ],
+    [
+     "RARE",
+     8
+    ],
+    [
+     "RARE_RELIC",
+     8
+    ],
+    [
+     "UNCOMMON",
+     8
+    ]
+   ],
+   "sample_ids": [
+    "COMMON_RELIC_CTHONIAN_PEARL",
+    "COMMON_RELIC_FISHING_SACK",
+    "COMMON_RELIC_HEALING_POTION",
+    "COMMON_RELIC_LEATHER_HELMET",
+    "COMMON_RELIC_MUSHROOM"
+   ]
+  },
+  "Bump": {
+   "name": "Bump",
+   "n_items": 38,
+   "pct_of_total": 0.238,
+   "ids_sha256": "18f9ebb3258fd983c42c99f71be5f21b2e85bc03c106d8713074ed749988caed",
+   "groups_by_dump_group_addon": [
+    "bump:appraise_info",
+    "bump:armor",
+    "bump:food",
+    "bump:hidden",
+    "bump:machine",
+    "bump:main",
+    "bump:stuff",
+    "bump:tool",
+    "bump:weapon"
+   ],
+   "groups_used_by_items": {
+    "bump:stuff": 12,
+    "bump:weapon": 11,
+    "bump:food": 6,
+    "bump:hidden": 3,
+    "bump:armor": 2,
+    "bump:machine": 2,
+    "bump:tool": 2
+   },
+   "researches_of_items": [
+    "bump:research_appraise",
+    "bump:research_bow",
+    "bump:research_food",
+    "bump:research_normal_sword",
+    "bump:research_old_stuff",
+    "bump:research_peach_sword",
+    "bump:research_random_equipment",
+    "bump:research_sky_devil",
+    "bump:research_soul_sword",
+    "bump:research_stuff"
+   ],
+   "n_researches_of_items": 10,
+   "items_with_research": 35,
+   "classes": {
+    "StuffItem": 12,
+    "SlimefunItem": 4,
+    "RandomEquipment": 3,
+    "LegacyAppraisalPaper": 3,
+    "Xuebi": 1,
+    "Kele": 1,
+    "Fangbianmian": 1,
+    "Latiao": 1,
+    "Kouxiangtang": 1,
+    "Zongzi": 1,
+    "AppraisalInstrument": 1,
+    "AttributeGrindstone": 1,
+    "GetgoldSpade": 1,
+    "QualityIdentifier": 1,
+    "LightBow": 1,
+    "WitherSkullBow": 1,
+    "SoulSword": 1,
+    "SkySword": 1,
+    "DevilSword": 1,
+    "SkyDevilSword": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 14,
+    "slimefun:armor_forge": 7,
+    "slimefun:magic_workbench": 6,
+    "slimefun:smeltery": 4,
+    "slimefun:compressor": 3,
+    "bump:getgold_spade": 1,
+    "slimefun:ancient_altar": 1,
+    "slimefun:pressure_chamber": 1,
+    "bump:compressor_mock": 1
+   },
+   "energy_components": 2,
+   "energy_types": {
+    "CONSUMER": 2
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 1,
+   "id_prefixes": [
+    [
+     "BUMP",
+     38
+    ]
+   ],
+   "sample_ids": [
+    "BUMP_APPRAISAL",
+    "BUMP_APPRAISAL_PAPER_ARMOR",
+    "BUMP_APPRAISAL_PAPER_DAMAGE",
+    "BUMP_APPRAISAL_PAPER_HORSE_ARMOR",
+    "BUMP_ATTRIBUTE_GRINDSTONE"
+   ]
+  },
+  "BetterChests": {
+   "name": "BetterChests",
+   "n_items": 38,
+   "pct_of_total": 0.238,
+   "ids_sha256": "172c45719670447900375dae4448c5b73991644ad448021891e022e39cb332d6",
+   "groups_by_dump_group_addon": [
+    "betterchests:group_main",
+    "betterchests:group_materials",
+    "betterchests:group_storages",
+    "betterchests:group_tools"
+   ],
+   "groups_used_by_items": {
+    "betterchests:group_storages": 32,
+    "betterchests:group_materials": 3,
+    "betterchests:group_tools": 3
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SimpleDrawer": 11,
+    "IEStorageUnit": 8,
+    "SimpleChest": 4,
+    "OnlyInputChest": 4,
+    "OnlyOutputChest": 4,
+    "SlimefunItem": 2,
+    "RadioactiveItem": 2,
+    "ChestDisassembler": 1,
+    "LocationRecorder": 1,
+    "ChestColorer": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 36,
+    "slimefun:null": 1,
+    "slimefun:compressor": 1
+   },
+   "energy_components": 1,
+   "energy_types": {
+    "CONSUMER": 1
+   },
+   "items_with_machine_recipes": 1,
+   "disabled": 0,
+   "items_without_recipe": 1,
+   "id_prefixes": [
+    [
+     "BC",
+     38
+    ],
+    [
+     "BC_CHEST",
+     14
+    ],
+    [
+     "BC_DRAWER",
+     11
+    ],
+    [
+     "BC_IE",
+     8
+    ],
+    [
+     "BC_IE_STORAGE",
+     8
+    ]
+   ],
+   "sample_ids": [
+    "BC_CHEST_27",
+    "BC_CHEST_36",
+    "BC_CHEST_45",
+    "BC_CHEST_54",
+    "BC_CHEST_COLORER"
+   ]
+  },
+  "TranscEndence": {
+   "name": "TranscEndence",
+   "n_items": 34,
+   "pct_of_total": 0.213,
+   "ids_sha256": "5273a683881167bab14030a801132904dae378002a8b5fc466a0d39f3b9ea7bf",
+   "groups_by_dump_group_addon": [
+    "transcendence:transcendence"
+   ],
+   "groups_used_by_items": {
+    "transcendence:transcendence": 34
+   },
+   "researches_of_items": [
+    "transcendence:daxis",
+    "transcendence:nanobot_crafter",
+    "transcendence:polarizers",
+    "transcendence:quirp_annihilator",
+    "transcendence:quirp_oscillator",
+    "transcendence:quirp_scatterer",
+    "transcendence:stable",
+    "transcendence:unstable",
+    "transcendence:zot_overloader",
+    "transcendence:zots"
+   ],
+   "n_researches_of_items": 10,
+   "items_with_research": 33,
+   "classes": {
+    "Quirps": 5,
+    "Daxi": 5,
+    "UnstableIngots": 4,
+    "Zots": 4,
+    "Zots_2": 4,
+    "StabilizedItems": 2,
+    "Polarizer": 2,
+    "QuirpScatterer": 1,
+    "NanobotCrafter": 1,
+    "QuirpOscillator": 1,
+    "QuirpAnnihilator": 1,
+    "QuirpCycler": 1,
+    "Stabilizer": 1,
+    "ZotOverloader": 1,
+    "SlimefunItem": 1
+   },
+   "recipe_types": {
+    "transcendence:nanobot_crafter": 19,
+    "transcendence:quirp_oscillator": 4,
+    "transcendence:stabilizer": 4,
+    "transcendence:zot_overloader": 4,
+    "transcendence:quirp_annihilator": 1,
+    "slimefun:multiblock": 1,
+    "slimefun:null": 1
+   },
+   "energy_components": 6,
+   "energy_types": {
+    "GENERATOR": 1,
+    "CONSUMER": 5
+   },
+   "items_with_machine_recipes": 3,
+   "disabled": 0,
+   "items_without_recipe": 10,
+   "id_prefixes": [
+    [
+     "ZOT",
+     9
+    ],
+    [
+     "QUIRP",
+     8
+    ],
+    [
+     "DAXI",
+     5
+    ]
+   ],
+   "sample_ids": [
+    "DAXI_ABSORPTION",
+    "DAXI_FORTITUDE",
+    "DAXI_REGENERATION",
+    "DAXI_SATURATION",
+    "DAXI_STRENGTH"
+   ]
+  },
+  "AlchimiaVitae": {
+   "name": "AlchimiaVitae",
+   "n_items": 33,
+   "pct_of_total": 0.206,
+   "ids_sha256": "0ef7c132b47d95906109437fea1d4c2d9e753b4a33df74471eada24e1fc5f970",
+   "groups_by_dump_group_addon": [
+    "alchimiavitae:alchimia_vitae",
+    "alchimiavitae:av_altar_recipes",
+    "alchimiavitae:av_general",
+    "alchimiavitae:av_infusions"
+   ],
+   "groups_used_by_items": {
+    "alchimiavitae:av_general": 18,
+    "alchimiavitae:av_infusions": 10,
+    "alchimiavitae:av_altar_recipes": 5
+   },
+   "researches_of_items": [
+    "alchimiavitae:altar_of_infusion",
+    "alchimiavitae:benevolent_brew",
+    "alchimiavitae:cosmic_cauldron",
+    "alchimiavitae:divine_altar",
+    "alchimiavitae:exp_crystals",
+    "alchimiavitae:magic_essence",
+    "alchimiavitae:magic_plants",
+    "alchimiavitae:magic_steel",
+    "alchimiavitae:malevolent_concoction",
+    "alchimiavitae:metal_amalgamation",
+    "alchimiavitae:potion_of_osmosis",
+    "alchimiavitae:soul"
+   ],
+   "n_researches_of_items": 12,
+   "items_with_research": 19,
+   "classes": {
+    "SlimefunItem": 23,
+    "SoulCollector": 1,
+    "PlantInfusionChamber": 1,
+    "EXPCrystallizer": 1,
+    "DivineAltar": 1,
+    "MoltenMysteryMetal": 1,
+    "CosmicCauldron": 1,
+    "PotionOfOsmosis": 1,
+    "BenevolentBrew": 1,
+    "MalevolentConcoction": 1,
+    "AltarOfInfusion": 1
+   },
+   "recipe_types": {
+    "alchimiavitae:infusion_altar_type": 9,
+    "alchimiavitae:divine_altar_type": 8,
+    "slimefun:ancient_altar": 4,
+    "slimefun:enhanced_crafting_table": 3,
+    "alchimiavitae:cosmic_cauldron_type": 3,
+    "alchimiavitae:plant_infusion_chamber_type": 2,
+    "slimefun:grind_stone": 2,
+    "alchimiavitae:soul_collector_type": 1,
+    "alchimiavitae:exp_crystallizer_type": 1
+   },
+   "energy_components": 2,
+   "energy_types": {
+    "CONSUMER": 2
+   },
+   "items_with_machine_recipes": 2,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "AV",
+     33
+    ]
+   ],
+   "sample_ids": [
+    "AV_ALTAR_OF_INFUSION",
+    "AV_AUTO_REPLANT_INFUSION",
+    "AV_BENEVOLENT_BREW_POTION",
+    "AV_COMPRESSED_CARBON",
+    "AV_CONDENSED_SOUL"
+   ]
+  },
+  "HotbarPets": {
+   "name": "HotbarPets",
+   "n_items": 31,
+   "pct_of_total": 0.194,
+   "ids_sha256": "23ce51dd67d96b70f4d4c2040b7bf4b24fb3320161dd83240ffd2989b31e615a",
+   "groups_by_dump_group_addon": [
+    "hotbarpets:pets"
+   ],
+   "groups_used_by_items": {
+    "hotbarpets:pets": 31
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "HotbarPet": 13,
+    "CowPet": 1,
+    "SquidPet": 1,
+    "RabbitPet": 1,
+    "DolphinPet": 1,
+    "IronGolemPet": 1,
+    "SpiderPet": 1,
+    "GhastPet": 1,
+    "ShulkerPet": 1,
+    "PhantomPet": 1,
+    "EndermanPet": 1,
+    "CreeperPet": 1,
+    "EnderDragonPet": 1,
+    "BedPet": 1,
+    "EnderChestPet": 1,
+    "WorkbenchPet": 1,
+    "PurpliciousCowPet": 1,
+    "CookieSlimePet": 1,
+    "PatriotPet": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 31
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "HOTBAR",
+     31
+    ],
+    [
+     "HOTBAR_PET",
+     31
+    ]
+   ],
+   "sample_ids": [
+    "HOTBAR_PET_BED",
+    "HOTBAR_PET_BLAZE",
+    "HOTBAR_PET_CHICKEN",
+    "HOTBAR_PET_COW",
+    "HOTBAR_PET_CREEPER"
+   ]
+  },
+  "MagicXpansion": {
+   "name": "MagicXpansion",
+   "n_items": 30,
+   "pct_of_total": 0.188,
+   "ids_sha256": "bb65f01aae452b04e181e206d2b808f92c6fe783b301333bc3f8d85fb9e85031",
+   "groups_by_dump_group_addon": [
+    "magicxpansion:magicxpansion",
+    "magicxpansion:magicxpansion_armor",
+    "magicxpansion:magicxpansion_general",
+    "magicxpansion:magicxpansion_machines",
+    "magicxpansion:magicxpansion_magical",
+    "magicxpansion:magicxpansion_resources",
+    "magicxpansion:magicxpansion_tools",
+    "magicxpansion:magicxpansion_weapons"
+   ],
+   "groups_used_by_items": {
+    "magicxpansion:magicxpansion_resources": 10,
+    "magicxpansion:magicxpansion_weapons": 6,
+    "magicxpansion:magicxpansion_magical": 6,
+    "magicxpansion:magicxpansion_machines": 3,
+    "magicxpansion:magicxpansion_general": 3,
+    "magicxpansion:magicxpansion_tools": 2
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "UnplaceableHeadItem": 6,
+    "Resource": 3,
+    "CustomCrossbow": 3,
+    "Lump": 2,
+    "VanillaItem": 2,
+    "MeleeWeapon": 2,
+    "NetherStarBlock": 1,
+    "CarbonCrusherMachine": 1,
+    "CraftingItem": 1,
+    "ContainerItem": 1,
+    "ShulkerAlloy": 1,
+    "RefinedShulkerAlloy": 1,
+    "PoseidonsTrident": 1,
+    "EnergyCore": 1,
+    "EnergizedWindStaff": 1,
+    "BasicSpellbook": 1,
+    "SoulManipulator": 1,
+    "Setup$1": 1
+   },
+   "recipe_types": {
+    "slimefun:ancient_altar": 13,
+    "slimefun:smeltery": 6,
+    "slimefun:magic_workbench": 2,
+    "slimefun:geo_miner": 2,
+    "slimefun:enhanced_crafting_table": 2,
+    "slimefun:multiblock": 1,
+    "slimefun:ore_washer": 1,
+    "slimefun:mob_drop": 1,
+    "magicxpansion:reaper_scythe_type": 1,
+    "magicxpansion:soul_manipulator_type": 1
+   },
+   "energy_components": 2,
+   "energy_types": {
+    "CONSUMER": 1,
+    "GENERATOR": 1
+   },
+   "items_with_machine_recipes": 1,
+   "disabled": 0,
+   "items_without_recipe": 2,
+   "id_prefixes": [
+    [
+     "SOUL",
+     6
+    ]
+   ],
+   "sample_ids": [
+    "ARCANIUM_INGOT",
+    "ARCANIUM_ORE",
+    "BASIC_SPELLBOOK",
+    "BLESSED_AQUATIC_NETHERITE_INGOT",
+    "CARBON_CRUSHER"
+   ]
+  },
+  "DankTech2": {
+   "name": "DankTech2",
+   "n_items": 29,
+   "pct_of_total": 0.181,
+   "ids_sha256": "f477d46dea90f54317b8e0e0777db65f5dddfdaac4054f4e093e584cf61354a3",
+   "groups_by_dump_group_addon": [
+    "danktech2:machines",
+    "danktech2:main",
+    "danktech2:materials",
+    "danktech2:packs"
+   ],
+   "groups_used_by_items": {
+    "danktech2:packs": 18,
+    "danktech2:materials": 9,
+    "danktech2:machines": 2
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "UnplaceableBlock": 9,
+    "DankPack": 9,
+    "TrashPack": 9,
+    "DankCrafter": 1,
+    "DankUnloader": 1
+   },
+   "recipe_types": {
+    "danktech2:dank_crafter": 18,
+    "slimefun:enhanced_crafting_table": 11
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "DK2",
+     29
+    ],
+    [
+     "DK2_CELL",
+     9
+    ],
+    [
+     "DK2_PACK",
+     9
+    ],
+    [
+     "DK2_TRASH",
+     9
+    ]
+   ],
+   "sample_ids": [
+    "DK2_CELL_1",
+    "DK2_CELL_2",
+    "DK2_CELL_3",
+    "DK2_CELL_4",
+    "DK2_CELL_5"
+   ]
+  },
+  "ElectricSpawners": {
+   "name": "ElectricSpawners",
+   "n_items": 27,
+   "pct_of_total": 0.169,
+   "ids_sha256": "c9a4a53156a0639efc095202a69732f3f19697b7f46867627e337c622f7dd0d2",
+   "groups_by_dump_group_addon": [
+    "electricspawners:electric_spawners"
+   ],
+   "groups_used_by_items": {
+    "electricspawners:electric_spawners": 27
+   },
+   "researches_of_items": [
+    "electricspawners:electric_spawners"
+   ],
+   "n_researches_of_items": 1,
+   "items_with_research": 27,
+   "classes": {
+    "ElectricSpawner": 27
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 27
+   },
+   "energy_components": 27,
+   "energy_types": {
+    "CONSUMER": 27
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "ELECTRIC",
+     27
+    ],
+    [
+     "ELECTRIC_SPAWNER",
+     27
+    ]
+   ],
+   "sample_ids": [
+    "ELECTRIC_SPAWNER_BLAZE",
+    "ELECTRIC_SPAWNER_CAVE_SPIDER",
+    "ELECTRIC_SPAWNER_CHICKEN",
+    "ELECTRIC_SPAWNER_COW",
+    "ELECTRIC_SPAWNER_CREEPER"
+   ]
+  },
+  "ObsidianExpansion": {
+   "name": "ObsidianExpansion",
+   "n_items": 26,
+   "pct_of_total": 0.163,
+   "ids_sha256": "442b653a7d93fb1f728cf514d8cd5ea52f45ceea722c2265993863ab3c4deb74",
+   "groups_by_dump_group_addon": [
+    "obsidianexpansion:junction_category",
+    "obsidianexpansion:omc_drops",
+    "obsidianexpansion:omc_expansion",
+    "obsidianexpansion:omc_forge_cheat",
+    "obsidianexpansion:omc_generators",
+    "obsidianexpansion:omc_items",
+    "obsidianexpansion:omc_machines",
+    "obsidianexpansion:omc_resources"
+   ],
+   "groups_used_by_items": {
+    "obsidianexpansion:omc_resources": 7,
+    "obsidianexpansion:omc_items": 6,
+    "obsidianexpansion:omc_forge_cheat": 5,
+    "obsidianexpansion:omc_generators": 4,
+    "obsidianexpansion:omc_machines": 2,
+    "obsidianexpansion:omc_drops": 2
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SlimefunItem": 8,
+    "Armor": 4,
+    "ObsidianReactor": 2,
+    "UnplaceableBlock": 2,
+    "ContainmentPick": 1,
+    "AdvancedObsidianGenerator": 1,
+    "VoidObsidianGenerator": 1,
+    "ObsidianForge": 1,
+    "AngelGem": 1,
+    "AngelGemT2": 1,
+    "AngelGemT3": 1,
+    "DragonScale": 1,
+    "PhantomScale": 1,
+    "NetheriteGen": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 13,
+    "slimefun:magic_workbench": 5,
+    "obsidianexpansion:omc_obsidian_forge": 5,
+    "slimefun:mob_drop": 2,
+    "slimefun:compressor": 1
+   },
+   "energy_components": 6,
+   "energy_types": {
+    "GENERATOR": 2,
+    "CONSUMER": 4
+   },
+   "items_with_machine_recipes": 1,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "OMC",
+     26
+    ],
+    [
+     "OMC_COMPRESSED",
+     5
+    ],
+    [
+     "OMC_COMPRESSED_OBSIDIAN",
+     4
+    ],
+    [
+     "OMC_OBSIDIAN",
+     4
+    ],
+    [
+     "OMC_ADVANCED",
+     3
+    ]
+   ],
+   "sample_ids": [
+    "OMC_ADVANCED_OBSIDIAN_ENERGY",
+    "OMC_ADVANCED_OBSIDIAN_GEN",
+    "OMC_ADVANCED_VOID_CORE",
+    "OMC_ANGEL_GEM",
+    "OMC_ANGEL_GEM_2"
+   ]
+  },
+  "PrivateStorage": {
+   "name": "PrivateStorage",
+   "n_items": 24,
+   "pct_of_total": 0.15,
+   "ids_sha256": "cabdbc6dc3dc727d3ed5390f6a406b4b1b1bc4910df13f830743a69ca02bc111",
+   "groups_by_dump_group_addon": [
+    "privatestorage:private_storage"
+   ],
+   "groups_used_by_items": {
+    "privatestorage:private_storage": 24
+   },
+   "researches_of_items": [
+    "privatestorage:gem_safes",
+    "privatestorage:hardened_chests",
+    "privatestorage:hardened_safes",
+    "privatestorage:metal_chests",
+    "privatestorage:metal_safes",
+    "privatestorage:wooden_chests",
+    "privatestorage:wooden_safes"
+   ],
+   "n_researches_of_items": 7,
+   "items_with_research": 24,
+   "classes": {
+    "SlimefunChest": 24
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 24
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "PRIVATE",
+     12
+    ],
+    [
+     "PRIVATE_SAFE",
+     12
+    ]
+   ],
+   "sample_ids": [
+    "ACACIA_CHEST",
+    "BIRCH_CHEST",
+    "DARK_OAK_CHEST",
+    "DIAMOND_CHEST",
+    "EMERALD_CHEST"
+   ]
+  },
+  "FlowerPower": {
+   "name": "FlowerPower",
+   "n_items": 23,
+   "pct_of_total": 0.144,
+   "ids_sha256": "fadc9ad2ccfbf00795612a6befdeab6ce1908b01c4c57e92371717d73d656365",
+   "groups_by_dump_group_addon": [
+    "flowerpower:flowerpower_category"
+   ],
+   "groups_used_by_items": {
+    "flowerpower:flowerpower_category": 23
+   },
+   "researches_of_items": [
+    "flowerpower:attribute_charms",
+    "flowerpower:experience_cauldron",
+    "flowerpower:experience_storage",
+    "flowerpower:faster_flower_growth",
+    "flowerpower:glistening_resources",
+    "flowerpower:infinity_magic",
+    "flowerpower:magic_crafting",
+    "flowerpower:recall_teleportation"
+   ],
+   "n_researches_of_items": 8,
+   "items_with_research": 23,
+   "classes": {
+    "NonplaceableBlock": 8,
+    "AttributeCharms": 6,
+    "MagicBasin": 1,
+    "ExperienceCauldron": 1,
+    "SlimefunItem": 1,
+    "MagicCream": 1,
+    "OvergrowthSeed": 1,
+    "ExperienceTome": 1,
+    "InfinityApple": 1,
+    "InfinityBandage": 1,
+    "RecallCharm": 1
+   },
+   "recipe_types": {
+    "flowerpower:magic_basin": 18,
+    "slimefun:magic_workbench": 3,
+    "slimefun:multiblock": 1,
+    "slimefun:mob_drop": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "GLISTENING",
+     4
+    ]
+   ],
+   "sample_ids": [
+    "ATTACK_SPEED_CHARM",
+    "DAMAGE_CHARM",
+    "EXPERIENCE_CAULDRON",
+    "EXPERIENCE_TOME",
+    "FLY_SPEED_CHARM"
+   ]
+  },
+  "BreweryMenu": {
+   "name": "BreweryMenu",
+   "n_items": 23,
+   "pct_of_total": 0.144,
+   "ids_sha256": "be56c8473ebefca37aff49db9b5baedcf4d011268f82176edfde7b80723fe64e",
+   "groups_by_dump_group_addon": [
+    "brewerymenu:brewery_category"
+   ],
+   "groups_used_by_items": {
+    "brewerymenu:brewery_category": 23
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SlimefunItem": 23
+   },
+   "recipe_types": {
+    "brewerymenu:brewery_category": 22,
+    "slimefun:multiblock": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [],
+   "sample_ids": [
+    "ABSINTH",
+    "BILE_VINO",
+    "BOURBON",
+    "BRAMBOROVA_POLEVKA",
+    "BREWERY"
+   ]
+  },
+  "PotionExpansion": {
+   "name": "PotionExpansion",
+   "n_items": 22,
+   "pct_of_total": 0.138,
+   "ids_sha256": "ff438fa09baa59ba90e37815795a7364054980546830dfd660da02c65fba22f6",
+   "groups_by_dump_group_addon": [
+    "potionexpansion:potionexpansion"
+   ],
+   "groups_used_by_items": {
+    "potionexpansion:potionexpansion": 22
+   },
+   "researches_of_items": [
+    "potionexpansion:ancient_debris_sight_research",
+    "potionexpansion:coal_sight_research",
+    "potionexpansion:copper_sight_research",
+    "potionexpansion:diamond_sight_research",
+    "potionexpansion:emerald_sight_research",
+    "potionexpansion:gold_sight_research",
+    "potionexpansion:iron_sight_research",
+    "potionexpansion:lapis_sight_research",
+    "potionexpansion:pestle_research",
+    "potionexpansion:quartz_sight_research",
+    "potionexpansion:redstone_sight_research"
+   ],
+   "n_researches_of_items": 11,
+   "items_with_research": 11,
+   "classes": {
+    "PotionSightItem": 10,
+    "SlimefunItem": 9,
+    "UnplaceableBlock": 2,
+    "AlchemicStation": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 11,
+    "potionexpansion:alchemic_station": 10,
+    "slimefun:multiblock": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [],
+   "sample_ids": [
+    "ALCHEMIC_STATION",
+    "ANCIENT_DEBRIS_POWDER",
+    "ANCIENT_DEBRIS_SIGHT",
+    "COAL_POWDER",
+    "COAL_SIGHT"
+   ]
+  },
+  "FastMachines": {
+   "name": "FastMachines",
+   "n_items": 22,
+   "pct_of_total": 0.138,
+   "ids_sha256": "2024c38fca8564559afb8350176cb404932c8611aed068a7e70c6d8f87ed8800",
+   "groups_by_dump_group_addon": [
+    "fastmachines:fast_machines",
+    "fastmachines:machines",
+    "fastmachines:materials"
+   ],
+   "groups_used_by_items": {
+    "fastmachines:machines": 19,
+    "fastmachines:materials": 3
+   },
+   "researches_of_items": [
+    "fastmachines:machines",
+    "fastmachines:materials"
+   ],
+   "n_researches_of_items": 2,
+   "items_with_research": 22,
+   "classes": {
+    "UnplaceableBlock": 2,
+    "StackedAncientPedestal": 1,
+    "FastCraftingTable": 1,
+    "FastFurnace": 1,
+    "FastEnhancedCraftingTable": 1,
+    "FastGrindStone": 1,
+    "FastArmorForge": 1,
+    "FastOreCrusher": 1,
+    "FastCompressor": 1,
+    "FastSmeltery": 1,
+    "FastPressureChamber": 1,
+    "FastMagicWorkbench": 1,
+    "FastOreWasher": 1,
+    "FastTableSaw": 1,
+    "FastComposter": 1,
+    "FastPanningMachine": 1,
+    "FastJuicer": 1,
+    "FastAncientAltar": 1,
+    "FastInfinityWorkbench": 1,
+    "FastMobDataInfuser": 1,
+    "FastSlimeFrameFoundry": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 19,
+    "slimefun:magic_workbench": 3
+   },
+   "energy_components": 19,
+   "energy_types": {
+    "CONSUMER": 19
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "FM",
+     22
+    ],
+    [
+     "FM_FAST",
+     20
+    ]
+   ],
+   "sample_ids": [
+    "FM_ETERNAL_FIRE",
+    "FM_FAST_ANCIENT_ALTAR",
+    "FM_FAST_ARMOR_FORGE",
+    "FM_FAST_COMPOSTER",
+    "FM_FAST_COMPRESSOR"
+   ]
+  },
+  "SimpleMaterialGenerators": {
+   "name": "SimpleMaterialGenerators",
+   "n_items": 19,
+   "pct_of_total": 0.119,
+   "ids_sha256": "9dcc7814053f258dce556fc94224b525225b84f02114f9174608a703d539c75a",
+   "groups_by_dump_group_addon": [
+    "simplematerialgenerators:simplematerialgenerators"
+   ],
+   "groups_used_by_items": {
+    "simplematerialgenerators:simplematerialgenerators": 19
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "MaterialGenerator": 10,
+    "BrokenGenerator": 8,
+    "GeneratorMultiblock": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 10,
+    "slimefun:smeltery": 4,
+    "slimefun:ore_crusher": 3,
+    "slimefun:multiblock": 1,
+    "slimefun:grind_stone": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "SMG",
+     19
+    ],
+    [
+     "SMG_GENERATOR",
+     19
+    ]
+   ],
+   "sample_ids": [
+    "SMG_GENERATOR_COBBLESTONE",
+    "SMG_GENERATOR_GLASS",
+    "SMG_GENERATOR_GRAVEL",
+    "SMG_GENERATOR_GRAVEL_BROKEN",
+    "SMG_GENERATOR_MULTIBLOCK"
+   ]
+  },
+  "EcoPower": {
+   "name": "EcoPower",
+   "n_items": 18,
+   "pct_of_total": 0.113,
+   "ids_sha256": "38abbbce5ae1760359d600c0cbfbe41d247198977ce32fb4fc825b0ed8f469e5",
+   "groups_by_dump_group_addon": [
+    "ecopower:generators"
+   ],
+   "groups_used_by_items": {
+    "ecopower:generators": 18
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SteamTurbine": 3,
+    "SteamTurbineMultiblock": 3,
+    "WindTurbine": 3,
+    "WindTurbineMultiblock": 3,
+    "HighEnergySolarGenerator": 2,
+    "SteelRotor": 1,
+    "LightningReceptor": 1,
+    "LunarGenerator": 1,
+    "SolarHelmet": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 12,
+    "slimefun:multiblock": 6
+   },
+   "energy_components": 10,
+   "energy_types": {
+    "GENERATOR": 10
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "STEAM",
+     6
+    ],
+    [
+     "WIND",
+     6
+    ],
+    [
+     "STEAM_TURBINE",
+     5
+    ],
+    [
+     "WIND_TURBINE",
+     5
+    ]
+   ],
+   "sample_ids": [
+    "HIGH_ENERGY_SOLAR_GENERATOR",
+    "HIGH_ENERGY_SOLAR_HELMET",
+    "LIGHTNING_RECEPTOR",
+    "LUNAR_GENERATOR",
+    "RADIANT_SOLAR_GENERATOR"
+   ]
+  },
+  "DyeBench": {
+   "name": "DyeBench",
+   "n_items": 17,
+   "pct_of_total": 0.106,
+   "ids_sha256": "a038a05eb4d885e81f35fe6c2a48615796f4aeec1f076329197979c95be8c869",
+   "groups_by_dump_group_addon": [
+    "dyebench:jc_db_general",
+    "dyebench:jc_db_machines",
+    "dyebench:jc_db_pigments"
+   ],
+   "groups_used_by_items": {
+    "dyebench:jc_db_pigments": 16,
+    "dyebench:jc_db_machines": 1
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "DyePigments": 16,
+    "TheDyeBench": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 17
+   },
+   "energy_components": 1,
+   "energy_types": {
+    "CONSUMER": 1
+   },
+   "items_with_machine_recipes": 1,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "JC",
+     17
+    ]
+   ],
+   "sample_ids": [
+    "JC_BLACK_PIGMENT",
+    "JC_BLUE_PIGMENT",
+    "JC_BROWN_PIGMENT",
+    "JC_CYAN_PIGMENT",
+    "JC_DYEBENCH"
+   ]
+  },
+  "SlimyTreeTaps": {
+   "name": "SlimyTreeTaps",
+   "n_items": 14,
+   "pct_of_total": 0.088,
+   "ids_sha256": "6e169f6dd330695ea19afa8456e208e7a9a9268afe055b1a8aa25811a754a2f6",
+   "groups_by_dump_group_addon": [
+    "slimytreetaps:tree_taps"
+   ],
+   "groups_used_by_items": {
+    "slimytreetaps:tree_taps": 14
+   },
+   "researches_of_items": [
+    "litexpansion:rubber",
+    "slimytreetaps:amber",
+    "slimytreetaps:magical_mirror",
+    "slimytreetaps:rubber_automation",
+    "slimytreetaps:tree_taps"
+   ],
+   "n_researches_of_items": 5,
+   "items_with_research": 14,
+   "classes": {
+    "SlimefunItem": 5,
+    "TreeTool": 4,
+    "TreeTaps$1": 1,
+    "TreeTaps$2": 1,
+    "TreeTaps$3": 1,
+    "UnplaceableBlock": 1,
+    "MagicalMirror": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 10,
+    "slimytreetaps:rubber_factory": 2,
+    "slimytreetaps:tree_tap": 1,
+    "slimefun:smeltery": 1
+   },
+   "energy_components": 3,
+   "energy_types": {
+    "CONSUMER": 3
+   },
+   "items_with_machine_recipes": 3,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [],
+   "sample_ids": [
+    "AMBER",
+    "AMBER_BLOCK",
+    "BLUE_ENDER_PEARL",
+    "DIAMOND_TREE_TAP",
+    "MAGICAL_MIRROR"
+   ]
+  },
+  "Nexcavate": {
+   "name": "Nexcavate",
+   "n_items": 13,
+   "pct_of_total": 0.081,
+   "ids_sha256": "ccf80ff009cd9c78fcce453ed2a29eeebe584888ad9b9c85ee984c65cc590946",
+   "groups_by_dump_group_addon": [
+    "nexcavate:dummy",
+    "nexcavate:nexcavate"
+   ],
+   "groups_used_by_items": {
+    "nexcavate:dummy": 13
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "ResearchStation": 2,
+    "RediscoveryPickaxe": 2,
+    "Assembler": 2,
+    "PartExtractor": 2,
+    "BlackstoneCast": 1,
+    "ItemHolder": 1,
+    "NEItem": 1,
+    "NEAssembly": 1,
+    "CivilizationCore": 1
+   },
+   "recipe_types": {
+    "nexcavate:invalid": 11,
+    "slimefun:enhanced_crafting_table": 2
+   },
+   "energy_components": 3,
+   "energy_types": {
+    "CONSUMER": 3
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 11,
+   "id_prefixes": [
+    [
+     "NE",
+     13
+    ],
+    [
+     "NE_PART",
+     3
+    ]
+   ],
+   "sample_ids": [
+    "NE_ADVANCED_ASSEMBLER",
+    "NE_ANCIENT_PART",
+    "NE_BASIC_ASSEMBLER",
+    "NE_BLACKSTONE_CAST",
+    "NE_CIVILIZATION_CORE"
+   ]
+  },
+  "NotEnoughAddons": {
+   "name": "NotEnoughAddons",
+   "n_items": 12,
+   "pct_of_total": 0.075,
+   "ids_sha256": "0d548bfe45ebb3abc0191d1c4b30dbac851ef36fd3562e40626dae34f6ff1d4c",
+   "groups_by_dump_group_addon": [
+    "notenoughaddons:items",
+    "notenoughaddons:machines",
+    "notenoughaddons:notenoughaddons"
+   ],
+   "groups_used_by_items": {
+    "notenoughaddons:items": 10,
+    "notenoughaddons:machines": 2
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "BudgetDustFabricator": 1,
+    "FlyingBubble": 1,
+    "AngelBlock": 1,
+    "MinerBackpack": 1,
+    "CopperShortsword": 1,
+    "TinShortsword": 1,
+    "IronShortsword": 1,
+    "LeadShortsword": 1,
+    "SilverShortsword": 1,
+    "TungstenShortsword": 1,
+    "GoldShortsword": 1,
+    "PlatinumShortsword": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 10,
+    "slimefun:magic_workbench": 2
+   },
+   "energy_components": 2,
+   "energy_types": {
+    "CONSUMER": 2
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "SHORTSWORD",
+     8
+    ]
+   ],
+   "sample_ids": [
+    "ANGEL_BLOCK",
+    "BUDGET_DUST_FABRICATOR",
+    "FLYING_BUBBLE",
+    "MINER_BACKPACK",
+    "SHORTSWORD_COPPER"
+   ]
+  },
+  "SlimefunOreChunks": {
+   "name": "SlimefunOreChunks",
+   "n_items": 11,
+   "pct_of_total": 0.069,
+   "ids_sha256": "8a73f23e90e8bf40d91c4f9cab914b9c842fdc74671e9d3d29bd256022caebc3",
+   "groups_by_dump_group_addon": [
+    "slimefunorechunks:ore_chunks"
+   ],
+   "groups_used_by_items": {
+    "slimefunorechunks:ore_chunks": 11
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "OreChunk": 11
+   },
+   "recipe_types": {
+    "slimefun:geo_miner": 11
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 11,
+   "id_prefixes": [],
+   "sample_ids": [
+    "ALUMINUM_ORE_CHUNK",
+    "COBALT_ORE_CHUNK",
+    "COPPER_ORE_CHUNK",
+    "GOLD_ORE_CHUNK",
+    "IRON_ORE_CHUNK"
+   ]
+  },
+  "RandomExpansion": {
+   "name": "RandomExpansion",
+   "n_items": 9,
+   "pct_of_total": 0.056,
+   "ids_sha256": "b9eaac51532073c5faf993a4e32e6443b65117e4b2dd0fa244a80a0f07664fd6",
+   "groups_by_dump_group_addon": [
+    "randomexpansion:randomexpansion"
+   ],
+   "groups_used_by_items": {
+    "randomexpansion:randomexpansion": 9
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "ReinforcedPhantomMembrane": 1,
+    "MonsterHelmet": 1,
+    "MonsterChest": 1,
+    "MonsterLeggings": 1,
+    "MonsterBoots": 1,
+    "AnimalDust": 1,
+    "AnimalIngot": 1,
+    "MonsterDust": 1,
+    "DarkHeart": 1
+   },
+   "recipe_types": {
+    "slimefun:armor_forge": 4,
+    "slimefun:ore_crusher": 2,
+    "slimefun:enhanced_crafting_table": 1,
+    "slimefun:smeltery": 1,
+    "slimefun:ancient_altar": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "MONSTER",
+     5
+    ]
+   ],
+   "sample_ids": [
+    "ANIMAL_DUST",
+    "ANIMAL_INGOT",
+    "DARK_HEART",
+    "MONSTER_BOOTS",
+    "MONSTER_CHESTPLATE"
+   ]
+  },
+  "DemonicExpansion": {
+   "name": "DemonicExpansion",
+   "n_items": 9,
+   "pct_of_total": 0.056,
+   "ids_sha256": "a49550320ee9e250b09d36c5c2fa62fb9e2b8be743d2d4e3ae00829c0cc1d40c",
+   "groups_by_dump_group_addon": [
+    "demonicexpansion:group_main"
+   ],
+   "groups_used_by_items": {
+    "demonicexpansion:group_main": 9
+   },
+   "researches_of_items": [
+    "demonicexpansion:research_hell"
+   ],
+   "n_researches_of_items": 1,
+   "items_with_research": 9,
+   "classes": {
+    "DemonicEssence": 1,
+    "DemonicHelmet": 1,
+    "DemonicChestplate": 1,
+    "DemonicLeggings": 1,
+    "DemonicBoots": 1,
+    "PentecostalCoin": 1,
+    "Napalm": 1,
+    "DevilsRing": 1,
+    "ThermalGenerator": 1
+   },
+   "recipe_types": {
+    "slimefun:ancient_altar": 6,
+    "slimefun:enhanced_crafting_table": 2,
+    "slimefun:mob_drop": 1
+   },
+   "energy_components": 1,
+   "energy_types": {
+    "GENERATOR": 1
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "DX",
+     9
+    ],
+    [
+     "DX_DEMONIC",
+     5
+    ]
+   ],
+   "sample_ids": [
+    "DX_DEMONIC_BOOTS",
+    "DX_DEMONIC_CHESTPLATE",
+    "DX_DEMONIC_ESSENCE",
+    "DX_DEMONIC_HELMET",
+    "DX_DEMONIC_LEGGINGS"
+   ]
+  },
+  "ChestTerminal": {
+   "name": "ChestTerminal",
+   "n_items": 9,
+   "pct_of_total": 0.056,
+   "ids_sha256": "259ec6fee8459a6c733ebd5f6d15bc309715c25734dd31750a198221ead533ce",
+   "groups_by_dump_group_addon": [
+    "chestterminal:chest_terminal"
+   ],
+   "groups_used_by_items": {
+    "chestterminal:chest_terminal": 9
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SlimefunItem": 2,
+    "AccessTerminal": 1,
+    "ImportBus": 1,
+    "ExportBus": 1,
+    "ChestTerminal$1": 1,
+    "ChestTerminal$2": 1,
+    "ChestTerminal$3": 1,
+    "ChestTerminal$4": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 8,
+    "slimefun:geo_miner": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 1,
+   "id_prefixes": [
+    [
+     "CT",
+     7
+    ],
+    [
+     "CT_WIRELESS",
+     4
+    ],
+    [
+     "CT_WIRELESS_ACCESS",
+     4
+    ]
+   ],
+   "sample_ids": [
+    "CHEST_TERMINAL",
+    "CT_EXPORT_BUS",
+    "CT_IMPORT_BUS",
+    "CT_PANEL",
+    "CT_WIRELESS_ACCESS_TERMINAL_128"
+   ]
+  },
+  "AdvancedTech": {
+   "name": "AdvancedTech",
+   "n_items": 9,
+   "pct_of_total": 0.056,
+   "ids_sha256": "df54d47fb89fd2d3d477b863916363164f0f0d5f2e2cb81941162f3e66d5102a",
+   "groups_by_dump_group_addon": [
+    "advancedtech:advanced_tech"
+   ],
+   "groups_used_by_items": {
+    "advancedtech:advanced_tech": 9
+   },
+   "researches_of_items": [
+    "advancedtech:advanced_tech_diggers",
+    "advancedtech:advanced_tech_gens",
+    "advancedtech:advanced_tech_resources"
+   ],
+   "n_researches_of_items": 3,
+   "items_with_research": 6,
+   "classes": {
+    "boosted_carbonado": 1,
+    "framed_uranium": 1,
+    "FireCake": 1,
+    "command_engine": 1,
+    "command_hub": 1,
+    "handheld_digger_1": 1,
+    "handheld_digger_2": 1,
+    "handheld_digger_3": 1,
+    "AdvancedSolarGen": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 8,
+    "slimefun:magic_workbench": 1
+   },
+   "energy_components": 1,
+   "energy_types": {
+    "GENERATOR": 1
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "HANDHELD",
+     3
+    ],
+    [
+     "HANDHELD_DIGGER",
+     3
+    ]
+   ],
+   "sample_ids": [
+    "ADVANCED_SOLAR_GEN",
+    "BOOSTED_CARBONADO",
+    "COMMAND_HUB",
+    "COMMAND_HUB_ENGINE",
+    "FIRE_CAKE"
+   ]
+  },
+  "ExtraTools": {
+   "name": "ExtraTools",
+   "n_items": 8,
+   "pct_of_total": 0.05,
+   "ids_sha256": "c00f68d409c9afde29db44cd435d05c067eed064b1975fed961e1ba132e74bde",
+   "groups_by_dump_group_addon": [
+    "extratools:extra_tools"
+   ],
+   "groups_used_by_items": {
+    "extratools:extra_tools": 8
+   },
+   "researches_of_items": [
+    "extratools:cobblestone_generator",
+    "extratools:concrete_factory",
+    "extratools:electric_composter",
+    "extratools:electric_composter_2",
+    "extratools:gold_transmuter",
+    "extratools:hammer",
+    "extratools:pulverizer",
+    "extratools:vaporizer"
+   ],
+   "n_researches_of_items": 8,
+   "items_with_research": 8,
+   "classes": {
+    "Hammer": 1,
+    "GoldTransmuter": 1,
+    "ExtraTools$1": 1,
+    "ExtraTools$2": 1,
+    "CobblestoneGenerator": 1,
+    "Vaporizer": 1,
+    "ConcreteFactory": 1,
+    "Pulverizer": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 7,
+    "slimefun:magic_workbench": 1
+   },
+   "energy_components": 7,
+   "energy_types": {
+    "CONSUMER": 7
+   },
+   "items_with_machine_recipes": 6,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [],
+   "sample_ids": [
+    "COBBLESTONE_GENERATOR",
+    "CONCRETE_FACTORY",
+    "ELECTRIC_COMPOSTER",
+    "ELECTRIC_COMPOSTER_2",
+    "GOLD_TRANSMUTER"
+   ]
+  },
+  "InfernalExpansion": {
+   "name": "InfernalExpansion",
+   "n_items": 8,
+   "pct_of_total": 0.05,
+   "ids_sha256": "321a4518551875de1d0573d8e6397c3acb24b99dc4a8a959ae30ecb166cda36a",
+   "groups_by_dump_group_addon": [
+    "infernalexpansion:infernal_runes"
+   ],
+   "groups_used_by_items": {
+    "infernalexpansion:infernal_runes": 6,
+    "slimefun:talismans": 1,
+    "slimefun:ender_talismans": 1
+   },
+   "researches_of_items": [
+    "slimefun:ender_talismans"
+   ],
+   "n_researches_of_items": 1,
+   "items_with_research": 1,
+   "classes": {
+    "ThermalWalkRune": 1,
+    "BedRune": 1,
+    "PortableNetherTeleporter": 1,
+    "PyromaniacBlazeRod": 1,
+    "FireballLauncher": 1,
+    "PiglinTalisman": 1,
+    "EnderTalisman": 1,
+    "PiglinAttractor": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 3,
+    "slimefun:magic_workbench": 3,
+    "slimefun:ancient_altar": 2
+   },
+   "energy_components": 1,
+   "energy_types": {
+    "CONSUMER": 1
+   },
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [],
+   "sample_ids": [
+    "ANCIENT_RUNE_BED",
+    "ANCIENT_RUNE_THERMAL_WALK",
+    "ENDER_PIGLIN_TALISMAN",
+    "FIREBALL_LAUNCHER",
+    "PIGLIN_ATTRACTOR"
+   ]
+  },
+  "EquivalencyTech": {
+   "name": "EquivalencyTech",
+   "n_items": 8,
+   "pct_of_total": 0.05,
+   "ids_sha256": "44d6acb2873f454e1c687d2f632dbc0d867a89c20043a51749d80b7f6785386f",
+   "groups_by_dump_group_addon": [
+    "equivalencytech:danktech_main"
+   ],
+   "groups_used_by_items": {
+    "equivalencytech:danktech_main": 8
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "EQSlimefunItem": 8
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 6,
+    "slimefun:null": 2
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 2,
+   "id_prefixes": [
+    [
+     "EQ",
+     8
+    ],
+    [
+     "EQ_COAL",
+     3
+    ]
+   ],
+   "sample_ids": [
+    "EQ_COAL_1",
+    "EQ_COAL_2",
+    "EQ_COAL_3",
+    "EQ_C_CHEST",
+    "EQ_DARK_MATTER"
+   ]
+  },
+  "VillagerUtil": {
+   "name": "VillagerUtil",
+   "n_items": 7,
+   "pct_of_total": 0.044,
+   "ids_sha256": "f3854e5c199efe0f12da13438923c3e365aeada643c2da4603a7b1f1aab379be",
+   "groups_by_dump_group_addon": [
+    "villagerutil:villager_util"
+   ],
+   "groups_used_by_items": {
+    "villagerutil:villager_util": 7
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SlimefunItem": 2,
+    "TransportCharm": 1,
+    "CureWand": 1,
+    "NitwitWand": 1,
+    "TradeWand": 1,
+    "TransportWand": 1
+   },
+   "recipe_types": {
+    "slimefun:ancient_altar": 5,
+    "slimefun:enhanced_crafting_table": 1,
+    "villagerutil:transport_wand_recipe_type": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "VU",
+     7
+    ]
+   ],
+   "sample_ids": [
+    "VU_CURE_WAND",
+    "VU_ESSENCE",
+    "VU_NITWIT_WAND",
+    "VU_TOKEN",
+    "VU_TRADE_WAND"
+   ]
+  },
+  "Obsidian-Armor": {
+   "name": "Obsidian-Armor",
+   "n_items": 5,
+   "pct_of_total": 0.031,
+   "ids_sha256": "12fceaa22f82c579c58275055ef79b8d4a4db919a4dc68057676db8e4320f7bc",
+   "groups_by_dump_group_addon": [
+    "obsidian-armor:obsidian_armor"
+   ],
+   "groups_used_by_items": {
+    "obsidian-armor:obsidian_armor": 5
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SlimefunItem": 5
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 5
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "OBSIDIAN",
+     5
+    ]
+   ],
+   "sample_ids": [
+    "OBSIDIAN_ALLOY",
+    "OBSIDIAN_BOOTS",
+    "OBSIDIAN_CHESTPLATE",
+    "OBSIDIAN_HELMET",
+    "OBSIDIAN_LEGGINGS"
+   ]
+  },
+  "SlimefunLuckyBlocks": {
+   "name": "SlimefunLuckyBlocks",
+   "n_items": 4,
+   "pct_of_total": 0.025,
+   "ids_sha256": "6ee1bdc76f062bcfda6d03df19aac83b2890cbdf4c4d9d9e9160e740d50cef47",
+   "groups_by_dump_group_addon": [
+    "slimefunluckyblocks:lucky_blocks"
+   ],
+   "groups_used_by_items": {
+    "slimefunluckyblocks:lucky_blocks": 4
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "LuckyBlock": 4
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 4
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "LUCKY",
+     3
+    ]
+   ],
+   "sample_ids": [
+    "LUCKY_BLOCK",
+    "LUCKY_BLOCK_LUCKY",
+    "LUCKY_BLOCK_UNLUCKY",
+    "PANDORAS_BOX"
+   ]
+  },
+  "SimpleUtils": {
+   "name": "SimpleUtils",
+   "n_items": 4,
+   "pct_of_total": 0.025,
+   "ids_sha256": "bd649eeaf7fb35236dad56f4c090582c815e1c98202613437e6218c51086deba",
+   "groups_by_dump_group_addon": [
+    "simpleutils:main"
+   ],
+   "groups_used_by_items": {
+    "simpleutils:main": 4
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "Workbench": 1,
+    "Sieve": 1,
+    "Elevator": 1,
+    "Wrench": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 3,
+    "slimefun:multiblock": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [
+    [
+     "SIMPLE",
+     4
+    ]
+   ],
+   "sample_ids": [
+    "SIMPLE_ELEVATOR",
+    "SIMPLE_SIEVE",
+    "SIMPLE_WORKBENCH",
+    "SIMPLE_WRENCH"
+   ]
+  },
+  "SFPortalGunsExtension": {
+   "name": "SFPortalGunsExtension",
+   "n_items": 3,
+   "pct_of_total": 0.019,
+   "ids_sha256": "7ad8b189d47304af7a9c71c29e5dd7a75df2531524711ec04095ec5b94cfc8e8",
+   "groups_by_dump_group_addon": [
+    "sfportalgunsextension:portal_guns"
+   ],
+   "groups_used_by_items": {
+    "sfportalgunsextension:portal_guns": 3
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SlimefunItem": 1,
+    "PortalGunItem": 1,
+    "GravityGunItem": 1
+   },
+   "recipe_types": {
+    "slimefun:magic_workbench": 3
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [],
+   "sample_ids": [
+    "GRAVITY_GUN",
+    "PORTAL_FLUID",
+    "PORTAL_GUN"
+   ]
+  },
+  "WorldEditSlimefun": {
+   "name": "WorldEditSlimefun",
+   "n_items": 1,
+   "pct_of_total": 0.006,
+   "ids_sha256": "1ebe19bd251269bf17784c281b12ed8f99c2880b95902763b3ce8443a325d0be",
+   "groups_by_dump_group_addon": [
+    "worldeditslimefun:world_edit_slimefun"
+   ],
+   "groups_used_by_items": {
+    "worldeditslimefun:world_edit_slimefun": 1
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "SlimefunItem": 1
+   },
+   "recipe_types": {
+    "slimefun:null": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 1,
+   "id_prefixes": [],
+   "sample_ids": [
+    "WESF_WAND"
+   ]
+  },
+  "Drugfun": {
+   "name": "Drugfun",
+   "n_items": 1,
+   "pct_of_total": 0.006,
+   "ids_sha256": "d97975f18c8b2088cf71f17614dd227c138db12414268d4ada64f50ce2397255",
+   "groups_by_dump_group_addon": [
+    "drugfun:drugs"
+   ],
+   "groups_used_by_items": {
+    "drugfun:drugs": 1
+   },
+   "researches_of_items": [],
+   "n_researches_of_items": 0,
+   "items_with_research": 0,
+   "classes": {
+    "Morphine": 1
+   },
+   "recipe_types": {
+    "slimefun:enhanced_crafting_table": 1
+   },
+   "energy_components": 0,
+   "energy_types": {},
+   "items_with_machine_recipes": 0,
+   "disabled": 0,
+   "items_without_recipe": 0,
+   "id_prefixes": [],
+   "sample_ids": [
+    "DRUG_MORPHINE"
+   ]
+  }
+ }
+}

@@ -65,6 +65,17 @@ public class HybridCompatSmoke extends JavaPlugin {
             if (hierarchyHas(it.getClass(), "MultiBlock")) multiblocks++;
             if (hierarchyHas(it.getClass(), "AContainer") || hierarchyHas(it.getClass(), "AbstractMachine") || hierarchyHas(it.getClass(), "MachineBlock")) machines++;
         }
+        // Lista completa de ids registrados (id, addon, grupo, clase) para comparar por CONJUNTO DE IDS con el volcado
+        // de produccion (compare_ids.py): el nombre de addon no es fiable (p. ej. Nanotech se registra con un nombre largo).
+        StringBuilder tsv = new StringBuilder("id\taddon\tgroup\tclass\n");
+        for (SlimefunItem it : all) {
+            Object addon = call(it, "getAddon");
+            Object grp = call(it, "getItemGroup");
+            Object gk = grp == null ? null : call(grp, "getKey");
+            tsv.append(it.getId()).append('\t').append(addon == null ? "" : String.valueOf(call(addon, "getName"))).append('\t')
+                .append(gk == null ? "" : gk).append('\t').append(it.getClass().getName()).append('\n');
+        }
+        Files.writeString(new File("registered-ids.tsv").toPath(), tsv.toString());
         Object reg = Slimefun.getRegistry();
         Object groups = call(reg, "getAllItemGroups");
         Object researches = call(reg, "getResearches");

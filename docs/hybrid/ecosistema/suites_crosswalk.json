@@ -1,0 +1,2454 @@
+{
+ "suites_commit_note": "ver REPORT.md",
+ "n_SlimefunItemStack_string_literal_calls": 0,
+ "modules_declared_via_super(plugin,key,display)": {
+  "drakes-bio/cultivation": [
+   "cultivation",
+   "Advanced Plant Cultivation"
+  ],
+  "drakes-bio/exoticgarden": [
+   "exotic_garden",
+   "Exotic Garden & Culinary Arts"
+  ],
+  "drakes-bio/flowerpower": [
+   "flowerpower",
+   "FlowerPower Botanical Acceleration"
+  ],
+  "drakes-bio/geneticchickens": [
+   "genetic_chickens",
+   "GeneticChickengineering Tiers 0-9"
+  ],
+  "drakes-bio/mobcapturer": [
+   "mob_capturer",
+   "Bio-Extraction & Mob Capturing"
+  ],
+  "drakes-bio/slimybees": [
+   "slimy_bees",
+   "SlimyBees Genetic Apiary"
+  ],
+  "drakes-bio/treetaps": [
+   "slimytreetaps",
+   "SlimyTreeTaps Bio-Resin Harvesting"
+  ],
+  "drakes-combat/extragear": [
+   "extragear",
+   "ExtraGear Modular Armors & Elemental Weapons"
+  ],
+  "drakes-combat/mobdrops": [
+   "sfmobdrops",
+   "SFMobDrops Custom Loot Tables"
+  ],
+  "drakes-combat/nukes": [
+   "slimefun_nukes",
+   "SlimefunNukes Tactical Warheads & Deterrence"
+  ],
+  "drakes-combat/obsidian": [
+   "obsidian_expansion",
+   "ObsidianExpansion & ObsidianArmor T10 Plating"
+  ],
+  "drakes-combat/slimefundisc": [
+   "slimefundisc",
+   "SlimefunDisc Custom Acoustic & Music Resonance"
+  ],
+  "drakes-combat/tinker": [
+   "slimetinker",
+   "SlimeTinker Custom Tools & Traits"
+  ],
+  "drakes-combat/warfare": [
+   "warfare",
+   "SlimefunWarfare Ballistics & Exoskeletons"
+  ],
+  "drakes-generators/betterreactors": [
+   "better_reactors",
+   "BetterNuclearReactor Fission & Cryocooling"
+  ],
+  "drakes-generators/ecopower": [
+   "ecopower",
+   "EcoPower Clean & Sustainable Energy Grids"
+  ],
+  "drakes-generators/liquid": [
+   "liquid",
+   "Liquid Hydrocarbons & Fluid Dynamics"
+  ],
+  "drakes-generators/litexpansion": [
+   "litexpansion",
+   "LiteXpansion Void Reactors & Solar Grids"
+  ],
+  "drakes-generators/orechunks": [
+   "ore_chunks",
+   "Slimefun OreChunks Mineral Processing"
+  ],
+  "drakes-generators/smg": [
+   "smg",
+   "SMG Material Generators"
+  ],
+  "drakes-generators/ultimategenerators": [
+   "ultimate_generators",
+   "UltimateGenerators2 Power Grids"
+  ],
+  "drakes-magic/alchimiavitae": [
+   "alchimia_vitae",
+   "AlchimiaVitae Transmutations & Infusions"
+  ],
+  "drakes-magic/crystamae": [
+   "crystamae",
+   "Crystamae Resonance"
+  ],
+  "drakes-magic/relics": [
+   "relics_cthonia",
+   "Relics of Cthonia Underworld"
+  ],
+  "drakes-magic/souljars": [
+   "soul_jars",
+   "Soul Containment Jars"
+  ],
+  "drakes-server/economy": [
+   "market",
+   "Drakes SlimeMarket, SII & Chilean Economy Engine"
+  ],
+  "drakes-tech/dynatech": [
+   "dynatech",
+   "DynaTech Advanced Machines & Generators"
+  ],
+  "drakes-tech/fluffymachines": [
+   "fluffymachines",
+   "FluffyMachines Automation"
+  ],
+  "drakes-tech/foxy": [
+   "foxy",
+   "FoxyMachines Automation"
+  ],
+  "drakes-tech/infinity": [
+   "infinity",
+   "Infinity Expansion & Singularities"
+  ],
+  "drakes-tech/nanotech": [
+   "nanotech",
+   "Drakes Nanotechnology & Stark Engineering"
+  ],
+  "drakes-tech/supreme": [
+   "supreme",
+   "Supreme Expansion & Quantum Compression"
+  ],
+  "drakes-utility/backpacks": [
+   "backpacks",
+   "DyedBackpacks & Utility Storage"
+  ],
+  "drakes-utility/chestterminal": [
+   "chest_terminal",
+   "ChestTerminal Digital Access"
+  ],
+  "drakes-utility/endercarryon": [
+   "endercarryon",
+   "EnderCarryOn Block & Entity Carry Mechanics"
+  ],
+  "drakes-utility/enderchests": [
+   "colored_enderchests",
+   "Frequency Colored EnderChests"
+  ],
+  "drakes-utility/extratools": [
+   "extratools",
+   "ExtraTools 3x3 Mining & Multi-Harvest Tools"
+  ],
+  "drakes-utility/notenoughaddons": [
+   "notenoughaddons",
+   "NotEnoughAddons Expansion & Terraria Tools"
+  ],
+  "drakes-utility/portalgun": [
+   "portalgun",
+   "SFPortalGun Quantum Entanglement Teleporters"
+  ],
+  "drakes-utility/sfcalc": [
+   "sfcalc",
+   "SFCalc Recipe & Resource Calculator"
+  ],
+  "drakes-utility/simpleutils": [
+   "simpleutils",
+   "SimpleUtils Utility Blocks & Tools"
+  ],
+  "drakes-utility/slimehud": [
+   "slimehud",
+   "SlimeHUD Holographic Overlay"
+  ],
+  "drakes-utility/soundmuffler": [
+   "soundmuffler",
+   "SoundMuffler Machine Noise Dampener"
+  ],
+  "drakes-utility/trash": [
+   "trash",
+   "Trash Disposal System"
+  ],
+  "drakes-utility/vanillapatpat": [
+   "vanillapatpat",
+   "VanillaPatPat Mob Interaction & Petting Mechanics"
+  ]
+ },
+ "module_to_dump_addon_by_id_overlap": [
+  {
+   "suite": "drakes-bio",
+   "package": "",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "BiomeSemanticAdapterTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "CultivationModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "DrakesBioPlugin.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "ExcitationEngineTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "ExoticGardenModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 28,
+   "dump_id_hits": 27,
+   "by_addon": {
+    "ExoticGarden": 27
+   }
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "FlowerPowerModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 23,
+   "dump_id_hits": 23,
+   "by_addon": {
+    "FlowerPower": 23
+   }
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "GeneticChickensModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "MobCapturerModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 3,
+   "dump_id_hits": 2,
+   "by_addon": {
+    "MobCapturer": 2
+   }
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "SlimyBeesModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 5,
+   "dump_id_hits": 3,
+   "by_addon": {
+    "SlimyBees": 3
+   }
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "TreeTapsModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "biome",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "cultivation",
+   "module_key": "cultivation",
+   "module_display": "Advanced Plant Cultivation",
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "exoticgarden",
+   "module_key": "exotic_garden",
+   "module_display": "Exotic Garden & Culinary Arts",
+   "literals": 37,
+   "dump_id_hits": 37,
+   "by_addon": {
+    "ExoticGarden": 37
+   }
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "flowerpower",
+   "module_key": "flowerpower",
+   "module_display": "FlowerPower Botanical Acceleration",
+   "literals": 23,
+   "dump_id_hits": 23,
+   "by_addon": {
+    "FlowerPower": 23
+   }
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "geneticchickens",
+   "module_key": "genetic_chickens",
+   "module_display": "GeneticChickengineering Tiers 0-9",
+   "literals": 13,
+   "dump_id_hits": 12,
+   "by_addon": {
+    "Slimefun": 10,
+    "GeneticChickengineering": 2
+   }
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "mobcapturer",
+   "module_key": "mob_capturer",
+   "module_display": "Bio-Extraction & Mob Capturing",
+   "literals": 3,
+   "dump_id_hits": 2,
+   "by_addon": {
+    "MobCapturer": 2
+   }
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "slimybees",
+   "module_key": "slimy_bees",
+   "module_display": "SlimyBees Genetic Apiary",
+   "literals": 7,
+   "dump_id_hits": 7,
+   "by_addon": {
+    "SlimyBees": 7
+   }
+  },
+  {
+   "suite": "drakes-bio",
+   "package": "treetaps",
+   "module_key": "slimytreetaps",
+   "module_display": "SlimyTreeTaps Bio-Resin Harvesting",
+   "literals": 10,
+   "dump_id_hits": 9,
+   "by_addon": {
+    "SlimyTreeTaps": 9
+   }
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "DrakesCombatPlugin.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "ExtraGearModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 6,
+   "dump_id_hits": 5,
+   "by_addon": {
+    "Slimefun": 2,
+    "ExtraGear": 2,
+    "Obsidian-Armor": 1
+   }
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "MobDropsModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "Slimefun": 1
+   }
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "ObsidianExpansionModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "SlimeTinkerModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 6,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "Slimefun": 1
+   }
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "SlimefunDiscModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "SlimefunNukesModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "WarfareModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 14,
+   "dump_id_hits": 9,
+   "by_addon": {
+    "SlimefunWarfare": 9
+   }
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "extragear",
+   "module_key": "extragear",
+   "module_display": "ExtraGear Modular Armors & Elemental Weapons",
+   "literals": 17,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "mobdrops",
+   "module_key": "sfmobdrops",
+   "module_display": "SFMobDrops Custom Loot Tables",
+   "literals": 7,
+   "dump_id_hits": 7,
+   "by_addon": {
+    "Slimefun": 6,
+    "ElementManipulation": 1
+   }
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "nukes",
+   "module_key": "slimefun_nukes",
+   "module_display": "SlimefunNukes Tactical Warheads & Deterrence",
+   "literals": 2,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "obsidian",
+   "module_key": "obsidian_expansion",
+   "module_display": "ObsidianExpansion & ObsidianArmor T10 Plating",
+   "literals": 21,
+   "dump_id_hits": 15,
+   "by_addon": {
+    "ObsidianExpansion": 10,
+    "Obsidian-Armor": 5
+   }
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "slimefundisc",
+   "module_key": "slimefundisc",
+   "module_display": "SlimefunDisc Custom Acoustic & Music Resonance",
+   "literals": 4,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "tinker",
+   "module_key": "slimetinker",
+   "module_display": "SlimeTinker Custom Tools & Traits",
+   "literals": 9,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "Slimefun": 1
+   }
+  },
+  {
+   "suite": "drakes-combat",
+   "package": "warfare",
+   "module_key": "warfare",
+   "module_display": "SlimefunWarfare Ballistics & Exoskeletons",
+   "literals": 23,
+   "dump_id_hits": 17,
+   "by_addon": {
+    "SlimefunWarfare": 17
+   }
+  },
+  {
+   "suite": "drakes-core",
+   "package": "",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "CommandModalityGateTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "CommandModalityRuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "CrossVersionAdapterTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "DrakesCorePlugin.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "NativeEngineBridgeTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 4,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "Slimefun": 1
+   }
+  },
+  {
+   "suite": "drakes-core",
+   "package": "PurpurRuntimeProviderTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "SlimefunWorldFilterTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "Slimefun": 1
+   }
+  },
+  {
+   "suite": "drakes-core",
+   "package": "SuiteDatabaseEngineTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "InfinityExpansion": 1
+   }
+  },
+  {
+   "suite": "drakes-core",
+   "package": "SuiteItemPdcBridgeTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 3,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "Slimefun": 1
+   }
+  },
+  {
+   "suite": "drakes-core",
+   "package": "SuiteTickerEngineTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "command",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "compat",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "database",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "logging",
+   "module_key": null,
+   "module_display": null,
+   "literals": 6,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "module",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "nativeengine",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "pdc",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "registry",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "runtime",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "ticker",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-core",
+   "package": "world",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "BetterReactorsModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "DrakesGeneratorsPlugin.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "EcoPowerModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "LiquidModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "OreChunksModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "SMGModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 3,
+   "dump_id_hits": 3,
+   "by_addon": {
+    "SimpleMaterialGenerators": 3
+   }
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "UltimateGeneratorsModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 11,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "betterreactors",
+   "module_key": "better_reactors",
+   "module_display": "BetterNuclearReactor Fission & Cryocooling",
+   "literals": 13,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "ecopower",
+   "module_key": "ecopower",
+   "module_display": "EcoPower Clean & Sustainable Energy Grids",
+   "literals": 5,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "liquid",
+   "module_key": "liquid",
+   "module_display": "Liquid Hydrocarbons & Fluid Dynamics",
+   "literals": 9,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "litexpansion",
+   "module_key": "litexpansion",
+   "module_display": "LiteXpansion Void Reactors & Solar Grids",
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "orechunks",
+   "module_key": "ore_chunks",
+   "module_display": "Slimefun OreChunks Mineral Processing",
+   "literals": 11,
+   "dump_id_hits": 11,
+   "by_addon": {
+    "SlimefunOreChunks": 11
+   }
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "smg",
+   "module_key": "smg",
+   "module_display": "SMG Material Generators",
+   "literals": 2,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "SimpleMaterialGenerators": 1
+   }
+  },
+  {
+   "suite": "drakes-generators",
+   "package": "ultimategenerators",
+   "module_key": "ultimate_generators",
+   "module_display": "UltimateGenerators2 Power Grids",
+   "literals": 22,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-magic",
+   "package": "",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-magic",
+   "package": "AlchimiaVitaeModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 12,
+   "dump_id_hits": 12,
+   "by_addon": {
+    "AlchimiaVitae": 12
+   }
+  },
+  {
+   "suite": "drakes-magic",
+   "package": "CrystamaeModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 32,
+   "dump_id_hits": 16,
+   "by_addon": {
+    "CrystamaeHistoria": 16
+   }
+  },
+  {
+   "suite": "drakes-magic",
+   "package": "DrakesMagicPlugin.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-magic",
+   "package": "SoulJarsModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 4,
+   "dump_id_hits": 4,
+   "by_addon": {
+    "SoulJars": 4
+   }
+  },
+  {
+   "suite": "drakes-magic",
+   "package": "alchimiavitae",
+   "module_key": "alchimia_vitae",
+   "module_display": "AlchimiaVitae Transmutations & Infusions",
+   "literals": 16,
+   "dump_id_hits": 16,
+   "by_addon": {
+    "AlchimiaVitae": 16
+   }
+  },
+  {
+   "suite": "drakes-magic",
+   "package": "crystamae",
+   "module_key": "crystamae",
+   "module_display": "Crystamae Resonance",
+   "literals": 52,
+   "dump_id_hits": 17,
+   "by_addon": {
+    "CrystamaeHistoria": 17
+   }
+  },
+  {
+   "suite": "drakes-magic",
+   "package": "relics",
+   "module_key": "relics_cthonia",
+   "module_display": "Relics of Cthonia Underworld",
+   "literals": 24,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-magic",
+   "package": "souljars",
+   "module_key": "soul_jars",
+   "module_display": "Soul Containment Jars",
+   "literals": 2,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "SoulJars": 1
+   }
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "",
+   "module_key": null,
+   "module_display": null,
+   "literals": 17,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "Slimefun": 1
+   }
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "BarrelMenu.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "BlockListener.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "Blueprints.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "CellMenu.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "ChatPrompts.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "CrafterMenu.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "CraftingGridMenu.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "CraftingListener.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "CraftingSupport.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "DeviceType.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "DrakesMultiversePlugin.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "EncoderMenu.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "FilterMenu.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "GreedyMenu.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 6,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "GuiListener.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "Items.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 38,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "Keys.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "LegacyChunkData.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "MenuHolder.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "MonitorMenu.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "MvnetsCommand.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "Network.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NetworkManager.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NetworkStorage.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NetworkTicker.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NodeBlob.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NodeIO.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NodeRecord.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NodeRegion.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NodeStore.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NodeStoreCorruptionTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NodeStoreEncodingTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NodeStoreLazyEncodeTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "NodeStoreRegionTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "PosUtil.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "QuantumWorkbenchMenu.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "RecipeData.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "RegionFile.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "Settings.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "SlimefunBridge.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "StackUtils.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "StorageListener.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "TerminalMenu.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "Text.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-multiverse",
+   "package": "WorldNodes.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-onechunk",
+   "package": "",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-onechunk",
+   "package": "ColumnProfile.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-onechunk",
+   "package": "ColumnProfileTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 3,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-onechunk",
+   "package": "OneChunkAddon.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-server",
+   "package": "",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-server",
+   "package": "DrakesServerPlugin.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-server",
+   "package": "LiveServerYamlConfigSmokeTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-server",
+   "package": "StarServerSmokeTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 7,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-server",
+   "package": "economy",
+   "module_key": "market",
+   "module_display": "Drakes SlimeMarket, SII & Chilean Economy Engine",
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-server",
+   "package": "modalities",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-server",
+   "package": "purchase",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-server",
+   "package": "vaults",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-tech",
+   "package": "",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-tech",
+   "package": "DrakesTechPlugin.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-tech",
+   "package": "DynaTechModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 10,
+   "dump_id_hits": 7,
+   "by_addon": {
+    "DynaTech": 7
+   }
+  },
+  {
+   "suite": "drakes-tech",
+   "package": "FluffyMachinesModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 3,
+   "dump_id_hits": 3,
+   "by_addon": {
+    "FluffyMachines": 3
+   }
+  },
+  {
+   "suite": "drakes-tech",
+   "package": "FoxyMachinesModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-tech",
+   "package": "dynatech",
+   "module_key": "dynatech",
+   "module_display": "DynaTech Advanced Machines & Generators",
+   "literals": 23,
+   "dump_id_hits": 16,
+   "by_addon": {
+    "DynaTech": 16
+   }
+  },
+  {
+   "suite": "drakes-tech",
+   "package": "fluffymachines",
+   "module_key": "fluffymachines",
+   "module_display": "FluffyMachines Automation",
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-tech",
+   "package": "foxy",
+   "module_key": "foxy",
+   "module_display": "FoxyMachines Automation",
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-tech",
+   "package": "infinity",
+   "module_key": "infinity",
+   "module_display": "Infinity Expansion & Singularities",
+   "literals": 23,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "MagicXpansion": 1
+   }
+  },
+  {
+   "suite": "drakes-tech",
+   "package": "nanotech",
+   "module_key": "nanotech",
+   "module_display": "Drakes Nanotechnology & Stark Engineering",
+   "literals": 206,
+   "dump_id_hits": 182,
+   "by_addon": {
+    "DrakesNanotech": 158,
+    "Slimefun": 13,
+    "Supreme": 7,
+    "InfinityExpansion": 4
+   }
+  },
+  {
+   "suite": "drakes-tech",
+   "package": "supreme",
+   "module_key": "supreme",
+   "module_display": "Supreme Expansion & Quantum Compression",
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "",
+   "module_key": null,
+   "module_display": null,
+   "literals": 4,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "BackpacksModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 1,
+   "by_addon": {
+    "DyedBackpacks": 1
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "ChestTerminalModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 8,
+   "dump_id_hits": 8,
+   "by_addon": {
+    "ChestTerminal": 8
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "ColoredEnderChestsModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 2,
+   "by_addon": {
+    "ColoredEnderChests": 2
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "DrakesUtilityPlugin.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "EnderCarryOnModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "ExtraToolsModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 11,
+   "dump_id_hits": 11,
+   "by_addon": {
+    "ExtraTools": 8,
+    "Slimefun": 3
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "NotEnoughAddonsModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 6,
+   "dump_id_hits": 6,
+   "by_addon": {
+    "NotEnoughAddons": 6
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "PortalGunModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 2,
+   "by_addon": {
+    "SFPortalGunsExtension": 2
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "SFCalcModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 11,
+   "dump_id_hits": 3,
+   "by_addon": {
+    "Slimefun": 3
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "SlimeHUDModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 2,
+   "dump_id_hits": 2,
+   "by_addon": {
+    "Slimefun": 2
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "VanillaPatPatModuleTest.java",
+   "module_key": null,
+   "module_display": null,
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "backpacks",
+   "module_key": "backpacks",
+   "module_display": "DyedBackpacks & Utility Storage",
+   "literals": 17,
+   "dump_id_hits": 3,
+   "by_addon": {
+    "Slimefun": 3
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "chestterminal",
+   "module_key": "chest_terminal",
+   "module_display": "ChestTerminal Digital Access",
+   "literals": 10,
+   "dump_id_hits": 9,
+   "by_addon": {
+    "ChestTerminal": 9
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "endercarryon",
+   "module_key": "endercarryon",
+   "module_display": "EnderCarryOn Block & Entity Carry Mechanics",
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "enderchests",
+   "module_key": "colored_enderchests",
+   "module_display": "Frequency Colored EnderChests",
+   "literals": 5,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "extratools",
+   "module_key": "extratools",
+   "module_display": "ExtraTools 3x3 Mining & Multi-Harvest Tools",
+   "literals": 11,
+   "dump_id_hits": 11,
+   "by_addon": {
+    "ExtraTools": 8,
+    "Slimefun": 3
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "notenoughaddons",
+   "module_key": "notenoughaddons",
+   "module_display": "NotEnoughAddons Expansion & Terraria Tools",
+   "literals": 22,
+   "dump_id_hits": 21,
+   "by_addon": {
+    "NotEnoughAddons": 12,
+    "Slimefun": 9
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "portalgun",
+   "module_key": "portalgun",
+   "module_display": "SFPortalGun Quantum Entanglement Teleporters",
+   "literals": 6,
+   "dump_id_hits": 4,
+   "by_addon": {
+    "SFPortalGunsExtension": 3,
+    "ExoticGarden": 1
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "sfcalc",
+   "module_key": "sfcalc",
+   "module_display": "SFCalc Recipe & Resource Calculator",
+   "literals": 9,
+   "dump_id_hits": 6,
+   "by_addon": {
+    "Slimefun": 6
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "simpleutils",
+   "module_key": "simpleutils",
+   "module_display": "SimpleUtils Utility Blocks & Tools",
+   "literals": 3,
+   "dump_id_hits": 3,
+   "by_addon": {
+    "SimpleUtils": 3
+   }
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "slimehud",
+   "module_key": "slimehud",
+   "module_display": "SlimeHUD Holographic Overlay",
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "soundmuffler",
+   "module_key": "soundmuffler",
+   "module_display": "SoundMuffler Machine Noise Dampener",
+   "literals": 1,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "trash",
+   "module_key": "trash",
+   "module_display": "Trash Disposal System",
+   "literals": 0,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  },
+  {
+   "suite": "drakes-utility",
+   "package": "vanillapatpat",
+   "module_key": "vanillapatpat",
+   "module_display": "VanillaPatPat Mob Interaction & Petting Mechanics",
+   "literals": 2,
+   "dump_id_hits": 0,
+   "by_addon": {}
+  }
+ ],
+ "literal_coverage_by_addon": {
+  "Slimefun": {
+   "n_items": 554,
+   "literal_hits_in_suites": 40
+  },
+  "SlimyTreeTaps": {
+   "n_items": 14,
+   "literal_hits_in_suites": 9
+  },
+  "LiteXpansion": {
+   "n_items": 64,
+   "literal_hits_in_suites": 0
+  },
+  "ExoticGarden": {
+   "n_items": 264,
+   "literal_hits_in_suites": 37
+  },
+  "InfinityExpansion": {
+   "n_items": 156,
+   "literal_hits_in_suites": 5
+  },
+  "DynaTech": {
+   "n_items": 123,
+   "literal_hits_in_suites": 16
+  },
+  "SimpleMaterialGenerators": {
+   "n_items": 19,
+   "literal_hits_in_suites": 3
+  },
+  "TranscEndence": {
+   "n_items": 34,
+   "literal_hits_in_suites": 0
+  },
+  "SlimefunWarfare": {
+   "n_items": 98,
+   "literal_hits_in_suites": 17
+  },
+  "FluffyMachines": {
+   "n_items": 52,
+   "literal_hits_in_suites": 3
+  },
+  "GeneticChickengineering": {
+   "n_items": 104,
+   "literal_hits_in_suites": 2
+  },
+  "Netheopoiesis": {
+   "n_items": 273,
+   "literal_hits_in_suites": 0
+  },
+  "ElementManipulation": {
+   "n_items": 126,
+   "literal_hits_in_suites": 1
+  },
+  "ElectricSpawners": {
+   "n_items": 27,
+   "literal_hits_in_suites": 0
+  },
+  "Supreme": {
+   "n_items": 510,
+   "literal_hits_in_suites": 7
+  },
+  "FNAmplifications": {
+   "n_items": 193,
+   "literal_hits_in_suites": 0
+  },
+  "AlchimiaVitae": {
+   "n_items": 33,
+   "literal_hits_in_suites": 16
+  },
+  "FoxyMachines": {
+   "n_items": 452,
+   "literal_hits_in_suites": 0
+  },
+  "Cultivation": {
+   "n_items": 1401,
+   "literal_hits_in_suites": 0
+  },
+  "ExtraTools": {
+   "n_items": 8,
+   "literal_hits_in_suites": 8
+  },
+  "SlimeTinker": {
+   "n_items": 1376,
+   "literal_hits_in_suites": 0
+  },
+  "SlimeFrame": {
+   "n_items": 178,
+   "literal_hits_in_suites": 0
+  },
+  "NetworksV6-Drake": {
+   "n_items": 80,
+   "literal_hits_in_suites": 0
+  },
+  "WorldEditSlimefun": {
+   "n_items": 1,
+   "literal_hits_in_suites": 0
+  },
+  "VillagerUtil": {
+   "n_items": 7,
+   "literal_hits_in_suites": 0
+  },
+  "SoulJars": {
+   "n_items": 130,
+   "literal_hits_in_suites": 4
+  },
+  "SlimyBees": {
+   "n_items": 83,
+   "literal_hits_in_suites": 7
+  },
+  "SlimefunOreChunks": {
+   "n_items": 11,
+   "literal_hits_in_suites": 11
+  },
+  "SlimefunLuckyBlocks": {
+   "n_items": 4,
+   "literal_hits_in_suites": 0
+  },
+  "SimpleUtils": {
+   "n_items": 4,
+   "literal_hits_in_suites": 3
+  },
+  "SFPortalGunsExtension": {
+   "n_items": 3,
+   "literal_hits_in_suites": 3
+  },
+  "SensibleToolbox": {
+   "n_items": 88,
+   "literal_hits_in_suites": 0
+  },
+  "RelicsOfCthonia": {
+   "n_items": 38,
+   "literal_hits_in_suites": 0
+  },
+  "RandomExpansion": {
+   "n_items": 9,
+   "literal_hits_in_suites": 0
+  },
+  "PrivateStorage": {
+   "n_items": 24,
+   "literal_hits_in_suites": 0
+  },
+  "PotionExpansion": {
+   "n_items": 22,
+   "literal_hits_in_suites": 0
+  },
+  "ObsidianExpansion": {
+   "n_items": 26,
+   "literal_hits_in_suites": 10
+  },
+  "Obsidian-Armor": {
+   "n_items": 5,
+   "literal_hits_in_suites": 5
+  },
+  "NotEnoughAddons": {
+   "n_items": 12,
+   "literal_hits_in_suites": 12
+  },
+  "Nexcavate": {
+   "n_items": 13,
+   "literal_hits_in_suites": 0
+  },
+  "MobCapturer": {
+   "n_items": 78,
+   "literal_hits_in_suites": 2
+  },
+  "MagicXpansion": {
+   "n_items": 30,
+   "literal_hits_in_suites": 1
+  },
+  "InfernalExpansion": {
+   "n_items": 8,
+   "literal_hits_in_suites": 0
+  },
+  "IDreamOfEasy": {
+   "n_items": 52,
+   "literal_hits_in_suites": 0
+  },
+  "HotbarPets": {
+   "n_items": 31,
+   "literal_hits_in_suites": 0
+  },
+  "Galaxyfun": {
+   "n_items": 100,
+   "literal_hits_in_suites": 0
+  },
+  "FlowerPower": {
+   "n_items": 23,
+   "literal_hits_in_suites": 23
+  },
+  "FastMachines": {
+   "n_items": 22,
+   "literal_hits_in_suites": 0
+  },
+  "ExtraGear": {
+   "n_items": 59,
+   "literal_hits_in_suites": 2
+  },
+  "EquivalencyTech": {
+   "n_items": 8,
+   "literal_hits_in_suites": 0
+  },
+  "EcoPower": {
+   "n_items": 18,
+   "literal_hits_in_suites": 0
+  },
+  "DyedBackpacks": {
+   "n_items": 96,
+   "literal_hits_in_suites": 1
+  },
+  "DyeBench": {
+   "n_items": 17,
+   "literal_hits_in_suites": 0
+  },
+  "Drugfun": {
+   "n_items": 1,
+   "literal_hits_in_suites": 0
+  },
+  "DrakesNanotech": {
+   "n_items": 158,
+   "literal_hits_in_suites": 158
+  },
+  "DemonicExpansion": {
+   "n_items": 9,
+   "literal_hits_in_suites": 0
+  },
+  "DankTech2": {
+   "n_items": 29,
+   "literal_hits_in_suites": 0
+  },
+  "CrystamaeHistoria": {
+   "n_items": 319,
+   "literal_hits_in_suites": 20
+  },
+  "ColoredEnderChests": {
+   "n_items": 8192,
+   "literal_hits_in_suites": 2
+  },
+  "ChestTerminal": {
+   "n_items": 9,
+   "literal_hits_in_suites": 9
+  },
+  "Bump": {
+   "n_items": 38,
+   "literal_hits_in_suites": 0
+  },
+  "BreweryMenu": {
+   "n_items": 23,
+   "literal_hits_in_suites": 0
+  },
+  "BetterChests": {
+   "n_items": 38,
+   "literal_hits_in_suites": 0
+  },
+  "AdvancedTech": {
+   "n_items": 9,
+   "literal_hits_in_suites": 0
+  }
+ },
+ "name_matches": {
+  "Slimefun": [
+   {
+    "suite": "drakes-generators",
+    "package": "orechunks",
+    "key": "ore_chunks",
+    "display": "Slimefun OreChunks Mineral Processing"
+   },
+   {
+    "suite": "drakes-combat",
+    "package": "warfare",
+    "key": "warfare",
+    "display": "SlimefunWarfare Ballistics & Exoskeletons"
+   },
+   {
+    "suite": "drakes-combat",
+    "package": "slimefundisc",
+    "key": "slimefundisc",
+    "display": "SlimefunDisc Custom Acoustic & Music Resonance"
+   },
+   {
+    "suite": "drakes-combat",
+    "package": "nukes",
+    "key": "slimefun_nukes",
+    "display": "SlimefunNukes Tactical Warheads & Deterrence"
+   }
+  ],
+  "SlimyTreeTaps": [
+   {
+    "suite": "drakes-bio",
+    "package": "treetaps",
+    "key": "slimytreetaps",
+    "display": "SlimyTreeTaps Bio-Resin Harvesting"
+   }
+  ],
+  "LiteXpansion": [
+   {
+    "suite": "drakes-generators",
+    "package": "litexpansion",
+    "key": "litexpansion",
+    "display": "LiteXpansion Void Reactors & Solar Grids"
+   }
+  ],
+  "ExoticGarden": [
+   {
+    "suite": "drakes-bio",
+    "package": "exoticgarden",
+    "key": "exotic_garden",
+    "display": "Exotic Garden & Culinary Arts"
+   }
+  ],
+  "InfinityExpansion": [
+   {
+    "suite": "drakes-tech",
+    "package": "infinity",
+    "key": "infinity",
+    "display": "Infinity Expansion & Singularities"
+   }
+  ],
+  "DynaTech": [
+   {
+    "suite": "drakes-tech",
+    "package": "dynatech",
+    "key": "dynatech",
+    "display": "DynaTech Advanced Machines & Generators"
+   }
+  ],
+  "SimpleMaterialGenerators": [],
+  "TranscEndence": [],
+  "SlimefunWarfare": [
+   {
+    "suite": "drakes-combat",
+    "package": "warfare",
+    "key": "warfare",
+    "display": "SlimefunWarfare Ballistics & Exoskeletons"
+   }
+  ],
+  "FluffyMachines": [
+   {
+    "suite": "drakes-tech",
+    "package": "fluffymachines",
+    "key": "fluffymachines",
+    "display": "FluffyMachines Automation"
+   }
+  ],
+  "GeneticChickengineering": [
+   {
+    "suite": "drakes-bio",
+    "package": "geneticchickens",
+    "key": "genetic_chickens",
+    "display": "GeneticChickengineering Tiers 0-9"
+   }
+  ],
+  "Netheopoiesis": [],
+  "ElementManipulation": [],
+  "ElectricSpawners": [],
+  "Supreme": [
+   {
+    "suite": "drakes-tech",
+    "package": "supreme",
+    "key": "supreme",
+    "display": "Supreme Expansion & Quantum Compression"
+   }
+  ],
+  "FNAmplifications": [],
+  "AlchimiaVitae": [
+   {
+    "suite": "drakes-magic",
+    "package": "alchimiavitae",
+    "key": "alchimia_vitae",
+    "display": "AlchimiaVitae Transmutations & Infusions"
+   }
+  ],
+  "FoxyMachines": [
+   {
+    "suite": "drakes-tech",
+    "package": "foxy",
+    "key": "foxy",
+    "display": "FoxyMachines Automation"
+   }
+  ],
+  "Cultivation": [
+   {
+    "suite": "drakes-bio",
+    "package": "cultivation",
+    "key": "cultivation",
+    "display": "Advanced Plant Cultivation"
+   }
+  ],
+  "ExtraTools": [
+   {
+    "suite": "drakes-utility",
+    "package": "extratools",
+    "key": "extratools",
+    "display": "ExtraTools 3x3 Mining & Multi-Harvest Tools"
+   }
+  ],
+  "SlimeTinker": [
+   {
+    "suite": "drakes-combat",
+    "package": "tinker",
+    "key": "slimetinker",
+    "display": "SlimeTinker Custom Tools & Traits"
+   }
+  ],
+  "SlimeFrame": [],
+  "NetworksV6-Drake": [],
+  "WorldEditSlimefun": [],
+  "VillagerUtil": [],
+  "SoulJars": [
+   {
+    "suite": "drakes-magic",
+    "package": "souljars",
+    "key": "soul_jars",
+    "display": "Soul Containment Jars"
+   }
+  ],
+  "SlimyBees": [
+   {
+    "suite": "drakes-bio",
+    "package": "slimybees",
+    "key": "slimy_bees",
+    "display": "SlimyBees Genetic Apiary"
+   }
+  ],
+  "SlimefunOreChunks": [
+   {
+    "suite": "drakes-generators",
+    "package": "orechunks",
+    "key": "ore_chunks",
+    "display": "Slimefun OreChunks Mineral Processing"
+   }
+  ],
+  "SlimefunLuckyBlocks": [],
+  "SimpleUtils": [
+   {
+    "suite": "drakes-utility",
+    "package": "simpleutils",
+    "key": "simpleutils",
+    "display": "SimpleUtils Utility Blocks & Tools"
+   }
+  ],
+  "SFPortalGunsExtension": [
+   {
+    "suite": "drakes-utility",
+    "package": "portalgun",
+    "key": "portalgun",
+    "display": "SFPortalGun Quantum Entanglement Teleporters"
+   }
+  ],
+  "SensibleToolbox": [],
+  "RelicsOfCthonia": [
+   {
+    "suite": "drakes-magic",
+    "package": "relics",
+    "key": "relics_cthonia",
+    "display": "Relics of Cthonia Underworld"
+   }
+  ],
+  "RandomExpansion": [],
+  "PrivateStorage": [],
+  "PotionExpansion": [],
+  "ObsidianExpansion": [
+   {
+    "suite": "drakes-combat",
+    "package": "obsidian",
+    "key": "obsidian_expansion",
+    "display": "ObsidianExpansion & ObsidianArmor T10 Plating"
+   }
+  ],
+  "Obsidian-Armor": [
+   {
+    "suite": "drakes-combat",
+    "package": "obsidian",
+    "key": "obsidian_expansion",
+    "display": "ObsidianExpansion & ObsidianArmor T10 Plating"
+   }
+  ],
+  "NotEnoughAddons": [
+   {
+    "suite": "drakes-utility",
+    "package": "notenoughaddons",
+    "key": "notenoughaddons",
+    "display": "NotEnoughAddons Expansion & Terraria Tools"
+   }
+  ],
+  "Nexcavate": [],
+  "MobCapturer": [
+   {
+    "suite": "drakes-bio",
+    "package": "mobcapturer",
+    "key": "mob_capturer",
+    "display": "Bio-Extraction & Mob Capturing"
+   }
+  ],
+  "MagicXpansion": [],
+  "InfernalExpansion": [],
+  "IDreamOfEasy": [],
+  "HotbarPets": [],
+  "Galaxyfun": [],
+  "FlowerPower": [
+   {
+    "suite": "drakes-bio",
+    "package": "flowerpower",
+    "key": "flowerpower",
+    "display": "FlowerPower Botanical Acceleration"
+   }
+  ],
+  "FastMachines": [],
+  "ExtraGear": [
+   {
+    "suite": "drakes-combat",
+    "package": "extragear",
+    "key": "extragear",
+    "display": "ExtraGear Modular Armors & Elemental Weapons"
+   }
+  ],
+  "EquivalencyTech": [],
+  "EcoPower": [
+   {
+    "suite": "drakes-generators",
+    "package": "ecopower",
+    "key": "ecopower",
+    "display": "EcoPower Clean & Sustainable Energy Grids"
+   }
+  ],
+  "DyedBackpacks": [
+   {
+    "suite": "drakes-utility",
+    "package": "backpacks",
+    "key": "backpacks",
+    "display": "DyedBackpacks & Utility Storage"
+   }
+  ],
+  "DyeBench": [],
+  "Drugfun": [],
+  "DrakesNanotech": [
+   {
+    "suite": "drakes-tech",
+    "package": "nanotech",
+    "key": "nanotech",
+    "display": "Drakes Nanotechnology & Stark Engineering"
+   }
+  ],
+  "DemonicExpansion": [],
+  "DankTech2": [],
+  "CrystamaeHistoria": [
+   {
+    "suite": "drakes-magic",
+    "package": "crystamae",
+    "key": "crystamae",
+    "display": "Crystamae Resonance"
+   }
+  ],
+  "ColoredEnderChests": [
+   {
+    "suite": "drakes-utility",
+    "package": "enderchests",
+    "key": "colored_enderchests",
+    "display": "Frequency Colored EnderChests"
+   }
+  ],
+  "ChestTerminal": [
+   {
+    "suite": "drakes-utility",
+    "package": "chestterminal",
+    "key": "chest_terminal",
+    "display": "ChestTerminal Digital Access"
+   }
+  ],
+  "Bump": [],
+  "BreweryMenu": [],
+  "BetterChests": [],
+  "AdvancedTech": []
+ },
+ "distinct_uppercase_literals_in_suites": 761,
+ "literals_in_suites_that_are_dump_ids": 437
+}

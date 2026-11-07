@@ -104,6 +104,10 @@ jobs:
           echo "== clases Slimefun en jars:"; for j in plugins/*lime*.jar plugins/*Slime*.jar; do [ -f "$j" ] && unzip -l "$j" | grep -E "/SlimefunItem.class|/BlockStorage.class|implementation/Slimefun.class" | head -4; done
           CP=$(find cache libraries -name '*.jar' | tr '\n' ':')$(ls plugins/*.jar | tr '\n' ':')
           echo "== javac:"; mkdir -p /tmp/sm && javac -proc:none -Xmaxerrs 6 -cp "$CP" -d /tmp/sm ../tools/compat-smoke/src/HybridCompatSmoke.java 2>&1 | head -24; echo "javac exit=${PIPESTATUS[0]}"
+      - name: Cobertura por conjunto de ids (instalacion vs volcado de produccion)
+        run: |
+          cp run/registered-ids.tsv . 2>/dev/null || true
+          python3 tools/compat-smoke/compare_ids.py --dump ext/knowledge/data/slimefun-dump.json.gz --registered registered-ids.tsv --aliases tools/compat-smoke/aliases.json --out coverage || true
       - name: Resumen del catalogo real
         if: always()
         run: |
@@ -120,7 +124,7 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         if: always()
-        with: { name: hybrid-compat-catalog, path: "run/compat-catalog.json\nrun/compat-catalog.md\nexpected.properties\nsmoke1.log\nsmoke2.log" }
+        with: { name: hybrid-compat-catalog, path: "run/compat-catalog.json\nrun/compat-catalog.md\nrun/registered-ids.tsv\ncoverage\nexpected.properties\nsmoke1.log\nsmoke2.log" }
       - name: Errores en logs
         if: always()
         run: grep -h -E "ERROR|SEVERE|Exception" smoke1.log smoke2.log 2>/dev/null | cut -c1-200 | sort | uniq -c | sort -rn | head -15
