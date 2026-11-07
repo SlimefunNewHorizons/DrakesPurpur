@@ -148,19 +148,19 @@ jobs:
         run: |
           ./gradlew applyAllPatches --stacktrace
           scripts/empaquetar_monolito.sh ext/suites
+          scripts/empaquetar_nativos.sh
           DRAKES_BUNDLE=1 BUILD_NUMBER=134 ./gradlew createPaperclipJar --stacktrace
-          (cd native/drakes-hybrid && cargo build --release)
-          mkdir -p native-lib run/plugins run/drakes-data && cp native/drakes-hybrid/target/release/libdrakes_hybrid_ffi.so native-lib/
+          mkdir -p run/plugins run/drakes-data
           cp purpur-server/build/libs/*paperclip*.jar run/server.jar
           sha256sum run/server.jar | tee monolith-sha256.txt
-          unzip -l run/server.jar | grep -c "drakes-bundled" || true
+          echo "entradas drakes-bundled en el JAR: $(unzip -l run/server.jar | grep -c drakes-bundled)"; unzip -l run/server.jar | grep -E 'drakes-natives' | head -4
       - name: Preparar servidor (solo Slimefun en plugins/; las suites salen del JAR)
         run: |
           cd run && echo "eula=true" > eula.txt
           printf 'online-mode=false\nserver-port=25597\nlevel-seed=12345\nview-distance=4\nsimulation-distance=4\nspawn-protection=0\n' > server.properties
           printf 'native:\n  hybrid:\n    enabled: true\n    bits: true\n' > drakes-data/perf.yml
           cp ../ext/slimefun/target/*.jar plugins/; rm -f plugins/*sources*.jar plugins/original-*.jar
-          (timeout 600 java -Xmx2G -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../boot0.log 2>&1 &) ; sleep 150; pkill -f server.jar || true; sleep 3
+          (timeout 600 java -Xmx2G --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../boot0.log 2>&1 &) ; sleep 150; pkill -f server.jar || true; sleep 3
           echo "== plugins/ tras el primer arranque (suites extraidas del JAR):"; ls plugins | head -30; cat drakes-data/bundled-state.yml 2>/dev/null | head -14
           CP=$(find cache libraries -name '*.jar' | tr '\n' ':')$(ls plugins/*.jar | tr '\n' ':')
           mkdir -p ../smoke-out && javac -proc:none -Xmaxerrs 8 -cp "$CP" -d ../smoke-out ../tools/compat-smoke/src/HybridCompatSmoke.java 2>&1 | head -10
@@ -169,7 +169,7 @@ jobs:
         run: |
           cd run; set +e
           for ph in 1 2; do
-            timeout 420 java -Xmx2G -Dsmoke.phase=$ph -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../mono$ph.log 2>&1
+            timeout 420 java -Xmx2G -Dsmoke.phase=$ph --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../mono$ph.log 2>&1
             echo "== fase $ph exit=$? PASS=$(grep -c ^PASS compat-smoke-phase$ph.txt) FAIL=$(grep -c ^FAIL compat-smoke-phase$ph.txt)"; grep -v -E "^PASS (getById|getByItem)|^plugin " compat-smoke-phase$ph.txt | head -12
             grep -E "Enabling|DrakesBundled|Done \(|HybridNative|SEVERE|ERROR" ../mono$ph.log | cut -c1-150 | head -26
           done
