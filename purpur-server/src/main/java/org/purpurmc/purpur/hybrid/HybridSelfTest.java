@@ -294,29 +294,38 @@ public final class HybridSelfTest {
      * {@code getChunkAtAsync}; es un modelo de CARGA sobre el sistema de chunks real, NO un cliente real.
      */
     private static void flyerBench(StringBuilder out, MinecraftServer srv) {
+        if (!Boolean.getBoolean("drakes.hybrid.selftest.flyer")) {
+            line(out, "[volador sintetico] omitido (activar con -Ddrakes.hybrid.selftest.flyer=true)");
+            return;
+        }
         try {
             org.bukkit.World w = org.bukkit.Bukkit.getWorlds().get(0);
-            final int R = 5, cols = 48;
-            final double speed = Double.parseDouble(System.getProperty("drakes.hybrid.selftest.flyer.speed", "64"));
+            final int R = 5, cols = Integer.getInteger("drakes.hybrid.selftest.flyer.cols", 36);
             final int lead = Integer.getInteger("drakes.hybrid.selftest.flyer.lead", 6);
-            line(out, String.format("[volador sintetico] R=%d chunks, %d columnas de %d chunks, %.0f bloques/s (%.1f columnas/s), lead=%d", R, cols, 2 * R + 1, speed, speed / 16, lead));
-            int[] order = {0, lead, lead, 0, 0, lead};   // reactiva/predictiva alternadas (A B B A A B)
-            java.util.Map<Integer, List<double[]>> res = new java.util.LinkedHashMap<>();
-            for (int run = 0; run < order.length; run++) {
-                int ld = order[run];
-                double[] r = flyerRun(w, R, cols, speed, ld, 12000 + run * 40, 3000 + run * 40);
-                res.computeIfAbsent(ld, k -> new ArrayList<>()).add(r);
-                line(out, String.format("  corrida %d (%s): columnas_estables=%d tarde=%d (%.0f%%) lateness p50=%.0f p95=%.0f max=%.0f ms, chunks=%d, total=%.1f s",
-                    run + 1, ld == 0 ? "reactiva" : "prefetch lead=" + ld, (int) r[0], (int) r[1], 100.0 * r[1] / Math.max(1, r[0]), r[2], r[3], r[4], (int) r[5], r[6]));
+            String[] speeds = System.getProperty("drakes.hybrid.selftest.flyer.speeds", "24,40,64").split(",");
+            int idx = 0;
+            for (String sp : speeds) {
+                final double speed = Double.parseDouble(sp.trim());
+                line(out, String.format("[volador sintetico] R=%d chunks, %d columnas de %d chunks, %.0f bloques/s (demanda %.0f chunks/s), lead=%d", R, cols, 2 * R + 1, speed, speed / 16 * (2 * R + 1), lead));
+                int[] order = {0, lead, lead, 0};   // reactiva/predictiva alternadas (A B B A)
+                java.util.Map<Integer, List<double[]>> res = new java.util.LinkedHashMap<>();
+                for (int run = 0; run < order.length; run++) {
+                    int ld = order[run];
+                    double[] r = flyerRun(w, R, cols, speed, ld, 12000 + idx * 60, 3000 + idx * 40);
+                    idx++;
+                    res.computeIfAbsent(ld, k -> new ArrayList<>()).add(r);
+                    line(out, String.format("  %.0f b/s corrida %d (%s): estables=%d tarde=%d (%.0f%%) lateness p50=%.0f p95=%.0f max=%.0f ms, total=%.1f s",
+                        speed, run + 1, ld == 0 ? "reactiva" : "prefetch lead=" + ld, (int) r[0], (int) r[1], 100.0 * r[1] / Math.max(1, r[0]), r[2], r[3], r[4], r[6]));
+                }
+                for (var e : res.entrySet()) {
+                    double cols_ = 0, late = 0, p95 = 0, p50 = 0;
+                    for (double[] r : e.getValue()) { cols_ += r[0]; late += r[1]; p95 += r[3]; p50 += r[2]; }
+                    int n = e.getValue().size();
+                    line(out, String.format("[volador sintetico] %.0f b/s %s: %d corridas -> %.0f%% de columnas tarde, lateness p50 %.0f ms, p95 %.0f ms",
+                        speed, e.getKey() == 0 ? "REACTIVA" : "PREFETCH lead=" + e.getKey(), n, 100.0 * late / Math.max(1, cols_), p50 / n, p95 / n));
+                }
             }
-            for (var e : res.entrySet()) {
-                double cols_ = 0, late = 0, p95 = 0, p50 = 0;
-                for (double[] r : e.getValue()) { cols_ += r[0]; late += r[1]; p95 += r[3]; p50 += r[2]; }
-                int n = e.getValue().size();
-                line(out, String.format("[volador sintetico] %s: media de %d corridas -> %.1f%% de columnas tarde, lateness p50 %.0f ms, p95 %.0f ms",
-                    e.getKey() == 0 ? "REACTIVA" : "PREFETCH lead=" + e.getKey(), n, 100.0 * late / Math.max(1, cols_), p50 / n, p95 / n));
-            }
-            line(out, "[volador sintetico] modelo de carga, no cliente real; se necesitan mas corridas y hardware dedicado para intervalos de confianza");
+            line(out, "[volador sintetico] modelo de CARGA sobre el sistema de chunks real (no cliente real); cada corrida usa un corredor distinto: la variabilidad del terreno es grande; sin intervalos de confianza");
         } catch (Throwable t) {
             line(out, "[volador sintetico] ERROR: " + t);
             LOG.log(Level.WARNING, "flyer", t);
