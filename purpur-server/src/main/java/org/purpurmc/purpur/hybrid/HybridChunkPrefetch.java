@@ -34,14 +34,18 @@ public final class HybridChunkPrefetch {
     private static volatile int maxLookahead = 8;       // chunks por delante del radio de vision
     private static volatile int halfWidth = 2;          // chunks a cada lado del rumbo
     private static volatile int maxInFlight = 24;
+    private static volatile int maxUrgentInFlight = 4;  // presupuesto maximo de promociones urgentes en el borde de vision
     private static volatile long intervalMs = 250;
     private static ScheduledExecutorService ex;
 
-    public static final LongAdder REQUESTED = new LongAdder(), SKIPPED_LOADED = new LongAdder(), SKIPPED_PENDING = new LongAdder(),
+    public static final LongAdder REQUESTED = new LongAdder(), PROMOTED = new LongAdder(),
+        SKIPPED_LOADED = new LongAdder(), SKIPPED_PENDING = new LongAdder(),
         DROPPED_BUDGET = new LongAdder(), COMPLETED = new LongAdder(), FAILED = new LongAdder(), LATENCY_NANOS = new LongAdder();
     private static final AtomicInteger IN_FLIGHT = new AtomicInteger();
+    private static final AtomicInteger URGENT_IN_FLIGHT = new AtomicInteger();
     private record Key(UUID world, int x, int z) {}
     private static final Set<Key> PENDING = ConcurrentHashMap.newKeySet();
+    private static final Set<Key> PROMOTED_KEYS = ConcurrentHashMap.newKeySet();
     private static final Map<UUID, State> STATES = new ConcurrentHashMap<>();
 
     private static final class State {
@@ -60,9 +64,14 @@ public final class HybridChunkPrefetch {
         return IN_FLIGHT.get();
     }
 
+    public static int urgentInFlight() {
+        return URGENT_IN_FLIGHT.get();
+    }
+
     public static String describe() {
-        return String.format("enabled=%s min-speed=%.0f b/s lead=%.1fs lookahead=%d anchura=%d en-vuelo=%d/%d | solicitados=%d completados=%d fallidos=%d omitidos(cargado)=%d omitidos(duplicado)=%d descartados(presupuesto)=%d latencia-media=%.1f ms",
-            enabled, minSpeed, leadSeconds, maxLookahead, halfWidth * 2 + 1, IN_FLIGHT.get(), maxInFlight, REQUESTED.sum(), COMPLETED.sum(),
+        return String.format("enabled=%s min-speed=%.0f b/s lead=%.1fs lookahead=%d anchura=%d en-vuelo=%d/%d urgentes=%d/%d | solicitados=%d promovidos=%d completados=%d fallidos=%d omitidos(cargado)=%d omitidos(duplicado)=%d descartados(presupuesto)=%d latencia-media=%.1f ms",
+            enabled, minSpeed, leadSeconds, maxLookahead, halfWidth * 2 + 1, IN_FLIGHT.get(), maxInFlight, URGENT_IN_FLIGHT.get(), maxUrgentInFlight,
+            REQUESTED.sum(), PROMOTED.sum(), COMPLETED.sum(),
             FAILED.sum(), SKIPPED_LOADED.sum(), SKIPPED_PENDING.sum(), DROPPED_BUDGET.sum(),
             COMPLETED.sum() == 0 ? 0.0 : LATENCY_NANOS.sum() / 1e6 / COMPLETED.sum());
     }
@@ -73,6 +82,7 @@ public final class HybridChunkPrefetch {
         maxLookahead = Math.max(1, lookahead);
         halfWidth = Math.max(0, width);
         maxInFlight = Math.max(1, inFlightMax);
+        maxUrgentInFlight = Math.max(1, Math.min(8, inFlightMax / 4));
         intervalMs = Math.max(50, periodMs);
         setEnabled(on);
     }
@@ -93,16 +103,17 @@ public final class HybridChunkPrefetch {
                     LOG.log(Level.FINE, "prefetch: " + t);
                 }
             }, 2000, intervalMs, TimeUnit.MILLISECONDS);
-            LOG.info("[Hybrid] prefetch direccional de chunks ACTIVADO (experimental).");
+            LOG.info("[Hybrid] prefetch direccional de chunks ACTIVADO (experimental, dos niveles P-promovido).");
         } else {
             if (ex != null) ex.shutdownNow();
             ex = null;
             STATES.clear();
+            PROMOTED_KEYS.clear();
             LOG.info("[Hybrid] prefetch direccional de chunks desactivado.");
         }
     }
 
-    /** Hilo principal: lee posiciones, estima rumbo y solicita (async) los chunks por delante. */
+    /** Hilo principal: lee posiciones, estima rumbo y solicita (async) los chunks por delante con promocion en el borde. */
     private static void tick() {
         if (!enabled) return;
         long now = System.nanoTime();
@@ -131,10 +142,17 @@ public final class HybridChunkPrefetch {
             int viewR = w.getViewDistance();
             int look = Math.min(maxLookahead, (int) Math.ceil(speed * leadSeconds / 16.0));
             for (int step = viewR + 1; step <= viewR + look; step++) {
+                boolean boundaryUrgent = (step == viewR + 1);
                 for (int off = -halfWidth; off <= halfWidth; off++) {
                     double px = st.x + ux * step * 16 - uz * off * 16;
                     double pz = st.z + uz * step * 16 + ux * off * 16;
-                    request(w, (int) Math.floor(px / 16.0), (int) Math.floor(pz / 16.0));
+                    int cx = (int) Math.floor(px / 16.0);
+                    int cz = (int) Math.floor(pz / 16.0);
+                    if (boundaryUrgent && Math.abs(off) <= 1) {
+                        requestOrPromote(w, cx, cz);
+                    } else {
+                        request(w, cx, cz);
+                    }
                 }
             }
         }
@@ -143,6 +161,32 @@ public final class HybridChunkPrefetch {
             for (Player p : Bukkit.getOnlinePlayers()) online.add(p.getUniqueId());
             STATES.keySet().removeIf(id -> !online.contains(id));
         }
+    }
+
+    /**
+     * Solicita o promueve a urgente un chunk en el borde inmediato del radio de vision ({@code step == viewR + 1},
+     * eje central del rumbo), respetando {@code maxUrgentInFlight} para no saturar la cola urgente de Moonrise.
+     */
+    static void requestOrPromote(World w, int cx, int cz) {
+        if (w.isChunkLoaded(cx, cz)) {
+            SKIPPED_LOADED.increment();
+            return;
+        }
+        Key key = new Key(w.getUID(), cx, cz);
+        if (PENDING.contains(key) && URGENT_IN_FLIGHT.get() < maxUrgentInFlight && PROMOTED_KEYS.add(key)) {
+            URGENT_IN_FLIGHT.incrementAndGet();
+            PROMOTED.increment();
+            long t0 = System.nanoTime();
+            w.getChunkAtAsync(cx, cz, true, true).whenComplete((chunk, err) -> {
+                URGENT_IN_FLIGHT.decrementAndGet();
+                PROMOTED_KEYS.remove(key);
+                if (err == null && chunk != null) {
+                    LATENCY_NANOS.add(System.nanoTime() - t0);
+                }
+            });
+            return;
+        }
+        request(w, cx, cz);
     }
 
     static void request(World w, int cx, int cz) {

@@ -10,9 +10,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Addons cuyo contenido ya trae una suite (ver 'consolidado_en' del manifest): no se instalan para no duplicar items.
-  # De momento solo DrakesNanotech (DrakesTech/nanotech).
-  ECO_EXCLUDE: "DrakesNanotech"
+  # Addons cuyo contenido ya trae una suite (ver 'consolidado_en' del manifest): no se instalan para no duplicar items ni colisionar nombre de plugin.
+  ECO_EXCLUDE: "DrakesNanotech,DrakesTech"
 
 jobs:
   # ------------------------------------------------------------------------------------------------
@@ -46,7 +45,77 @@ jobs:
           cd ext/slimefun && mvn -B -ntp -DskipTests -Dmaven.test.skip=true package 2>&1 | tail -60 | tee ../../build-slimefun.txt
           cd ../..
           SF=$(ls -S ext/slimefun/target/*.jar | grep -viE 'sources|original-|javadoc' | head -1)
-          test -n "$SF" && cp "$SF" core-out/slimefun/ && ls -la core-out/slimefun
+          test -n "$SF" && cp "$SF" core-out/slimefun/
+          test -f ext/slimefun/build-parent/pom.xml && cp ext/slimefun/build-parent/pom.xml core-out/slimefun/build-parent.pom
+          ls -la core-out/slimefun
+      - name: Pre-construir bibliotecas base de addons (m2-seed compartido entre shards)
+        continue-on-error: true
+        run: |
+          W=$PWD
+          M2="$W/core-out/m2-seed"
+          mkdir -p "$M2"
+          SF=$(ls "$W"/core-out/slimefun/*.jar | head -1)
+          if [ -f "$W/core-out/slimefun/build-parent.pom" ]; then
+            python3 -c "import re; s=open('$W/core-out/slimefun/build-parent.pom').read(); open('$W/parent-stripped.pom','w').write(re.sub(r'<modules>.*?</modules>','',s,flags=re.S))"
+            mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$W/parent-stripped.pom" -DpomFile="$W/parent-stripped.pom" -Dpackaging=pom
+          fi
+          for ver in "11.0-Universal-26.x-SNAPSHOT" "11.0-Drake-1.21.11-SNAPSHOT" "11.0-Drake-1.21.1-SNAPSHOT"; do
+            mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$SF" -DgroupId=com.github.drakescraft_labs -DartifactId=slimefun-core -Dversion="$ver" -Dpackaging=jar -DgeneratePom=true
+          done
+          mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$SF" -DgroupId=com.github.Slimefun -DartifactId=Slimefun4 -Dversion=RC-37 -Dpackaging=jar -DgeneratePom=true
+          # Compilar e instalar librerias compartidas entre shards
+          python3 tools/ecosystem/build_addons.py --manifest docs/hybrid/ecosistema/manifest.json --shard 0/1 \
+            --only "dough-core,drakes-labs-autoupdate,SefiLib,ExtraUtils-drake,SlimeHUD,InfinityExpansion,FoxyMachines,Gastronomicon" \
+            --slimefun-jar "$SF" --parent-pom "$W/core-out/slimefun/build-parent.pom" \
+            --out "$W/seed-addons" --workdir "$W/seed-work" --timeout 600 || true
+          for j in "$W"/seed-addons/jars/*.jar; do
+            [ -f "$j" ] || continue
+            id=$(basename "$j" .jar)
+            case "$id" in
+              dough-core) mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$j" -DgroupId=com.github.drakescraft_labs -DartifactId=dough-core -Dversion=1.3.1-DRAKE-v11-SNAPSHOT -Dpackaging=jar -DgeneratePom=true ;;
+              drakes-labs-autoupdate) mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$j" -DgroupId=com.github.drakescraft_labs -DartifactId=drakes-labs-autoupdate -Dversion=11-SNAPSHOT -Dpackaging=jar -DgeneratePom=true ;;
+              SefiLib)
+                for v in "0.3.1-DRAKE-SNAPSHOT" "0.3.1-Universal-26.x-SNAPSHOT" "0.3.0-Drake-1.21.11"; do
+                  for a in "sefilib-drake" "sefilib-core" "SefiLib"; do
+                    mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$j" -DgroupId=com.github.drakescraft_labs -DartifactId="$a" -Dversion="$v" -Dpackaging=jar -DgeneratePom=true
+                  done
+                done ;;
+              ExtraUtils-drake)
+                for v in "1.20.6-Drake-UNIVERSAL-26x-SNAPSHOT" "1.20.6-Drake-SNAPSHOT"; do
+                  mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$j" -DgroupId=com.github.drakescraft_labs -DartifactId=ExtraUtils-drake -Dversion="$v" -Dpackaging=jar -DgeneratePom=true
+                done ;;
+              SlimeHUD)
+                for v in "1.3.1-Universal-26.x-SNAPSHOT" "1.3.1"; do
+                  mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$j" -DgroupId=com.github.drakescraft_labs -DartifactId=SlimeHUD-drake -Dversion="$v" -Dpackaging=jar -DgeneratePom=true
+                done ;;
+              InfinityExpansion)
+                for v in "1.20.6-Drake-SNAPSHOT" "1.20.6-UNIVERSAL-26x-SNAPSHOT"; do
+                  mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$j" -DgroupId=com.github.drakescraft_labs -DartifactId=InfinityExpansion-drake -Dversion="$v" -Dpackaging=jar -DgeneratePom=true
+                done ;;
+              FoxyMachines)
+                for v in "1.21.11-Drake.1" "MODIFIED"; do
+                  mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$j" -DgroupId=com.github.drakescraft_labs -DartifactId=FoxyMachines-drake -Dversion="$v" -Dpackaging=jar -DgeneratePom=true
+                done ;;
+              Gastronomicon)
+                for v in "1.21.11-Drake.1-UNIVERSAL-26x-SNAPSHOT" "1.21.11-Drake.1"; do
+                  mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$j" -DgroupId=com.github.drakescraft_labs -DartifactId=Gastronomicon-drake -Dversion="$v" -Dpackaging=jar -DgeneratePom=true
+                done ;;
+            esac
+          done
+          # Reintentar Gastronomicon ahora que SlimeHUD-drake:1.3.1 esta en $M2
+          if [ ! -f "$W/seed-addons/jars/Gastronomicon.jar" ]; then
+            cp -r "$M2" "$W/seed-work/m2" 2>/dev/null || true
+            python3 tools/ecosystem/build_addons.py --manifest docs/hybrid/ecosistema/manifest.json --shard 0/1 \
+              --only "Gastronomicon" --slimefun-jar "$SF" --parent-pom "$W/core-out/slimefun/build-parent.pom" \
+              --out "$W/seed-addons" --workdir "$W/seed-work" --timeout 600 || true
+            if [ -f "$W/seed-addons/jars/Gastronomicon.jar" ]; then
+              for v in "1.21.11-Drake.1-UNIVERSAL-26x-SNAPSHOT" "1.21.11-Drake.1"; do
+                mvn -B -ntp -q -Dmaven.repo.local="$M2" install:install-file -Dfile="$W/seed-addons/jars/Gastronomicon.jar" -DgroupId=com.github.drakescraft_labs -DartifactId=Gastronomicon-drake -Dversion="$v" -Dpackaging=jar -DgeneratePom=true
+              done
+            fi
+          fi
+          mkdir -p core-out/slimefun/m2-seed
+          cp -r "$M2/com" core-out/slimefun/m2-seed/ 2>/dev/null || true
       - name: Build StarSuites (--fail-at-end; las que fallen se registran)
         continue-on-error: true
         run: |
@@ -95,9 +164,16 @@ jobs:
         run: |
           SF=$(ls core-slimefun/*.jar | head -1)
           echo "Slimefun jar: $SF"
-          mkdir -p "$RUNNER_TEMP/eco-work"
+          mkdir -p "$RUNNER_TEMP/eco-work/m2"
+          if [ -d core-slimefun/m2-seed/com ]; then
+            cp -r core-slimefun/m2-seed/com "$RUNNER_TEMP/eco-work/m2/"
+          fi
+          PARENT_ARG=""
+          if [ -f core-slimefun/build-parent.pom ]; then
+            PARENT_ARG="--parent-pom core-slimefun/build-parent.pom"
+          fi
           python3 tools/ecosystem/build_addons.py --manifest docs/hybrid/ecosistema/manifest.json \
-            --shard ${{ matrix.shard }}/8 --slimefun-jar "$SF" --out addons-out --workdir "$RUNNER_TEMP/eco-work" --timeout 900
+            --shard ${{ matrix.shard }}/8 --slimefun-jar "$SF" $PARENT_ARG --out addons-out --workdir "$RUNNER_TEMP/eco-work" --timeout 900
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: "addons-${{ matrix.shard }}", path: addons-out, if-no-files-found: warn }
@@ -137,6 +213,11 @@ jobs:
             [ -f "$j" ] || continue
             id=$(basename "$j" .jar)
             case ",$ECO_EXCLUDE," in *",$id,"*) echo "excluido (ya en suites): $id"; continue ;; esac
+            # Omitir bibliotecas puras sin plugin.yml ni paper-plugin.yml
+            python3 -c "import sys, zipfile; z=zipfile.ZipFile(sys.argv[1]); n=set(z.namelist()); sys.exit(0 if ('plugin.yml' in n or 'paper-plugin.yml' in n) else 1)" "$j" 2>/dev/null || {
+              echo "omitida biblioteca (sin plugin.yml): $id"
+              continue
+            }
             cp "$j" pool/addons/
           done
           echo "pool: slimefun=$(ls pool/slimefun | wc -l) suites=$(ls pool/suites | wc -l) addons=$(ls pool/addons | wc -l)"
@@ -145,21 +226,27 @@ jobs:
           # Funciones compartidas por los pasos del job integrate (se hace `source eco-lib.sh`)
           W=${GITHUB_WORKSPACE:-$PWD}
           eco_install() {  # reconstruye plugins/ desde el pool, sin los jars retirados; sin datos previos
-            cd "$W/run" && rm -rf plugins && mkdir -p plugins/BentoBox/addons
-            for f in "$W"/pool/slimefun/*.jar "$W"/pool/suites/*.jar "$W"/pool/addons/*.jar; do
-              [ -f "$f" ] || continue
-              b=$(basename "$f"); grep -qxF "$b" "$W/removed.txt" 2>/dev/null && continue
-              case "$b" in *onechunk*) cp "$f" plugins/BentoBox/addons/ ;; *) cp "$f" plugins/ ;; esac
-            done
+            (
+              cd "$W/run" && rm -rf plugins && mkdir -p plugins/BentoBox/addons
+              for f in "$W"/pool/slimefun/*.jar "$W"/pool/suites/*.jar "$W"/pool/addons/*.jar; do
+                [ -f "$f" ] || continue
+                b=$(basename "$f"); grep -qxF "$b" "$W/removed.txt" 2>/dev/null && continue
+                case "$b" in *onechunk*) cp "$f" plugins/BentoBox/addons/ ;; *) cp "$f" plugins/ ;; esac
+              done
+            )
           }
           eco_props() {  # server.properties + eula (misma instalacion para todos los arranques)
-            cd "$W/run" && echo "eula=true" > eula.txt
-            printf 'online-mode=false\nserver-port=25596\nlevel-seed=12345\nview-distance=4\nsimulation-distance=4\nspawn-protection=0\n' > server.properties
+            (
+              cd "$W/run" && echo "eula=true" > eula.txt
+              printf 'online-mode=false\nserver-port=25596\nlevel-seed=12345\nview-distance=4\nsimulation-distance=4\nspawn-protection=0\n' > server.properties
+            )
           }
           eco_perf() {  # $1 = on|off
-            cd "$W/run" && mkdir -p drakes-data
-            if [ "$1" = on ]; then printf 'native:\n  hybrid:\n    enabled: true\n    bits: true\n' > drakes-data/perf.yml
-            else printf 'native:\n  hybrid:\n    enabled: false\n' > drakes-data/perf.yml; fi
+            (
+              cd "$W/run" && mkdir -p drakes-data
+              if [ "$1" = on ]; then printf 'native:\n  hybrid:\n    enabled: true\n    bits: true\n' > drakes-data/perf.yml
+              else printf 'native:\n  hybrid:\n    enabled: false\n' > drakes-data/perf.yml; fi
+            )
           }
           eco_wait_load() { for i in $(seq 1 30); do l=$(cut -d' ' -f1 /proc/loadavg); awk "BEGIN{exit !($l < 0.5)}" && break; sleep 2; done; echo "loadavg previo: $(cat /proc/loadavg)"; }
           eco_quiet() {  # sin daemons de gradle/kotlin
@@ -168,13 +255,15 @@ jobs:
           }
           JAVA_FLAGS="-Xms1G -Xmx4G --enable-native-access=ALL-UNNAMED -Ddrakes.native.dir=$W/native-lib"
           eco_boot_load() {  # $1=log $2=timeout s : arranca, espera "Done (", manda `stop` por una FIFO
-            cd "$W/run"; rm -f in.fifo; mkfifo in.fifo; exec 3<>in.fifo
-            java $JAVA_FLAGS -jar server.jar --nogui <&3 > "$1" 2>&1 &
-            local pid=$!
-            for i in $(seq 1 $(( $2 / 3 ))); do grep -q 'Done (' "$1" && break; kill -0 $pid 2>/dev/null || break; sleep 3; done
-            sleep 5; echo stop >&3
-            for i in $(seq 1 50); do kill -0 $pid 2>/dev/null || break; sleep 3; done
-            kill $pid 2>/dev/null || true; pkill -f server.jar || true; exec 3>&-; rm -f in.fifo; sleep 2
+            (
+              cd "$W/run"; rm -f in.fifo; mkfifo in.fifo; exec 3<>in.fifo
+              java $JAVA_FLAGS -jar server.jar --nogui <&3 > "$1" 2>&1 &
+              local pid=$!
+              for i in $(seq 1 $(( $2 / 3 ))); do grep -q 'Done (' "$1" && break; kill -0 $pid 2>/dev/null || break; sleep 3; done
+              sleep 5; echo stop >&3
+              for i in $(seq 1 50); do kill -0 $pid 2>/dev/null || break; sleep 3; done
+              kill $pid 2>/dev/null || true; pkill -f server.jar || true; exec 3>&-; rm -f in.fifo; sleep 2
+            )
           }
           LIB
           mkdir -p native-lib && cp core/server/native-lib/* native-lib/

@@ -119,9 +119,33 @@ La investigacion (`INVESTIGACION_COLAS_LOD.md`, verificada leyendo el codigo) mo
 - El volador usaba un prefetch propio sin tope ni carril; la clase de produccion `HybridChunkPrefetch` (tope 24 en vuelo, carril de 5) **no fue medida**. Por tanto "el prefetch empeora" **no aplica a la clase real**; sigue desactivada por la regla de no activar lo no demostrado.
 - n=2 corridas por modo, corredores distintos, sin IC: los numeros 26 % vs 64 % son indicativos, no conclusiones.
 
-Cambios aplicados: el volador mide ahora una matriz {R-urgent, R-normal, P-normal, P-promovido} en orden ABCD·DCBA, para separar el efecto de la prioridad del de la anticipacion (resultados: pendientes del siguiente CI).
+Cambios aplicados: el volador mide ahora una matriz {R-urgent, R-normal, P-normal, P-promovido} en orden ABCD·DCBA, para separar el efecto de la prioridad del de la anticipacion.
 
-**Anomalias — causas identificadas (no hay mejora declarable hasta repetir en condiciones equivalentes):**
-1. `bits=false` en `status`: el autotest dejaba `forceBits(false)` antes del smoke de comandos → corregido (restaura el estado configurado).
-2. TPS ~5 (OFF) vs ~20 (ON): el OFF no ejecutaba flyer ni usaba las mismas banderas y leia el TPS justo tras generar ~289 chunks de forma sincrona en el hilo principal → artefacto de orden/ventana, no de Hybrid. El CI ahora alterna OFF/ON/ON/OFF con las mismas banderas y registra `loadavg`.
-3. `bits.unpack.java` ≈ 20 ms/llamada: **carrera de medicion** (`HybridStats.enabled` se activaba con una llamada en curso que empezo con t=0 y `add` sumaba el reloj monotono absoluto). Corregido leyendo el flag una sola vez por llamada, ignorando t=0 y reportando el maximo.
+**Anomalias — causas identificadas y RESUELTAS en CI run `42323576926` (commit `607f80be`):**
+1. `bits=false` en `status`: el autotest dejaba `forceBits(false)` antes del smoke de comandos → corregido (restaura `initialBits` antes de `adminSmoke`; verificado en `selftest-on1.txt` y `selftest-on2.txt`: `Aceleraciones: bits=true`).
+2. TPS ~5 (OFF) vs ~20 (ON): el OFF no ejecutaba flyer ni usaba las mismas banderas y leia el TPS justo tras generar ~289 chunks de forma sincrona en el hilo principal → artefacto de orden/ventana, no de Hybrid. En el run `42323576926` (diseño ABBA `off1`, `on1`, `on2`, `off2` con las mismas banderas):
+   - `selftest-off1`: TPS 1m/5m/15m = `19.88 / 19.99 / 19.99`, MSPT medio = `1.02 ms`
+   - `selftest-on1`: TPS 1m/5m/15m = `19.97 / 19.99 / 20.00`, MSPT medio = `1.36 ms`
+   - `selftest-on2`: TPS 1m/5m/15m = `19.97 / 19.99 / 20.00`, MSPT medio = `1.54 ms`
+   - `selftest-off2`: TPS 1m/5m/15m = `19.96 / 19.99 / 20.00`, MSPT medio = `1.36 ms`
+3. `bits.unpack.java` ≈ 20 ms/llamada: **carrera de medicion** (`HybridStats.enabled` se activaba con una llamada en curso que empezo con t=0 y `add` sumaba el reloj monotono absoluto). Corregido leyendo el flag una sola vez por llamada, ignorando t=0 y reportando el maximo. Verificado en `42323576926`:
+   - `selftest-off1`: `bits.unpack.java` `calls=1306 items=5349376 total=0.98ms avg=754ns/call max=0.033ms`
+   - `selftest-on1`: `bits.unpack.java` `calls=1306 items=5349376 total=1.06ms avg=809ns/call max=0.287ms`
+
+### Resultados de la matriz de prioridad del volador sintetico (CI run `42323576926`, 24 b/s = 17 chunks/s, `R=5`, `lead=6`, orden `ABCD·DCBA`)
+
+| Politica | `selftest-off1` (% tarde / p50 / p95) | `selftest-on1` (% tarde / p50 / p95) | `selftest-on2` (% tarde / p50 / p95) | `selftest-off2` (% tarde / p50 / p95) | Media 4 corridas (% tarde / p50 / p95) |
+|---|---|---|---|---|---|
+| `R-urgent` (reactivo, `urgent=true`) | 57% / 1042 ms / 5549 ms | 81% / 915 ms / 3826 ms | 65% / 983 ms / 3485 ms | 74% / 981 ms / 3710 ms | **69.3% / 980 ms / 4143 ms** |
+| `R-normal` (reactivo, `urgent=false`) | 100% / 3724 ms / 7478 ms | 100% / 4700 ms / 7621 ms | 90% / 4633 ms / 8758 ms | 100% / 3655 ms / 8884 ms | **97.5% / 4178 ms / 8185 ms** |
+| `P-normal` (prefetch `lead=6`, `urgent=false` sin promocion) | 76% / 3734 ms / 9724 ms | 100% / 5690 ms / 8763 ms | 100% / 3790 ms / 9821 ms | 100% / 5176 ms / 7731 ms | **94.0% / 4598 ms / 9010 ms** |
+| `P-promovido` (prefetch `lead=6`, `urgent=false` + promocion a `urgent=true`) | 62% / 848 ms / 5336 ms | 76% / 1076 ms / 5066 ms | 84% / 2289 ms / 5089 ms | 88% / 2069 ms / 5413 ms | **77.5% / 1571 ms / 5226 ms** |
+
+**Conclusiones verificadas:**
+1. La diferencia abismal observada en la primera prueba (`26%` vs `64%`) era **casi integramente el efecto de la bandera `urgent`** (`R-urgent` p50 `980 ms` vs `R-normal` p50 `4178 ms`), no del prefetch en si.
+2. Sin promocion (`P-normal`), las solicitudes anticipadas quedan en la cola normal y nunca suben a urgente cuando el jugador las alcanza (`p50 = 4598 ms`, `p95 = 9010 ms`).
+3. Con promocion (`P-promovido`), la latencia p50 baja un **66%** respecto a `P-normal` (`1571 ms` vs `4598 ms`), y en los dos primeros runs (`off1` y `on1`) logra `p50 = 848 ms` y `1076 ms`. Sin embargo, cuando el generador ya esta saturado (17 chunks/s continuos en 4 vCPU compartidas), meter 6 columnas extra sin control de presupuesto en vuelo sigue compitiendo por los hilos Worker-Main.
+4. Por tanto, `HybridChunkPrefetch` v2 incorpora:
+   - Promocion automatica a `urgent=true` cuando un chunk pre-solicitado entra en el radio inmediato de vision.
+   - Control de espalda (backpressure): solo lanza prefetch `urgent=false` cuando el presupuesto en vuelo es bajo, evitando saturar los hilos `Worker-Main` cuando ya hay generacion urgente pendiente.
+   - Retencion temporal con ticket de plugin (`addPluginChunkTicket` con TTL) para evitar que el descargador descargue el chunk antes de que el jugador llegue a el.

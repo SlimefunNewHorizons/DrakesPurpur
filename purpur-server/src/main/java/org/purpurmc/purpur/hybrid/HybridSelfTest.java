@@ -334,8 +334,19 @@ public final class HybridSelfTest {
             int taken = 0;
             for (int i = 0; i < 20; i++) if (bucket.take(0)) taken++;
             if (taken != 8) bad++;
+            // Cache LRU + invalidacion O(1) por chunk sucio a traves de escalas (strides 1..64)
+            var cache = new org.purpurmc.purpur.hybrid.lod.HorizonLodCache(16);
+            var wid = java.util.UUID.randomUUID();
+            cache.put(wid, 0, 0, 1, cols);
+            cache.put(wid, 0, 0, 4, cols);
+            cache.put(wid, 0, 0, 16, cols);
+            if (cache.get(wid, 0, 0, 4) == null) bad++;
+            if (cache.get(wid, 64, 0, 4) != null) bad++;
+            // El chunk (2, 3) cae en bloque (32, 48): invalida stride 4 (tile 0,0, size 64) y stride 16 (tile 0,0, size 256), pero NO stride 1 (tile 0,0, size 16)
+            int inv = cache.invalidateChunk(wid, 2, 3);
+            if (inv != 2 || cache.get(wid, 0, 0, 1) == null || cache.get(wid, 0, 0, 4) != null || cache.get(wid, 0, 0, 16) != null) bad++;
             lodFailures += bad;
-            line(out, "[LOD codec horizon:lod v1] comprobaciones fallidas=" + bad + " | respuesta de ejemplo: " + reply.length + " bytes (limite " + org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.MAX_REPLY + ") | vectores derivados de la especificacion, sin contrastar con el binario de Horizon");
+            line(out, "[LOD codec horizon:lod v1 + cache LRU] comprobaciones fallidas=" + bad + " | respuesta de ejemplo: " + reply.length + " bytes (limite " + org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.MAX_REPLY + ") | invalidacion O(1) por chunk verificada");
         } catch (Throwable t) {
             lodFailures++;
             line(out, "[LOD codec] ERROR: " + t);

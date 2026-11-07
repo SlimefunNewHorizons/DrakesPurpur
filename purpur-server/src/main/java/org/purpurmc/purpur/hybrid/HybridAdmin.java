@@ -138,6 +138,7 @@ public final class HybridAdmin {
             line(s, "Chunks enviados a jugadores", String.valueOf(HybridEvents.CHUNK_SENDS.sum()));
         }
         line(s, "Prefetch", HybridChunkPrefetch.describe());
+        line(s, "Cache LOD (horizon:lod)", org.purpurmc.purpur.hybrid.lod.HorizonLodCache.global().describe());
         line(s, "Bits (Java/Rust)", HybridStats.PACK_JAVA.calls.sum() + "+" + HybridStats.UNPACK_JAVA.calls.sum() + " / " + HybridStats.PACK_NATIVE.calls.sum() + "+" + HybridStats.UNPACK_NATIVE.calls.sum()
             + " llamadas (requiere native.hybrid.stats)");
     }

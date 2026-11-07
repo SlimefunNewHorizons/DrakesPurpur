@@ -92,6 +92,18 @@ public final class HybridEvents {
             }, plugin);
             pm.registerEvent(io.papermc.paper.event.packet.PlayerChunkLoadEvent.class, l, EventPriority.MONITOR,
                 (li, e) -> CHUNK_SENDS.increment(), plugin);
+            pm.registerEvent(org.bukkit.event.block.BlockBreakEvent.class, l, EventPriority.MONITOR, (li, e) -> {
+                if (e instanceof org.bukkit.event.block.BlockBreakEvent b) {
+                    var blk = b.getBlock();
+                    org.purpurmc.purpur.hybrid.lod.HorizonLodCache.global().invalidateChunk(blk.getWorld().getUID(), blk.getX() >> 4, blk.getZ() >> 4);
+                }
+            }, plugin, true);
+            pm.registerEvent(org.bukkit.event.block.BlockPlaceEvent.class, l, EventPriority.MONITOR, (li, e) -> {
+                if (e instanceof org.bukkit.event.block.BlockPlaceEvent b) {
+                    var blk = b.getBlock();
+                    org.purpurmc.purpur.hybrid.lod.HorizonLodCache.global().invalidateChunk(blk.getWorld().getUID(), blk.getX() >> 4, blk.getZ() >> 4);
+                }
+            }, plugin, true);
             pm.registerEvent(InventoryClickEvent.class, l, EventPriority.HIGHEST, (li, e) -> {
                 if (e instanceof InventoryClickEvent c && c.getInventory().getHolder() instanceof MenuHolder) {
                     c.setCancelled(true);

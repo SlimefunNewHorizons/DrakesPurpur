@@ -20,14 +20,22 @@ def log(*a):
 
 def run(cmd, cwd=None, timeout=900, env=None):
     """Ejecuta con grupo de procesos propio; devuelve (rc|None si timeout, salida)."""
+    if os.name == 'nt' and cmd and cmd[0] in ('mvn', 'gradle'):
+        resolved = shutil.which(cmd[0])
+        if resolved:
+            cmd = [resolved] + list(cmd[1:])
     p = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                         stdin=subprocess.DEVNULL, text=True, errors='replace', start_new_session=True)
+                         stdin=subprocess.DEVNULL, text=True, errors='replace',
+                         start_new_session=(os.name != 'nt'))
     try:
         out, _ = p.communicate(timeout=timeout)
         return p.returncode, out
     except subprocess.TimeoutExpired:
         try:
-            os.killpg(p.pid, signal.SIGKILL)
+            if hasattr(os, 'killpg'):
+                os.killpg(p.pid, signal.SIGKILL)
+            else:
+                p.kill()
         except Exception:
             pass
         out, _ = p.communicate()
@@ -173,15 +181,107 @@ def maven_java(chain, props):
 
 def find_poms(root, depth=3):
     out = []
-    base = root.rstrip('/').count('/')
-    for dp, dn, fn in os.walk(root):
-        if dp.count('/') - base >= depth or '/.git' in dp or '/node_modules' in dp:
+    root_norm = os.path.normpath(root)
+    base = root_norm.count(os.sep)
+    for dp, dn, fn in os.walk(root_norm):
+        dp_norm = os.path.normpath(dp)
+        if dp_norm.count(os.sep) - base >= depth or (os.sep + '.git') in dp_norm or (os.sep + 'node_modules') in dp_norm:
             dn[:] = []
             continue
         if 'pom.xml' in fn:
             out.append(os.path.join(dp, 'pom.xml'))
-    out.sort(key=lambda p: p.count('/'))
+    out.sort(key=lambda p: os.path.normpath(p).count(os.sep))
     return out
+
+
+def prepare_parent_pom(parent_pom_path, workdir, dry_run=False):
+    """Instala el parent POM drakes-slimefun-labs:11-SNAPSHOT (sin <modules>) en workdir/m2."""
+    if not parent_pom_path or not os.path.isfile(parent_pom_path):
+        return None
+    m2 = os.path.join(workdir, 'm2')
+    stripped = os.path.join(workdir, 'drakes-slimefun-labs-parent.pom')
+    raw = open(parent_pom_path, encoding='utf-8', errors='replace').read()
+    raw = re.sub(r'<modules>.*?</modules>', '', raw, flags=re.S)
+    open(stripped, 'w', encoding='utf-8').write(raw)
+    if dry_run:
+        return stripped
+    rc, out = run(['mvn', '-B', '-ntp', '-q', '-Dmaven.repo.local=' + m2, 'install:install-file',
+                   '-Dfile=' + stripped, '-DpomFile=' + stripped, '-Dpackaging=pom'], timeout=180)
+    if rc != 0:
+        log('WARN: install parent pom fallo:', reason_from(out, 200))
+    return stripped
+
+
+def normalize_addon_sources(src, slimefun_jar, notes):
+    """Normaliza en el clon efimero referencias heredadas del monorepo sin tocar el repo remoto."""
+    has_dough_core = False
+    # 1. Normalizar pom.xml en el clon temporal
+    for pf in find_poms(src, depth=4):
+        try:
+            t = open(pf, encoding='utf-8', errors='replace').read()
+        except Exception:
+            continue
+        if 'dough-core' in t or 'dough-api' in t or 'drakes-slimefun-labs' in t:
+            has_dough_core = True
+        orig = t
+        # Si el parent es drakes-slimefun-labs y apunta a ../../../pom.xml fuera del repo, vaciar relativePath
+        if 'drakes-slimefun-labs' in t and '<relativePath>' in t:
+            t = re.sub(r'<relativePath>\s*\.\./[^<]*</relativePath>', '<relativePath/>', t)
+        # Odysseia / Odysseia-Rust con <source>21</source> + --enable-preview (Panama FFM es estandar en Java 22+/25)
+        if '--enable-preview' in t:
+            t = re.sub(r'<arg>\s*--enable-preview\s*</arg>', '', t)
+            t = t.replace('--enable-preview', '')
+            t = re.sub(r'<(source|target|release|maven\.compiler\.(?:source|target|release))>\s*21\s*</\1>', r'<\1>25</\1>', t)
+        # Java 1.8 / 8 ya no es soportado por javac 25 (subir a 11)
+        t = re.sub(r'<(source|target)>\s*(?:1\.)?[678]\s*</\1>', r'<\1>11</\1>', t)
+        t = re.sub(r'<(maven\.compiler\.(?:source|target|release))>\s*(?:1\.)?[678]\s*</\1>', r'<\1>11</\1>', t)
+        # Lombok < 1.18.38 falla en javac 25 con ExceptionInInitializerError: TypeTag :: UNKNOWN
+        t = re.sub(r'(<artifactId>lombok</artifactId>\s*<version>)1\.18\.(?:[0-2]\d|3[0-7])(</version>)', r'\g<1>1.18.46\2', t)
+        t = re.sub(r'<lombok\.version>1\.18\.(?:[0-2]\d|3[0-7])</lombok\.version>', '<lombok.version>1.18.46</lombok.version>', t)
+        # Actualizar maven-compiler-plugin muy antiguo (< 3.11) y maven-shade-plugin 2.x para compatibilidad con JDK 25
+        t = re.sub(r'(<artifactId>maven-compiler-plugin</artifactId>\s*<version>)3\.(?:[0-9]|10)(?:\.\d+)?(</version>)', r'\g<1>3.13.0\2', t)
+        t = re.sub(r'(<artifactId>maven-shade-plugin</artifactId>\s*<version>)2\.\d+(?:\.\d+)?(</version>)', r'\g<1>3.6.0\2', t)
+        if t != orig:
+            open(pf, 'w', encoding='utf-8').write(t)
+            notes.append('pom normalizado: ' + os.path.relpath(pf, src))
+
+    # 2. Si el addon usa SlimefunKnowledgeDump work/Slimefun.jar, copiar nuestro --slimefun-jar alli
+    if slimefun_jar and os.path.isfile(slimefun_jar):
+        work_sf = os.path.join(src, 'work', 'Slimefun.jar')
+        if os.path.isdir(os.path.join(src, 'dump-plugin')) and not os.path.isfile(work_sf):
+            os.makedirs(os.path.dirname(work_sf), exist_ok=True)
+            shutil.copyfile(slimefun_jar, work_sf)
+            notes.append('copiado Slimefun.jar a work/Slimefun.jar')
+
+    # 3. Normalizar imports de paquetes legacy (com.github.drakescraft_labs.slimefun4.*) al paquete universal
+    replaced_files = 0
+    for dp, dn, fn in os.walk(src):
+        if (os.sep + '.git') in dp:
+            dn[:] = []
+            continue
+        for f in fn:
+            if not f.endswith(('.java', '.kt')):
+                continue
+            fp = os.path.join(dp, f)
+            try:
+                t = open(fp, encoding='utf-8', errors='replace').read()
+            except Exception:
+                continue
+            orig = t
+            if 'com.github.drakescraft_labs.slimefun4.' in t:
+                t = t.replace('com.github.drakescraft_labs.slimefun4.legacy.', 'me.mrCookieSlime.Slimefun.')
+                t = t.replace('com.github.drakescraft_labs.slimefun4.', 'io.github.thebusybiscuit.slimefun4.')
+            if not has_dough_core and 'io.github.bakedlibs.dough.' in t:
+                t = t.replace('io.github.bakedlibs.dough.', 'io.github.thebusybiscuit.slimefun4.libraries.dough.')
+            if 'io.papermc.lib.PaperLib' in t and 'SlimyTreeTaps' in src:
+                t = t.replace('import io.papermc.lib.PaperLib;', 'import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;')
+            if 'Bukkit.getPlayerCount()' in t:
+                t = t.replace('Bukkit.getPlayerCount()', 'Bukkit.getOnlinePlayers().size()')
+            if t != orig:
+                open(fp, 'w', encoding='utf-8').write(t)
+                replaced_files += 1
+    if replaced_files:
+        notes.append('imports normalizados a API universal en %d archivos' % replaced_files)
 
 
 # ---------------------------------------------------------------- gradle
@@ -222,12 +322,27 @@ def write_local_repo(repo_dir, group, artifact, version, jar):
                 '<version>%s</version></project>' % (group, artifact, version))
 
 
-def gradle_init_script(path, repo_dir):
+def rm_tree(path):
+    if not os.path.exists(path):
+        return
+    def _onerr(func, p, _exc):
+        try:
+            os.chmod(p, 0o700)
+            func(p)
+        except Exception:
+            pass
+    shutil.rmtree(path, onerror=_onerr)
+
+
+def gradle_init_script(path, repo_dir, m2_dir=None):
     names = ', '.join('"%s"' % n for n in sorted(SF_ARTIFACTS))
+    m2_block = '    maven { url = uri("%s") }\n' % m2_dir.replace('\\', '/') if m2_dir else ''
     open(path, 'w').write('''
 def sfNames = [%s]
 gradle.beforeProject { p ->
-  p.repositories { maven { url = uri("%s"); content { includeGroup("drake.local") } } }
+  p.repositories {
+    maven { url = uri("%s"); content { includeGroup("drake.local") } }
+%s  }
   p.configurations.all {
     resolutionStrategy.eachDependency { d ->
       if (d.requested.name.toLowerCase() in sfNames && d.requested.group != "drake.local") {
@@ -235,8 +350,11 @@ gradle.beforeProject { p ->
       }
     }
   }
+  p.tasks.matching { it.name in ["test", "compileTestJava", "compileTestKotlin"] }.configureEach {
+    enabled = false
+  }
 }
-''' % (names, repo_dir.replace('\\', '/')))
+''' % (names, repo_dir.replace('\\', '/'), m2_block))
 
 
 # ---------------------------------------------------------------- jars
@@ -283,6 +401,9 @@ def ident(e):
     """id estable y seguro como nombre de fichero (el manifest trae ids con prefijo '(gradle, ...)' o None)."""
     raw = e.get('id') or (e.get('repo') or 'desconocido').split('/')[-1]
     raw = re.sub(r'^\([^)]*\)\s*', '', raw)
+    repo_tail = (e.get('repo') or '').split('/')[-1]
+    if repo_tail.lower() == 'odysseia-rust' and raw.lower() == 'odysseia':
+        raw = 'Odysseia-Rust'
     return re.sub(r'[^\w.\-]', '_', raw) or 'desconocido'
 
 
@@ -296,7 +417,7 @@ def process(e, a, dirs):
     logf = os.path.join(dirs['logs'], ident(e) + '.log')
     transcript = []
     try:
-        shutil.rmtree(src, ignore_errors=True)
+        rm_tree(src)
         env = dict(os.environ, GIT_TERMINAL_PROMPT='0', GIT_ASKPASS='/bin/true')
         url = e['repo'] if e['repo'].startswith(('/', 'file:')) else 'https://github.com/%s' % e['repo']  # ruta local solo para pruebas
         branch = e.get('branch')
@@ -304,7 +425,7 @@ def process(e, a, dirs):
         transcript.append(out)
         if rc not in (0, None) and re.search(r'Remote branch .* not found|not found in upstream', out) and e.get('default_branch') and e['default_branch'] != branch:
             res['notes'].append('rama %s no existe; se uso la rama por defecto %s' % (branch, e['default_branch']))
-            shutil.rmtree(src, ignore_errors=True)
+            rm_tree(src)
             res['branch'] = e['default_branch']
             rc, out = run(['git', 'clone', '--depth', '1', '-b', e['default_branch'], url, src], timeout=300, env=env)
             transcript.append(out)
@@ -331,6 +452,9 @@ def process(e, a, dirs):
             res.update(status='sin-build', reason='sin pom.xml, build.gradle[.kts] ni gradlew en la raiz del repo')
             return res
 
+        if not a.dry_run:
+            normalize_addon_sources(src, a.slimefun_jar, res['notes'])
+
         cmd, cwd = None, src
         if system == 'maven':
             poms = find_poms(src)
@@ -341,6 +465,10 @@ def process(e, a, dirs):
             deps, notes = maven_slimefun_deps(poms)
             res['notes'] += notes
             m2 = os.path.join(a.workdir, 'm2')
+            # Asegurar coordenadas universales de Slimefun cuando el parent POM define la version
+            default_sf = ('com.github.drakescraft_labs', 'slimefun-core', '11.0-Universal-26.x-SNAPSHOT')
+            if not any((d['groupId'], d['artifactId'], d['version']) == default_sf for d in deps):
+                deps.append(dict(groupId=default_sf[0], artifactId=default_sf[1], version=default_sf[2]))
             installed = []
             for d in deps:
                 coord = '%(groupId)s:%(artifactId)s:%(version)s' % d
@@ -360,30 +488,31 @@ def process(e, a, dirs):
             res['slimefun_dep_resolved'] = installed or None
             if not deps:
                 res['notes'].append('sin dependencia a Slimefun detectada en los poms')
-            cmd = ['mvn', '-B', '-ntp', '-nsu', '-Dmaven.repo.local=' + m2, '-DskipTests', '-Dmaven.test.skip=true',
-                   '-Dmaven.javadoc.skip=true', '-Dgpg.skip=true', 'package']
+            cmd = ['mvn', '-B', '-ntp', '-nsu', '-Dmaven.repo.local=' + m2, '-Dmaven.compiler.proc=full',
+                   '-DskipTests', '-Dmaven.test.skip=true', '-Dmaven.javadoc.skip=true', '-Dgpg.skip=true', 'package']
         else:
             deps, java = gradle_scan(src)
             res['java_required'] = java
-            wrapper = os.path.join(src, 'gradlew')
-            if os.path.isfile(wrapper):
+            wrapper = os.path.join(src, 'gradlew.bat' if os.name == 'nt' and os.path.isfile(os.path.join(src, 'gradlew.bat')) else 'gradlew')
+            if os.path.isfile(wrapper) and os.name != 'nt':
                 os.chmod(wrapper, 0o755)
             gcmd = [wrapper] if os.path.isfile(wrapper) else ['gradle']
             cmd = gcmd + ['build', '-x', 'test', '--no-daemon', '--console=plain']
-            if deps:
-                if os.path.isfile(a.slimefun_jar):
-                    repo_dir = os.path.join(a.workdir, 'gradle-local-repo')
-                    init = os.path.join(a.workdir, 'sf-init.gradle')
-                    if not a.dry_run:
-                        write_local_repo(repo_dir, 'drake.local', 'slimefun', 'local', a.slimefun_jar)
-                        gradle_init_script(init, repo_dir)
-                    cmd += ['--init-script', init]
+            m2 = os.path.join(a.workdir, 'm2')
+            if os.path.isfile(a.slimefun_jar):
+                repo_dir = os.path.join(a.workdir, 'gradle-local-repo')
+                init = os.path.join(a.workdir, 'sf-init.gradle')
+                if not a.dry_run:
+                    write_local_repo(repo_dir, 'drake.local', 'slimefun', 'local', a.slimefun_jar)
+                    gradle_init_script(init, repo_dir, m2 if os.path.isdir(m2) else None)
+                cmd += ['--init-script', init]
+                if deps:
                     res['slimefun_dep_resolved'] = ['drake.local:slimefun:local (sustituye %s)' %
                                                     ', '.join('%s:%s:%s' % d for d in deps)]
                 else:
-                    res['notes'].append('--slimefun-jar no existe; no se pudo sustituir la dependencia')
+                    res['notes'].append('init-script gradle aplicado (m2 local + drake.local)')
             else:
-                res['notes'].append('sin dependencia a Slimefun detectada en los scripts gradle')
+                res['notes'].append('--slimefun-jar no existe; no se pudo sustituir la dependencia')
         res['command'] = ' '.join(cmd)
         if a.dry_run:
             res.update(status='dry-run', reason='')
@@ -414,7 +543,7 @@ def process(e, a, dirs):
         except Exception:
             pass
         if not a.keep_clones:
-            shutil.rmtree(src, ignore_errors=True)
+            rm_tree(src)
 
 
 def main():
@@ -422,6 +551,7 @@ def main():
     ap.add_argument('--manifest', required=True)
     ap.add_argument('--shard', default='0/1', help='I/N (reparto por indice: posicion % N == I)')
     ap.add_argument('--slimefun-jar', default='')
+    ap.add_argument('--parent-pom', default='', help='pom.xml padre drakes-slimefun-labs para instalar en workdir/m2')
     ap.add_argument('--out', required=True)
     ap.add_argument('--workdir', required=True)
     ap.add_argument('--timeout', type=int, default=900)
@@ -433,9 +563,13 @@ def main():
     a.out, a.workdir = os.path.abspath(a.out), os.path.abspath(a.workdir)
     if a.slimefun_jar:
         a.slimefun_jar = os.path.abspath(a.slimefun_jar)
+    if a.parent_pom:
+        a.parent_pom = os.path.abspath(a.parent_pom)
     dirs = {k: os.path.join(a.out, k) for k in ('results', 'jars', 'logs')}
     for d in list(dirs.values()) + [a.workdir]:
         os.makedirs(d, exist_ok=True)
+    if a.parent_pom:
+        prepare_parent_pom(a.parent_pom, a.workdir, dry_run=a.dry_run)
     entries = [x for x in json.load(open(a.manifest))['entries'] if x.get('category') == 'addon_slimefun']
     mine = [x for i, x in enumerate(entries) if i % sn == si]
     if a.only:
