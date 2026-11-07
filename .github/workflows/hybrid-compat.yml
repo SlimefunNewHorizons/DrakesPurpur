@@ -153,7 +153,7 @@ jobs:
           mkdir -p run/plugins run/drakes-data
           cp purpur-server/build/libs/*paperclip*.jar run/server.jar
           sha256sum run/server.jar | tee monolith-sha256.txt
-          echo "entradas drakes-bundled en el JAR: $(unzip -l run/server.jar | grep -c drakes-bundled)"; unzip -l run/server.jar | grep -E 'drakes-natives' | head -4
+          echo "entradas empaquetadas en el JAR (suites .jar + nativos): $(unzip -l run/server.jar | grep -cE 'bundled/|drakes-natives/')"; unzip -l run/server.jar | grep -E 'drakes-natives' | head -4
       - name: Preparar servidor (solo Slimefun en plugins/; las suites salen del JAR)
         run: |
           cd run && echo "eula=true" > eula.txt
@@ -172,4 +172,5 @@ jobs:
             timeout 420 java -Xmx2G -Dsmoke.phase=$ph --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../mono$ph.log 2>&1
             echo "== fase $ph exit=$? PASS=$(grep -c ^PASS compat-smoke-phase$ph.txt) FAIL=$(grep -c ^FAIL compat-smoke-phase$ph.txt)"; grep -v -E "^PASS (getById|getByItem)|^plugin " compat-smoke-phase$ph.txt | head -12
             grep -E "Enabling|DrakesBundled|Done \(|HybridNative|SEVERE|ERROR" ../mono$ph.log | cut -c1-150 | head -26
+            echo "-- origen de la biblioteca nativa (ruta completa, sin -Ddrakes.native.dir):"; grep -ho "lib=[^ ]*" ../mono$ph.log | head -2; ls -la drakes-data/natives/*/ 2>/dev/null | head -5
           done

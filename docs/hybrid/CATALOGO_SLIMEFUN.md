@@ -23,3 +23,19 @@ El volcado de produccion incluye contenido generado (p. ej. `ColoredEnderChests`
 - Encontrados: Slimefun **555** items (produccion: 554) y `Drakes Nanotechnology & Stark Engineering` **158** (produccion: `DrakesNanotech` 158; el auditor lo marca como "no esperado" solo por diferencia de nombre).
 - **63 de los 64 addons de produccion no estan presentes** en este servidor de pruebas (p. ej. FoxyMachines 452, DynaTech 123, FNAmplifications 193, Galaxyfun 100...). Es una limitacion del entorno de prueba (solo core + StarSuites), no un fallo de compatibilidad medido.
 - Para cubrir todo el ecosistema falta: construir y cargar los addons independientes (repos `*-drake` de SlimefunNewHorizons) junto a los de las StarSuites.
+
+## Resultado verificado del CI de compatibilidad (run 42322308340, commit 70c4942)
+
+Fuente: paso "Resumen del catalogo real" (servidor real con Slimefun4-Drake `port-26x` + Drakes-Suites `26.x` + plugin de prueba; comparado con el volcado de produccion de Slimefun-Knowledge-Drake, solo lectura).
+
+| Magnitud | Cargado en CI | Volcado de produccion |
+|---|---|---|
+| Items de Slimefun | **713** (555 Slimefun + 158 Drakes Nanotechnology & Stark Engineering) | 15 986 |
+| Items con receta | 711 de 713 (no es el numero total de recetas: es items que tienen receta) | — |
+| Categorias (item groups) | 25 | 274 |
+| Investigaciones | 257 | 440 |
+| Addons con items | 2 | 64 |
+| Plugins habilitados | 11 (DrakesCore, Slimefun, DrakesCombat, DrakesTech, DrakesUtility, DrakesMultiverse, DrakesServer, DrakesGenerators, DrakesBio, DrakesMagic + el plugin de prueba) | — |
+| Otros | 87 componentes de energia, 15 multibloques, 48 maquinas (heuristica) | — |
+
+**713 NO es el total del ecosistema**: es lo que carga este entorno de CI. 63 de los 64 addons del volcado de produccion **no estan presentes** (los mayores: ColoredEnderChests 8192, Cultivation 1401, SlimeTinker 1376, Supreme 510, FoxyMachines 452). Los 158 de Nanotech aparecen bajo otro nombre de addon que el del volcado (`DrakesNanotech`) y se reportan como "no esperado"; es una discrepancia de nombres, no de items. Cobertura real de los 15 986 items de produccion: **sin verificar** hasta tener todos los addons en el CI.

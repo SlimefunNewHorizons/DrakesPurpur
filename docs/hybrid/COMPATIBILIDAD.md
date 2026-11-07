@@ -34,3 +34,11 @@ Nota: que los plugins carguen y pasen estas operaciones **no** prueba que el mot
 | Horizon Client (26.3) -> servidor 26.2 | NV | el cliente trae adaptador 26.2; ver CLIENTE_HORIZON.md |
 | Mods Forge/Fabric/NeoForge | N/A | no se promete |
 | FPS / render | N/A | cliente |
+
+## Monolito (run 42322308340, job "Monolito + Hybrid ON")
+
+- Build correcto; las 9 suites embebidas se **extrajeron del JAR en el primer arranque** (`bundled-state.yml` con 9 entradas, modo activo) y arrancan sin que estén en `plugins/` de origen.
+- Smoke fase 1: **156 PASS / 0 FAIL**; fase 2 tras reinicio: **123 PASS / 0 FAIL**, `PERSISTENCIA tras reinicio: 17 bloques con datos de la fase 1`, `RESULT OK`. 713 items de Slimefun, sin lineas SEVERE/ERROR. Arranque ~12 s.
+- Biblioteca nativa: arranco con `bits=true` **sin `-Ddrakes.native.dir`** y la ruta resuelta cuelga de `run/drakes-d…` (coherente con la extraccion a `drakes-data/natives/embedded-<sha>`). **La ruta completa y el origen no se vieron** (el log estaba truncado): el CI ahora imprime la ruta completa y el contenido de `drakes-data/natives/`; hasta leerlo, la extraccion embebida se considera *probable, no confirmada*.
+- Falla de instrumentacion: el contador "entradas drakes-bundled en el JAR" daba 0 pese a que la extraccion funciona (patron de busqueda erroneo); corregido.
+- No cubre: GUIs de Slimefun con jugador real, maquinas/redes en carga, ni los 63 addons ausentes.
