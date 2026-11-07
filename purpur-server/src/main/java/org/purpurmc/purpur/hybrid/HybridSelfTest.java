@@ -242,7 +242,7 @@ public final class HybridSelfTest {
 
             // 9) DrakesLOD: codec horizon:lod v1 y coste de muestrear terreno lejano sin generar chunks
             lodCodecTest(out);
-            lodSamplerProbe(out, srv, level, chunks.size() == 0 ? 0 : genMs);
+            lodSamplerProbe(out, srv, level, genMs);
             if (diffs != 0 || roundTripDiffs != 0 || densityMismatches != 0 || adminFailures != 0 || lodFailures != 0) {
                 exit = 3;
                 line(out, "RESULTADO: FALLO DE PARIDAD");
