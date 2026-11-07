@@ -213,11 +213,64 @@ public class HybridCompatSmoke extends JavaPlugin {
             check(false, "excepcion: " + t);
             t.printStackTrace();
         }
+        if (Boolean.getBoolean("smoke.perf") && Integer.getInteger("smoke.phase", 1) == 1) {
+            perfThenFinish();
+            return;
+        }
+        finish();
+    }
+
+    private void finish() {
         out.add(failures == 0 ? "RESULT OK" : "RESULT FAILURES=" + failures);
         try {
             Files.write(new File("compat-smoke-phase" + Integer.getInteger("smoke.phase", 1) + ".txt").toPath(), out);
         } catch (Throwable ignored) {
         }
         Bukkit.shutdown();
+    }
+
+    /**
+     * Medicion de rendimiento con TODO el ecosistema cargado (-Dsmoke.perf=true): throughput de generacion de chunks
+     * asincrona y, despues, muestras de TPS/MSPT/CPU/heap cada 2 s con el servidor en reposo. Escribe perf-sample.json.
+     * Son cifras de ESTA ejecucion en un runner compartido: sirven para comparar OFF/ON solo con corridas alternadas.
+     */
+    private void perfThenFinish() {
+        final org.bukkit.World w = Bukkit.getWorlds().get(0);
+        final int n = Integer.getInteger("smoke.perf.chunks", 150);
+        final long t0 = System.nanoTime();
+        final java.util.concurrent.atomic.AtomicInteger done = new java.util.concurrent.atomic.AtomicInteger();
+        final double[] genSeconds = {-1};
+        for (int i = 0; i < n; i++) {
+            int cx = 4000 + (i % 15), cz = 4000 + (i / 15);
+            w.getChunkAtAsync(cx, cz, true).whenComplete((c, e) -> {
+                if (done.incrementAndGet() == n) genSeconds[0] = (System.nanoTime() - t0) / 1e9;
+            });
+        }
+        final List<double[]> samples = new ArrayList<>();
+        final com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+        final int[] tick = {0};
+        new org.bukkit.scheduler.BukkitRunnable() {
+            @Override
+            public void run() {
+                if (genSeconds[0] < 0 && tick[0] < 90) { tick[0]++; return; }   // esperar la generacion (max ~3 min) antes de muestrear
+                double heap = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576.0;
+                int loaded = 0;
+                for (org.bukkit.World x : Bukkit.getWorlds()) loaded += x.getLoadedChunks().length;
+                samples.add(new double[] {Bukkit.getTPS()[0], Bukkit.getAverageTickTime(), os.getProcessCpuLoad() * 100, heap, loaded});
+                if (samples.size() >= 15) {
+                    cancel();
+                    StringBuilder j = new StringBuilder("{\"chunks_requested\": " + n + ", \"chunks_done\": " + done.get() + ", \"gen_seconds\": " + genSeconds[0]
+                        + ", \"chunks_per_s\": " + (genSeconds[0] > 0 ? n / genSeconds[0] : -1) + ", \"plugins_enabled\": " + Bukkit.getPluginManager().getPlugins().length
+                        + ", \"cpus\": " + Runtime.getRuntime().availableProcessors() + ", \"samples\": [");
+                    for (int i = 0; i < samples.size(); i++) {
+                        double[] a = samples.get(i);
+                        j.append(i == 0 ? "" : ",").append(String.format(java.util.Locale.ROOT, "{\"tps\":%.2f,\"mspt\":%.2f,\"cpu_pct\":%.1f,\"heap_mb\":%.0f,\"loaded_chunks\":%d}", a[0], a[1], a[2], a[3], (int) a[4]));
+                    }
+                    j.append("]}");
+                    try { Files.writeString(new File("perf-sample.json").toPath(), j.toString()); } catch (Throwable ignored) { }
+                    finish();
+                }
+            }
+        }.runTaskTimer(HybridCompatSmoke.this, 40L, 40L);
     }
 }
