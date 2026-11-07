@@ -79,6 +79,8 @@ public final class HybridSelfTest {
             final ServerLevel level = srv.overworld();
             boolean lib = HybridNative.libraryLoaded();
             line(out, "== DrakesPurpur Hybrid selftest == radius=" + radius + " lib=" + lib + " " + HybridNative.status());
+            final boolean initialBits = HybridNative.bitsEnabled();
+            line(out, entorno("inicio"));
             line(out, "jvm=" + System.getProperty("java.vm.name") + " " + Runtime.version() + " cpus=" + Runtime.getRuntime().availableProcessors());
 
             // 1) generacion / carga
@@ -237,12 +239,14 @@ public final class HybridSelfTest {
             // 7) Pipeline de chunks bajo un volador sintetico: lectura reactiva vs prefetch direccional
             flyerBench(out, srv);
 
-            // 8) Comandos /drakes hybrid y GUI con datos reales
+            // 8) Comandos /drakes hybrid y GUI con datos reales (con el estado CONFIGURADO, no el que dejo el autotest)
+            HybridNative.forceBits(initialBits);
             adminSmoke(out, srv);
 
             // 9) DrakesLOD: codec horizon:lod v1 y coste de muestrear terreno lejano sin generar chunks
             lodCodecTest(out);
             lodSamplerProbe(out, srv, level, genMs);
+            line(out, entorno("fin"));
             if (diffs != 0 || roundTripDiffs != 0 || densityMismatches != 0 || adminFailures != 0 || lodFailures != 0) {
                 exit = 3;
                 line(out, "RESULTADO: FALLO DE PARIDAD");
@@ -599,5 +603,18 @@ public final class HybridSelfTest {
         if (a.length == 0) return "n/a";
         return String.format("p50=%.3f p95=%.3f p99=%.3f max=%.3f mean=%.3f", a[a.length / 2], a[(int) (a.length * 0.95)],
             a[Math.min(a.length - 1, (int) (a.length * 0.99))], a[a.length - 1], Arrays.stream(a).average().orElse(0));
+    }
+
+    /** Condiciones del host para poder decidir si dos corridas son comparables (carga ajena, CPUs, GC). */
+    private static String entorno(String fase) {
+        String load = "?";
+        try {
+            load = Files.readString(java.nio.file.Path.of("/proc/loadavg")).trim();
+        } catch (Throwable ignored) {
+        }
+        long gcMs = 0;
+        for (var gc : java.lang.management.ManagementFactory.getGarbageCollectorMXBeans()) gcMs += Math.max(0, gc.getCollectionTime());
+        return "[entorno " + fase + "] loadavg(1/5/15 procs)=" + load + " cpus=" + Runtime.getRuntime().availableProcessors()
+            + " gcAcumulado=" + gcMs + "ms bitsConfigurado=" + HybridNative.bitsEnabled();
     }
 }

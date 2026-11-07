@@ -12,6 +12,8 @@ public final class HybridStats {
     public static final class Stage {
         public final String name;
         public final LongAdder calls = new LongAdder(), nanos = new LongAdder(), items = new LongAdder();
+        /** Peor llamada: un maximo muy superior a la media delata descheduling/pausas del runner, no coste del kernel. */
+        public final java.util.concurrent.atomic.LongAccumulator max = new java.util.concurrent.atomic.LongAccumulator(Math::max, 0L);
 
         Stage(String name) {
             this.name = name;
@@ -19,19 +21,22 @@ public final class HybridStats {
 
         public void add(long startNanos, int itemCount) {
             calls.increment();
-            nanos.add(System.nanoTime() - startNanos);
+            long d = System.nanoTime() - startNanos;
+            nanos.add(d);
+            max.accumulate(d);
             items.add(itemCount);
         }
 
         public String line() {
             long c = calls.sum(), n = nanos.sum();
-            return String.format("%-22s calls=%d items=%d total=%.2fms avg=%.0fns/call", name, c, items.sum(), n / 1e6, c == 0 ? 0 : (double) n / c);
+            return String.format("%-22s calls=%d items=%d total=%.2fms avg=%.0fns/call max=%.3fms (tiempo de pared; incluye descheduling)", name, c, items.sum(), n / 1e6, c == 0 ? 0 : (double) n / c, max.get() / 1e6);
         }
 
         public void reset() {
             calls.reset();
             nanos.reset();
             items.reset();
+            max.reset();
         }
     }
 

@@ -88,6 +88,11 @@ public final class HybridNative {
         return true;
     }
 
+    /** Estado actual del interruptor de bits (configurado o forzado por un test). */
+    public static boolean bitsEnabled() {
+        return bitsOn;
+    }
+
     public static boolean libraryLoaded() {
         return natives != null;
     }

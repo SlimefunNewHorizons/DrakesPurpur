@@ -40,21 +40,24 @@ jobs:
           mkdir -p run && cp purpur-server/build/libs/*paperclip*.jar run/server.jar
           cd run && echo "eula=true" > eula.txt
           printf 'online-mode=false\nserver-port=25599\nlevel-seed=12345\nview-distance=4\nsimulation-distance=4\nenable-command-block=false\nspawn-protection=0\n' > server.properties
-      - name: Run selftest with Hybrid OFF (control)
+      - name: Selftest equivalente OFF/ON alternado (OFF,ON,ON,OFF) con mismas banderas
         run: |
-          cd run && rm -rf world drakes-data
-          mkdir drakes-data && printf 'native:\n  hybrid:\n    enabled: false\n' > drakes-data/perf.yml
-          set +e
-          timeout 1500 java -Xms1G -Xmx3G --enable-native-access=ALL-UNNAMED -Ddrakes.hybrid.selftest=8 -jar server.jar --nogui > ../server-off.log 2>&1
-          echo "exit=$?"; cp drakes-data/hybrid-selftest.txt ../selftest-off.txt || true
-      - name: Run selftest with Hybrid ON (bits)
-        run: |
-          cd run && rm -rf world drakes-data
-          mkdir drakes-data && printf 'native:\n  hybrid:\n    enabled: true\n    bits: true\n' > drakes-data/perf.yml
-          set +e
-          timeout 1500 java -Xms1G -Xmx3G --enable-native-access=ALL-UNNAMED -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib -Ddrakes.hybrid.selftest.flyer=true -Ddrakes.hybrid.selftest=8 -jar server.jar --nogui > ../server-on.log 2>&1
-          rc=$?; echo "exit=$rc"; cp drakes-data/hybrid-selftest.txt ../selftest-on.txt || true
-          grep -q "RESULTADO: OK" ../selftest-on.txt && echo 0 > ../exit-on.txt || echo 1 > ../exit-on.txt
+          # Condiciones equivalentes: sin daemons de Gradle, mismas banderas JVM (flyer en ambas), carpeta limpia,
+          # espera a que la carga del host baje y orden alternado para que el orden no sea una variable.
+          ./gradlew --stop >/dev/null 2>&1 || true
+          pkill -f 'GradleDaemon|KotlinCompileDaemon' || true
+          run_one() { # $1=etiqueta $2=on|off
+            cd $GITHUB_WORKSPACE/run && rm -rf world drakes-data && mkdir drakes-data
+            for i in $(seq 1 30); do l=$(cut -d' ' -f1 /proc/loadavg); awk "BEGIN{exit !($l < 0.5)}" && break; sleep 2; done
+            echo "== $1 loadavg previo: $(cat /proc/loadavg)"
+            if [ "$2" = on ]; then printf 'native:\n  hybrid:\n    enabled: true\n    bits: true\n' > drakes-data/perf.yml
+            else printf 'native:\n  hybrid:\n    enabled: false\n' > drakes-data/perf.yml; fi
+            set +e
+            timeout 1500 java -Xms1G -Xmx3G --enable-native-access=ALL-UNNAMED -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib -Ddrakes.hybrid.selftest.flyer=true -Ddrakes.hybrid.selftest=8 -jar server.jar --nogui > ../server-$1.log 2>&1
+            echo "exit=$?"; cp drakes-data/hybrid-selftest.txt ../selftest-$1.txt || true
+          }
+          run_one off1 off; run_one on1 on; run_one on2 on; run_one off2 off
+          W=$GITHUB_WORKSPACE; grep -q "RESULTADO: OK" $W/selftest-on1.txt && grep -q "RESULTADO: OK" $W/selftest-on2.txt && echo 0 > $W/exit-on.txt || echo 1 > $W/exit-on.txt
       - name: Profile world generation with JFR (Hybrid OFF)
         run: |
           cd run && rm -rf world drakes-data
@@ -65,9 +68,8 @@ jobs:
           python3 ../tools/hybrid-bench/jfr_top.py gen.jfr 30 | tee ../jfr-top.txt
       - name: Summary
         run: |
-          echo "===== OFF"; cat selftest-off.txt || true
-          echo "===== ON";  cat selftest-on.txt  || true
-          grep -E "\[Hybrid\]|HybridSelfTest|Exception|ERROR" server-on.log | head -40 || true
+          for f in selftest-off1 selftest-on1 selftest-on2 selftest-off2; do echo "===== $f"; cat $f.txt || true; done
+          grep -E "\[Hybrid\]|HybridSelfTest|Exception|ERROR" server-on1.log | head -40 || true
           test "$(cat exit-on.txt)" = "0"
       - uses: actions/upload-artifact@v4
         if: always()
