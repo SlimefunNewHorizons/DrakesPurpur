@@ -104,9 +104,23 @@ jobs:
           echo "== clases Slimefun en jars:"; for j in plugins/*lime*.jar plugins/*Slime*.jar; do [ -f "$j" ] && unzip -l "$j" | grep -E "/SlimefunItem.class|/BlockStorage.class|implementation/Slimefun.class" | head -4; done
           CP=$(find cache libraries -name '*.jar' | tr '\n' ':')$(ls plugins/*.jar | tr '\n' ':')
           echo "== javac:"; mkdir -p /tmp/sm && javac -proc:none -Xmaxerrs 6 -cp "$CP" -d /tmp/sm ../tools/compat-smoke/src/HybridCompatSmoke.java 2>&1 | head -24; echo "javac exit=${PIPESTATUS[0]}"
+      - name: Resumen del catalogo real
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json
+          d = json.load(open('run/compat-catalog.json'))
+          print('TOTALES encontrados:', json.dumps(d['totals']))
+          print('TOTALES esperados  :', json.dumps(d['expected_totals']))
+          print('items por addon    :', json.dumps(d['items_by_addon']))
+          print('ausentes (%d)      :' % len(d['expected_addons_missing']), '; '.join(d['expected_addons_missing'][:70]))
+          print('parciales          :', d['expected_addons_partial'])
+          print('no esperados       :', d['found_addons_not_in_expected'])
+          print('plugins            :', ', '.join(d['plugins']))
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
-        with: { name: hybrid-compat-catalog, path: "compat-catalog.json\ncompat-catalog.md\nexpected.properties\nsmoke1.log\nsmoke2.log" }
+        with: { name: hybrid-compat-catalog, path: "run/compat-catalog.json\nrun/compat-catalog.md\nexpected.properties\nsmoke1.log\nsmoke2.log" }
       - name: Errores en logs
         if: always()
         run: grep -h -E "ERROR|SEVERE|Exception" smoke1.log smoke2.log 2>/dev/null | cut -c1-200 | sort | uniq -c | sort -rn | head -15
