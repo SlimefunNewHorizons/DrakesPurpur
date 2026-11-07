@@ -25,7 +25,7 @@ import org.purpurmc.purpur.nativelib.HybridNative;
  */
 public final class HybridAdmin {
     public static final String PERM = "drakes.hybrid.admin";
-    public static final List<String> SUBS = List.of("status", "info", "chunks", "workers", "benchmark", "diagnostics", "gui", "help");
+    public static final List<String> SUBS = List.of("status", "info", "chunks", "workers", "benchmark", "diagnostics", "manifest", "gui", "help");
     private static volatile String lastBenchmark = "(sin ejecutar)";
     private static final AtomicBoolean BENCH_RUNNING = new AtomicBoolean();
 
@@ -59,6 +59,7 @@ public final class HybridAdmin {
                 case "workers" -> workers(sender);
                 case "benchmark" -> benchmark(sender, args.length > 1 && args[1].equalsIgnoreCase("confirm"));
                 case "diagnostics", "diag" -> diagnostics(sender);
+                case "manifest" -> manifest(sender);
                 case "gui" -> {
                     if (sender instanceof Player p) HybridAdminMenu.open(p);
                     else sender.sendMessage(ChatColor.RED + "La GUI es solo para jugadores. Usa /drakes hybrid status en consola.");
@@ -87,6 +88,7 @@ public final class HybridAdmin {
         s.sendMessage(ChatColor.YELLOW + "/drakes hybrid workers" + ChatColor.GRAY + " - hilos del servidor por familia y estado");
         s.sendMessage(ChatColor.YELLOW + "/drakes hybrid benchmark confirm" + ChatColor.GRAY + " - micro-benchmark sintetico (no toca mundos)");
         s.sendMessage(ChatColor.YELLOW + "/drakes hybrid diagnostics" + ChatColor.GRAY + " - errores, JVM, GC, plugins y compatibilidad");
+        s.sendMessage(ChatColor.YELLOW + "/drakes hybrid manifest" + ChatColor.GRAY + " - genera drakes-data/client-manifest.json para DrakeStar-Launcher");
         s.sendMessage(ChatColor.YELLOW + "/drakes hybrid gui" + ChatColor.GRAY + " - panel in-game (jugadores)");
         s.sendMessage(ChatColor.GRAY + "Todo es experimental y esta apagado por defecto. Permiso: " + PERM);
     }
@@ -228,6 +230,40 @@ public final class HybridAdmin {
         for (String c : compatLines()) s.sendMessage(ChatColor.GRAY + c);
         s.sendMessage(ChatColor.GRAY + "Etapas (requieren native.hybrid.stats): ");
         for (String l : HybridStats.report().split("\n")) if (!l.isBlank()) s.sendMessage(ChatColor.DARK_GRAY + "  " + l);
+    }
+
+    private static void manifest(CommandSender s) {
+        header(s, "manifiesto delta-sync (DrakeStar-Launcher)");
+        try {
+            java.nio.file.Path modsDir = java.nio.file.Path.of("drakes-data", "client-mods");
+            java.nio.file.Files.createDirectories(modsDir);
+            var modsJson = new StringBuilder("[");
+            int count = 0;
+            try (var stream = java.nio.file.Files.list(modsDir)) {
+                for (java.nio.file.Path p : stream.sorted().toList()) {
+                    String fn = p.getFileName().toString();
+                    if (!java.nio.file.Files.isRegularFile(p) || !fn.toLowerCase().endsWith(".jar")) continue;
+                    byte[] bytes = java.nio.file.Files.readAllBytes(p);
+                    String sha = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes));
+                    String id = fn.substring(0, fn.length() - 4).toLowerCase().replaceAll("[^a-z0-9_-]", "-");
+                    if (count > 0) modsJson.append(",");
+                    modsJson.append(String.format(
+                        "\n    {\"file\":\"%s\",\"id\":\"%s\",\"version\":\"1.0.0\",\"sha256\":\"%s\",\"size\":%d,\"url\":\"https://maven.drakescraft.cl/client-mods/%s\",\"required\":true,\"depends\":[],\"conflicts\":[],\"mixin_targets\":[]}",
+                        fn, id, sha, bytes.length, fn));
+                    count++;
+                }
+            }
+            modsJson.append(count > 0 ? "\n  ]" : "]");
+            String json = String.format(
+                "{\n  \"schema\": 1,\n  \"server_name\": \"DrakesCraft Season 2\",\n  \"minecraft\": \"%s\",\n  \"loader\": \"fabric\",\n  \"mods\": %s\n}\n",
+                Bukkit.getMinecraftVersion(), modsJson);
+            java.nio.file.Path out = java.nio.file.Path.of("drakes-data", "client-manifest.json");
+            java.nio.file.Files.writeString(out, json, java.nio.charset.StandardCharsets.UTF_8);
+            line(s, "Archivo generado", out.toString());
+            line(s, "Mods indexados (SHA-256)", count + " en " + modsDir);
+        } catch (Throwable t) {
+            s.sendMessage(ChatColor.RED + "No se pudo generar client-manifest.json: " + t.getMessage());
+        }
     }
 
     private static void benchmark(CommandSender s, boolean confirm) {

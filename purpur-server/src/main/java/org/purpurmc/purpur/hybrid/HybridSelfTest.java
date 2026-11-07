@@ -505,7 +505,7 @@ public final class HybridSelfTest {
                     }
                 });
             int ok = 0, bad = 0;
-            for (String sub : new String[] {"help", "status", "info", "chunks", "workers", "diagnostics", "benchmark", "gui"}) {
+            for (String sub : new String[] {"help", "status", "info", "chunks", "workers", "diagnostics", "manifest", "benchmark", "gui"}) {
                 captured.clear();
                 String[] args = {sub};
                 boolean handled = onMain(srv, () -> org.purpurmc.purpur.hybrid.HybridAdmin.handle(fake, args));

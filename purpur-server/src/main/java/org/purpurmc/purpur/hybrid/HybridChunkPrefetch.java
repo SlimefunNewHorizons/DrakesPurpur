@@ -16,33 +16,37 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 /**
  * Prefetch direccional de chunks para jugadores que se desplazan rapido (Elytra, vuelo creativo, montura).
  * <p>
  * Estima la velocidad horizontal de cada jugador por la variacion de posicion, y si supera {@code min-speed} solicita de
- * forma asincrona (API publica de Paper {@code World#getChunkAtAsync}, prioridad normal, no urgente) los chunks en un
- * abanico por delante del radio de vision. No toca el estado del mundo, no bloquea el hilo principal, respeta el
- * presupuesto de solicitudes en vuelo y evita trabajo duplicado. Apagado por defecto ({@code native.hybrid.prefetch.enabled}).
+ * forma asincrona (API publica de Paper {@code World#getChunkAtAsync}, dos niveles P-promovido + retencion de ticket TTL corto)
+ * los chunks en un abanico por delante del radio de vision. No toca el estado del mundo, no bloquea el hilo principal,
+ * respeta el presupuesto de solicitudes en vuelo y evita trabajo duplicado.
  */
 public final class HybridChunkPrefetch {
     private static final Logger LOG = Logger.getLogger("HybridPrefetch");
 
     private static volatile boolean enabled;
-    private static volatile double minSpeed = 20.0;     // bloques/s
+    private static volatile double minSpeed = 16.0;     // bloques/s
     private static volatile double leadSeconds = 3.0;   // segundos de anticipacion
     private static volatile int maxLookahead = 8;       // chunks por delante del radio de vision
     private static volatile int halfWidth = 2;          // chunks a cada lado del rumbo
-    private static volatile int maxInFlight = 24;
-    private static volatile int maxUrgentInFlight = 4;  // presupuesto maximo de promociones urgentes en el borde de vision
-    private static volatile long intervalMs = 250;
+    private static volatile int maxInFlight = 32;
+    private static volatile int maxUrgentInFlight = 6;  // presupuesto maximo de promociones urgentes en el borde de vision
+    private static volatile long intervalMs = 150;
+    private static final long TICKET_TTL_TICKS = 120L;  // 6 s de retencion de ticket para evitar descarga prematura
     private static ScheduledExecutorService ex;
 
     public static final LongAdder REQUESTED = new LongAdder(), PROMOTED = new LongAdder(),
         SKIPPED_LOADED = new LongAdder(), SKIPPED_PENDING = new LongAdder(),
-        DROPPED_BUDGET = new LongAdder(), COMPLETED = new LongAdder(), FAILED = new LongAdder(), LATENCY_NANOS = new LongAdder();
+        DROPPED_BUDGET = new LongAdder(), COMPLETED = new LongAdder(), FAILED = new LongAdder(),
+        LATENCY_NANOS = new LongAdder(), TICKETS_RETAINED = new LongAdder();
     private static final AtomicInteger IN_FLIGHT = new AtomicInteger();
     private static final AtomicInteger URGENT_IN_FLIGHT = new AtomicInteger();
+    private static final AtomicInteger HELD_TICKETS = new AtomicInteger();
     private record Key(UUID world, int x, int z) {}
     private static final Set<Key> PENDING = ConcurrentHashMap.newKeySet();
     private static final Set<Key> PROMOTED_KEYS = ConcurrentHashMap.newKeySet();
@@ -68,10 +72,14 @@ public final class HybridChunkPrefetch {
         return URGENT_IN_FLIGHT.get();
     }
 
+    public static int heldTickets() {
+        return HELD_TICKETS.get();
+    }
+
     public static String describe() {
-        return String.format("enabled=%s min-speed=%.0f b/s lead=%.1fs lookahead=%d anchura=%d en-vuelo=%d/%d urgentes=%d/%d | solicitados=%d promovidos=%d completados=%d fallidos=%d omitidos(cargado)=%d omitidos(duplicado)=%d descartados(presupuesto)=%d latencia-media=%.1f ms",
-            enabled, minSpeed, leadSeconds, maxLookahead, halfWidth * 2 + 1, IN_FLIGHT.get(), maxInFlight, URGENT_IN_FLIGHT.get(), maxUrgentInFlight,
-            REQUESTED.sum(), PROMOTED.sum(), COMPLETED.sum(),
+        return String.format("enabled=%s min-speed=%.0f b/s lead=%.1fs lookahead=%d anchura=%d en-vuelo=%d/%d urgentes=%d/%d tickets-ttl=%d | solicitados=%d promovidos=%d completados=%d retenidos=%d fallidos=%d omitidos(cargado)=%d omitidos(duplicado)=%d descartados(presupuesto)=%d latencia-media=%.1f ms",
+            enabled, minSpeed, leadSeconds, maxLookahead, halfWidth * 2 + 1, IN_FLIGHT.get(), maxInFlight, URGENT_IN_FLIGHT.get(), maxUrgentInFlight, HELD_TICKETS.get(),
+            REQUESTED.sum(), PROMOTED.sum(), COMPLETED.sum(), TICKETS_RETAINED.sum(),
             FAILED.sum(), SKIPPED_LOADED.sum(), SKIPPED_PENDING.sum(), DROPPED_BUDGET.sum(),
             COMPLETED.sum() == 0 ? 0.0 : LATENCY_NANOS.sum() / 1e6 / COMPLETED.sum());
     }
@@ -103,7 +111,7 @@ public final class HybridChunkPrefetch {
                     LOG.log(Level.FINE, "prefetch: " + t);
                 }
             }, 2000, intervalMs, TimeUnit.MILLISECONDS);
-            LOG.info("[Hybrid] prefetch direccional de chunks ACTIVADO (experimental, dos niveles P-promovido).");
+            LOG.info("[Hybrid] prefetch direccional de chunks ACTIVADO (experimental, dos niveles P-promovido + TTL ticket).");
         } else {
             if (ex != null) ex.shutdownNow();
             ex = null;
@@ -182,6 +190,7 @@ public final class HybridChunkPrefetch {
                 PROMOTED_KEYS.remove(key);
                 if (err == null && chunk != null) {
                     LATENCY_NANOS.add(System.nanoTime() - t0);
+                    retainTicketBriefly(w, cx, cz);
                 }
             });
             return;
@@ -213,9 +222,45 @@ public final class HybridChunkPrefetch {
             if (err == null && chunk != null) {
                 COMPLETED.increment();
                 LATENCY_NANOS.add(System.nanoTime() - t0);
+                retainTicketBriefly(w, cx, cz);
             } else {
                 FAILED.increment();
             }
         });
+    }
+
+    /**
+     * Retiene un ticket temporal (6 s) sobre el chunk recien pre-cargado para evitar que Moonrise lo descargue
+     * justo antes de que el jugador en vuelo entre en su radio de vision (hallazgo H7).
+     */
+    private static void retainTicketBriefly(World w, int cx, int cz) {
+        if (HELD_TICKETS.get() >= maxInFlight * 2) return;
+        try {
+            MinecraftServer.getServer().execute(() -> {
+                Plugin host = findHostPlugin();
+                if (host == null || !host.isEnabled()) return;
+                if (w.addPluginChunkTicket(cx, cz, host)) {
+                    HELD_TICKETS.incrementAndGet();
+                    TICKETS_RETAINED.increment();
+                    Bukkit.getScheduler().runTaskLater(host, () -> {
+                        try {
+                            w.removePluginChunkTicket(cx, cz, host);
+                        } finally {
+                            HELD_TICKETS.decrementAndGet();
+                        }
+                    }, TICKET_TTL_TICKS);
+                }
+            });
+        } catch (Throwable ignored) {
+        }
+    }
+
+    private static Plugin findHostPlugin() {
+        Plugin p = Bukkit.getPluginManager().getPlugin("DrakesCore");
+        if (p != null && p.isEnabled()) return p;
+        for (Plugin cand : Bukkit.getPluginManager().getPlugins()) {
+            if (cand.isEnabled()) return cand;
+        }
+        return null;
     }
 }
