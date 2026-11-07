@@ -4,7 +4,7 @@
 
 # DrakesPurpur · Horizon Hybrid Engine
 
-**Servidor Purpur 26.2 soberano de DrakesCraft con un backend nativo Rust opcional (FFM), instrumentacion del pipeline de chunks y compatibilidad verificada con Slimefun y las StarSuites.**
+**Un unico motor Java + Rust para DrakesCraft: Purpur 26.2 con backend nativo Rust integrado (FFM, biblioteca embebida en el JAR), pipeline de chunks instrumentado, DrakesLOD en investigacion y compatibilidad verificada con Slimefun y las StarSuites.**
 
 <p>
   <img src="https://img.shields.io/badge/Java-25-F89820?style=flat-square&logo=openjdk&logoColor=white" alt="Java 25"/>
@@ -16,6 +16,8 @@
 
 </div>
 
+> **Un solo producto, un solo proceso, una sola autoridad del mundo.** Rust no es un servidor aparte: es una biblioteca nativa que va **dentro del JAR**, se extrae por plataforma, se verifica por SHA-256 y se carga sola; si falta o falla, todo sigue en Java.
+>
 > **Estado honesto.** Esta rama (`experimental/horizon-rust-hybrid-engine`, PR #1, borrador) integra un puente Java↔Rust real y comprobado, pero **ninguna aceleracion nativa ha demostrado hoy una mejora de rendimiento** frente a Java. Todo lo experimental esta **apagado por defecto**. No esta lista para produccion. Ver [Benchmarks verificados](#benchmarks-verificados) y [Limitaciones](#limitaciones).
 > El README del monolito de produccion se conserva integro en [`docs/README_MONOLITO.md`](docs/README_MONOLITO.md).
 
@@ -31,6 +33,17 @@ DrakesPurpur es el fork de [Purpur](https://github.com/PurpurMC/Purpur) (sobre P
 - un **auditor de catalogo** de Slimefun y un servidor de pruebas de compatibilidad en CI.
 
 **Principio de diseno:** Java sigue siendo la unica autoridad del mundo. Rust solo calcula sobre buffers prestados durante una llamada; nunca abre archivos de region ni guarda punteros. No hay dos simulaciones.
+
+## Motor unificado: que significa aqui (y que no)
+
+| Propiedad | Estado |
+|---|---|
+| Un unico JAR / proceso / mundo / configuracion (`drakes-data/perf.yml`) / logs / administracion (`/drakes hybrid`) | **Implementado** |
+| Biblioteca nativa embebida en el JAR, extraida y verificada (SHA-256) automaticamente | **Implementado** (`scripts/empaquetar_nativos.sh` + `DRAKES_BUNDLE=1`); solo **Linux x86_64** construida y probada |
+| Deteccion de plataforma, comprobacion de ABI, fallback Java, trazabilidad de fallos | **Implementado** |
+| Interruptor unico `hybrid.engine.enabled` | **Implementado**; **`false` por defecto** hasta cumplir [`CRITERIOS_ESTABLE.md`](docs/hybrid/CRITERIOS_ESTABLE.md) (hoy ninguna aceleracion demuestra mejora) |
+| Capacidades de Horizon como componentes de primera clase | **Parcial:** diseno e investigacion + codec `horizon:lod`; los kernels portados no superan a Java |
+| DrakesLOD (terreno lejano para clientes Horizon) | **Investigado; codec probado; backend NO conectado** ([`DRAKES_LOD.md`](docs/hybrid/DRAKES_LOD.md)) |
 
 ## Arquitectura
 
@@ -66,7 +79,7 @@ El numero de items de Slimefun depende de lo que se cargue: el servidor de prueb
 
 **Experimentales / sin ganancia demostrada**: aceleracion nativa de bits y ruido (dentro del ruido de medida) · prefetch direccional de chunks (ver benchmarks).
 
-**No implementadas**: port del grafo completo de density functions · launcher propio (DrakesRust) · pruebas con Horizon Client · plataformas nativas distintas de Linux x86_64.
+**No implementadas**: port del grafo completo de density functions · backend DrakesLOD conectado · cache del paquete de chunk (idea de Horizon, ver [`HORIZON_PIPELINE.md`](docs/hybrid/HORIZON_PIPELINE.md)) · launcher propio (DrakesRust) · pruebas con Horizon Client · plataformas nativas distintas de Linux x86_64.
 
 ## Requisitos
 
@@ -90,7 +103,7 @@ El **JAR** (servidor) y la **biblioteca nativa** son artefactos separados: el JA
 ## Instalacion
 
 1. Copia el JAR a una carpeta nueva, acepta `eula.txt` y arranca con `--enable-native-access=ALL-UNNAMED`.
-2. (Opcional) Copia `libdrakes_hybrid_ffi.so` a `natives/` (tambien se busca en `drakes-data/natives`, `-Ddrakes.native.dir` y `$DRAKES_NATIVE_DIR`).
+2. La biblioteca nativa puede ir **embebida** (JAR construido con `scripts/empaquetar_nativos.sh` y `DRAKES_BUNDLE=1`: se extrae sola) o como archivo externo en `natives/` (tambien `drakes-data/natives`, `-Ddrakes.native.dir`, `$DRAKES_NATIVE_DIR`; lo externo tiene prioridad).
 3. En `drakes-data/perf.yml` activa **solo lo que quieras probar** (ver abajo) y reinicia.
 4. Usa `/drakes hybrid status` para comprobar biblioteca, ABI y modo.
 
@@ -99,9 +112,12 @@ El **JAR** (servidor) y la **biblioteca nativa** son artefactos separados: el JA
 ## Configuracion (`drakes-data/perf.yml`)
 
 ```yaml
+hybrid:
+  engine:
+    enabled: false      # interruptor unico del motor (true solo tras cumplir CRITERIOS_ESTABLE.md; o -Ddrakes.hybrid.engine.enabled=true en pruebas)
 native:
   hybrid:
-    enabled: false      # maestro del puente nativo
+    enabled: false      # (compatibilidad) equivale a hybrid.engine.enabled
     min-batch: 2048     # bajo este tamano se usa Java
     bits: false         # SimpleBitStorage por lotes
     noise: false        # reservado; sin ganancia demostrada
@@ -153,6 +169,10 @@ Con Hybrid ON, Slimefun y 9 modulos de StarSuites cargan sin excepciones; 123/12
 
 [`docs/hybrid/LIMITACIONES.md`](docs/hybrid/LIMITACIONES.md): sin ganancia de rendimiento demostrada, port de density functions no realizado, sin pruebas con Horizon Client, solo Linux x86_64, GUI no probada con jugadores, benchmarks en hardware compartido.
 
+## Criterios para dejar de ser experimental
+
+Lista objetiva de 12 criterios (build, paridad, regresion, concurrencia, persistencia, compatibilidad de plugins, benchmarks repetibles, **mejora demostrada**, jugadores, recuperacion, rollback, estabilidad prolongada) y estado por componente en [`CRITERIOS_ESTABLE.md`](docs/hybrid/CRITERIOS_ESTABLE.md). **Hoy ningun componente cumple la mejora demostrada**, por eso el motor sigue desactivado por defecto.
+
 ## Roadmap
 
 1. Medir la carga real con jugadores/bots y hardware dedicado; decidir el prefetch con intervalos de confianza.
@@ -164,7 +184,7 @@ Con Hybrid ON, Slimefun y 9 modulos de StarSuites cargan sin excepciones; 123/12
 
 ## Documentacion
 
-[`docs/hybrid/`](docs/hybrid/README.md) · [Arquitectura](docs/hybrid/ARQUITECTURA.md) · [Componentes de Horizon](docs/hybrid/HORIZON_COMPONENTS.md) · [Resultados](docs/hybrid/RESULTADOS.md) · [Compatibilidad](docs/hybrid/COMPATIBILIDAD.md) · [Catalogo Slimefun](docs/hybrid/CATALOGO_SLIMEFUN.md) · [Horizon Client](docs/hybrid/CLIENTE_HORIZON.md) · [Despliegue](docs/hybrid/DESPLIEGUE.md) · [Limitaciones](docs/hybrid/LIMITACIONES.md) · [Instalacion del motor](docs/INSTALACION_MOTOR.md) · [Monolito](docs/MONOLITO.md)
+[`docs/hybrid/`](docs/hybrid/README.md) · [Arquitectura](docs/hybrid/ARQUITECTURA.md) · [Componentes de Horizon](docs/hybrid/HORIZON_COMPONENTS.md) · [Resultados](docs/hybrid/RESULTADOS.md) · [Compatibilidad](docs/hybrid/COMPATIBILIDAD.md) · [Catalogo Slimefun](docs/hybrid/CATALOGO_SLIMEFUN.md) · [Horizon Client](docs/hybrid/CLIENTE_HORIZON.md) · [DrakesLOD](docs/hybrid/DRAKES_LOD.md) · [Horizon vs Paper](docs/hybrid/HORIZON_PIPELINE.md) · [Criterios de estabilidad](docs/hybrid/CRITERIOS_ESTABLE.md) · [Despliegue](docs/hybrid/DESPLIEGUE.md) · [Limitaciones](docs/hybrid/LIMITACIONES.md) · [Instalacion del motor](docs/INSTALACION_MOTOR.md) · [Monolito](docs/MONOLITO.md)
 
 ## Licencias y creditos
 
