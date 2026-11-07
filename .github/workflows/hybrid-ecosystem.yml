@@ -1,0 +1,322 @@
+name: Hybrid ecosystem (Slimefun + suites + 112 addons) (EXPERIMENTAL)
+on:
+  workflow_dispatch:
+  push:
+    branches: ["experimental/horizon-rust-hybrid-engine"]
+    paths: ["tools/ecosystem/**", ".github/workflows/hybrid-ecosystem.yml"]
+
+concurrency:
+  group: hybrid-ecosystem-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Addons cuyo contenido ya trae una suite (ver 'consolidado_en' del manifest): no se instalan para no duplicar items.
+  # De momento solo DrakesNanotech (DrakesTech/nanotech).
+  ECO_EXCLUDE: "DrakesNanotech"
+
+jobs:
+  # ------------------------------------------------------------------------------------------------
+  core:
+    name: Core (DrakesPurpur + nativa, Slimefun4-Drake, Drakes-Suites)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: 25, cache: gradle }
+      - uses: gradle/actions/setup-gradle@v6
+      - run: git config --global user.email "no-reply@github.com" && git config --global user.name "Github Actions"
+      - name: Build DrakesPurpur Hybrid jar + native lib
+        run: |
+          ./gradlew applyAllPatches --stacktrace
+          ./gradlew createPaperclipJar --stacktrace
+          (cd native/drakes-hybrid && cargo build --release)
+          mkdir -p core-out/server/native-lib core-out/slimefun core-out/suites
+          cp native/drakes-hybrid/target/release/libdrakes_hybrid_ffi.so core-out/server/native-lib/
+          cp purpur-server/build/libs/*paperclip*.jar core-out/server/server.jar
+      - name: Checkout Slimefun4-Drake (read-only)
+        uses: actions/checkout@v7
+        with: { repository: SlimefunNewHorizons/Slimefun4-Drake, ref: port-26x, path: ext/slimefun }
+      - name: Checkout Drakes-Suites (read-only)
+        uses: actions/checkout@v7
+        with: { repository: SlimefunNewHorizons/Drakes-Suites, ref: 26.x, path: ext/suites }
+      - name: Build Slimefun (obligatorio)
+        run: |
+          set -o pipefail
+          cd ext/slimefun && mvn -B -ntp -DskipTests -Dmaven.test.skip=true package 2>&1 | tail -60 | tee ../../build-slimefun.txt
+          cd ../..
+          SF=$(ls -S ext/slimefun/target/*.jar | grep -viE 'sources|original-|javadoc' | head -1)
+          test -n "$SF" && cp "$SF" core-out/slimefun/ && ls -la core-out/slimefun
+      - name: Build StarSuites (--fail-at-end; las que fallen se registran)
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          cd ext/suites && mvn -B -ntp -DskipTests -Dmaven.test.skip=true --fail-at-end package 2>&1 | tail -60 | tee ../../build-suites.txt
+      - name: Recoger jars de suites
+        if: always()
+        run: |
+          mkdir -p core-out/suites
+          for j in ext/suites/*/target/*.jar; do [ -f "$j" ] || continue; case "$j" in *sources*|*original-*|*javadoc*) ;; *) cp "$j" core-out/suites/ ;; esac; done
+          echo "suites: $(ls core-out/suites | wc -l) jars"; ls -la core-out/suites
+          grep -E "ERROR|BUILD" build-suites.txt 2>/dev/null | cut -c1-200 | head -15 || true
+      - uses: actions/upload-artifact@v4
+        with: { name: core-server, path: core-out/server, if-no-files-found: error }
+      - uses: actions/upload-artifact@v4
+        with: { name: core-slimefun, path: core-out/slimefun, if-no-files-found: error }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: core-suites, path: core-out/suites, if-no-files-found: warn }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: core-build-logs, path: "build-slimefun.txt\nbuild-suites.txt", if-no-files-found: warn }
+
+  # ------------------------------------------------------------------------------------------------
+  addons:
+    name: Addons shard ${{ matrix.shard }}/8
+    needs: core
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: |
+            21
+            25
+      - uses: actions/download-artifact@v4
+        with: { name: core-slimefun, path: core-slimefun }
+      - name: Construir addons del shard
+        run: |
+          SF=$(ls core-slimefun/*.jar | head -1)
+          echo "Slimefun jar: $SF"
+          mkdir -p "$RUNNER_TEMP/eco-work"
+          python3 tools/ecosystem/build_addons.py --manifest docs/hybrid/ecosistema/manifest.json \
+            --shard ${{ matrix.shard }}/8 --slimefun-jar "$SF" --out addons-out --workdir "$RUNNER_TEMP/eco-work" --timeout 900
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: "addons-${{ matrix.shard }}", path: addons-out, if-no-files-found: warn }
+
+  # ------------------------------------------------------------------------------------------------
+  integrate:
+    name: Integracion (informe + carga + smoke Hybrid ON/OFF)
+    needs: [core, addons]
+    if: always() && needs.core.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: 25 }
+      - name: Checkout Slimefun-Knowledge-Drake (volcado de produccion, solo lectura)
+        uses: actions/checkout@v7
+        with: { repository: JackStar6677-1/Slimefun-Knowledge-Drake, path: ext/knowledge }
+      - uses: actions/download-artifact@v4
+        with: { name: core-server, path: core/server }
+      - uses: actions/download-artifact@v4
+        with: { name: core-slimefun, path: core/slimefun }
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with: { name: core-suites, path: core/suites }
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with: { pattern: "addons-*", path: addons-all }
+      - name: Montar pool de jars y funciones auxiliares
+        run: |
+          W=$GITHUB_WORKSPACE
+          mkdir -p pool/slimefun pool/suites pool/addons logs results coverage run
+          cp core/slimefun/*.jar pool/slimefun/
+          cp core/suites/*.jar pool/suites/ 2>/dev/null || true
+          : > removed.txt
+          for j in addons-all/*/addons-out/jars/*.jar addons-all/*/jars/*.jar; do
+            [ -f "$j" ] || continue
+            id=$(basename "$j" .jar)
+            case ",$ECO_EXCLUDE," in *",$id,"*) echo "excluido (ya en suites): $id"; continue ;; esac
+            cp "$j" pool/addons/
+          done
+          echo "pool: slimefun=$(ls pool/slimefun | wc -l) suites=$(ls pool/suites | wc -l) addons=$(ls pool/addons | wc -l)"
+          cp core/server/server.jar run/server.jar
+          cat > eco-lib.sh <<'LIB'
+          # Funciones compartidas por los pasos del job integrate (se hace `source eco-lib.sh`)
+          W=${GITHUB_WORKSPACE:-$PWD}
+          eco_install() {  # reconstruye plugins/ desde el pool, sin los jars retirados; sin datos previos
+            cd "$W/run" && rm -rf plugins && mkdir -p plugins/BentoBox/addons
+            for f in "$W"/pool/slimefun/*.jar "$W"/pool/suites/*.jar "$W"/pool/addons/*.jar; do
+              [ -f "$f" ] || continue
+              b=$(basename "$f"); grep -qxF "$b" "$W/removed.txt" 2>/dev/null && continue
+              case "$b" in *onechunk*) cp "$f" plugins/BentoBox/addons/ ;; *) cp "$f" plugins/ ;; esac
+            done
+          }
+          eco_props() {  # server.properties + eula (misma instalacion para todos los arranques)
+            cd "$W/run" && echo "eula=true" > eula.txt
+            printf 'online-mode=false\nserver-port=25596\nlevel-seed=12345\nview-distance=4\nsimulation-distance=4\nspawn-protection=0\n' > server.properties
+          }
+          eco_perf() {  # $1 = on|off
+            cd "$W/run" && mkdir -p drakes-data
+            if [ "$1" = on ]; then printf 'native:\n  hybrid:\n    enabled: true\n    bits: true\n' > drakes-data/perf.yml
+            else printf 'native:\n  hybrid:\n    enabled: false\n' > drakes-data/perf.yml; fi
+          }
+          eco_wait_load() { for i in $(seq 1 30); do l=$(cut -d' ' -f1 /proc/loadavg); awk "BEGIN{exit !($l < 0.5)}" && break; sleep 2; done; echo "loadavg previo: $(cat /proc/loadavg)"; }
+          eco_quiet() {  # sin daemons de gradle/kotlin
+            ./gradlew --stop >/dev/null 2>&1 || true
+            pkill -f 'GradleDaemon|KotlinCompileDaemon' || true
+          }
+          JAVA_FLAGS="-Xms1G -Xmx4G --enable-native-access=ALL-UNNAMED -Ddrakes.native.dir=$W/native-lib"
+          eco_boot_load() {  # $1=log $2=timeout s : arranca, espera "Done (", manda `stop` por una FIFO
+            cd "$W/run"; rm -f in.fifo; mkfifo in.fifo; exec 3<>in.fifo
+            java $JAVA_FLAGS -jar server.jar --nogui <&3 > "$1" 2>&1 &
+            local pid=$!
+            for i in $(seq 1 $(( $2 / 3 ))); do grep -q 'Done (' "$1" && break; kill -0 $pid 2>/dev/null || break; sleep 3; done
+            sleep 5; echo stop >&3
+            for i in $(seq 1 50); do kill -0 $pid 2>/dev/null || break; sleep 3; done
+            kill $pid 2>/dev/null || true; pkill -f server.jar || true; exec 3>&-; rm -f in.fifo; sleep 2
+          }
+          LIB
+          mkdir -p native-lib && cp core/server/native-lib/* native-lib/
+          ls -la native-lib
+      - name: Arranque base (solo Slimefun) - FALLA el job si el servidor o Slimefun no arrancan
+        run: |
+          source eco-lib.sh
+          mkdir -p "$W/run" && cd "$W/run"
+          eco_props; eco_perf on
+          rm -rf plugins && mkdir -p plugins && cp "$W"/pool/slimefun/*.jar plugins/
+          eco_boot_load "$W/logs/boot-base.log" 600
+          grep -E "Done \(|Enabling|Disabling|SEVERE|ERROR" "$W/logs/boot-base.log" | cut -c1-200 | head -30
+          ok=1
+          grep -q 'Done (' "$W/logs/boot-base.log" || { echo "::error::el servidor no llego a 'Done ('"; ok=0; }
+          grep -qE '\] Enabling Slimefun' "$W/logs/boot-base.log" || { echo "::error::Slimefun no se habilito"; ok=0; }
+          grep -qE 'Error occurred while enabling Slimefun|Could not load .*[Ss]limefun' "$W/logs/boot-base.log" && { echo "::error::Slimefun fallo al cargar"; ok=0; }
+          echo $ok > "$W/base-ok.txt"
+          if [ $ok != 1 ]; then tail -60 "$W/logs/boot-base.log" | cut -c1-220; exit 1; fi
+      - name: Prueba de carga con reintento (retira jars que no cargan, max 3 iteraciones)
+        run: |
+          source eco-lib.sh; cd "$W"
+          echo 1 > load-server-done.txt
+          for it in 1 2 3; do
+            echo "=== iteracion $it"
+            eco_install
+            ls "$W/run/plugins" | wc -l
+            eco_boot_load "$W/logs/load-$it.log" 900
+            python3 tools/ecosystem/build_addons.py load-report --log "logs/load-$it.log" --plugins run/plugins \
+              --out "results/load-$it.json" --accumulate load-acc.json --iteration $it --remove-list "results/remove-$it.txt"
+            grep -q 'Done (' "logs/load-$it.log" && echo 1 > load-server-done.txt || echo 0 > load-server-done.txt
+            if [ ! -s "results/remove-$it.txt" ]; then echo "sin jars que retirar: carga estable"; break; fi
+            echo "retirados en la iteracion $it:"; cat "results/remove-$it.txt"
+            sed 's#.*/##' "results/remove-$it.txt" >> removed.txt
+          done
+          echo "== retirados en total:"; sort -u removed.txt | tee removed-final.txt | head -80
+          # si la ultima iteracion aun retiro jars, el servidor final no se reverifica aqui: lo hacen los arranques smoke
+          python3 - <<'PY'
+          import json
+          a = json.load(open('load-acc.json'))
+          for it in a['iterations']:
+              print('iteracion %(iteration)s: done=%(server_done)s jars=%(total)s cargaron=%(cargaron)s fallaron=%(fallaron)s' % it)
+          fails = {}
+          for j, d in a['final'].items():
+              if d['status'] == 'fallo':
+                  fails.setdefault(d['kind'], []).append(j)
+          for k, v in sorted(fails.items()):
+              print('%-30s %3d  %s' % (k, len(v), ', '.join(sorted(v))[:300]))
+          PY
+      - name: Informe de build del ecosistema (JSON + MD)
+        if: always()
+        run: |
+          mkdir -p ecosystem-build-report
+          python3 tools/ecosystem/build_addons.py report --results-dir addons-all --manifest docs/hybrid/ecosistema/manifest.json \
+            --load-json load-acc.json --excluded "$ECO_EXCLUDE" --out ecosystem-build-report
+          cp load-acc.json removed-final.txt ecosystem-build-report/ 2>/dev/null || true
+          head -c 900000 ecosystem-build-report/ecosystem-build-report.md > "$GITHUB_STEP_SUMMARY" || true
+      - name: Esperado desde Slimefun-Knowledge-Drake
+        run: |
+          python3 - <<'PY'
+          import gzip, json, collections
+          d = json.load(gzip.open('ext/knowledge/data/slimefun-dump.json.gz'))
+          c = collections.Counter(i.get('addon') for i in d['items'])
+          with open('expected.properties', 'w') as f:
+              f.write('__items=%d\n__groups=%d\n__researches=%d\n' % (len(d['items']), len(d['groups']), len(d['researches'])))
+              for k, v in c.items():
+                  f.write('%s=%d\n' % (str(k).replace(' ', '\\ ').replace(':', '\\:').replace('=', '\\='), v))
+          print('esperado:', len(d['items']), 'items,', len(c), 'addons')
+          PY
+      - name: Compilar el plugin de prueba (tools/compat-smoke)
+        run: |
+          source eco-lib.sh; cd "$W"
+          eco_install
+          cd run
+          CP=$(find cache libraries -name '*.jar' | tr '\n' ':')$(ls plugins/*.jar | tr '\n' ':')
+          mkdir -p ../smoke-out && javac -proc:none -Xmaxerrs 8 -cp "$CP" -d ../smoke-out ../tools/compat-smoke/src/HybridCompatSmoke.java 2>&1 | head -20
+          cp ../tools/compat-smoke/plugin.yml ../smoke-out/ && (cd ../smoke-out && jar cf "$W/HybridCompatSmoke.jar" .)
+          unzip -l "$W/HybridCompatSmoke.jar" | tail -3
+      - name: Smoke fase 1 y 2 con Hybrid OFF,ON,ON,OFF (misma instalacion, orden alternado)
+        run: |
+          source eco-lib.sh; cd "$W"
+          eco_quiet
+          set +e
+          run_one() {  # $1=etiqueta $2=on|off
+            eco_install; cp "$W/HybridCompatSmoke.jar" "$W/run/plugins/"
+            cd "$W/run"; rm -rf world world_nether world_the_end drakes-data compat-smoke-phase*.txt compat-catalog.* registered-ids.tsv
+            eco_perf $2; echo "===== $1 (hybrid $2)"; eco_wait_load
+            mkdir -p "$W/results/$1"
+            for ph in 1 2; do
+              extra=""; [ $ph = 1 ] && extra="-Dcatalog.expected=$W/expected.properties"
+              s=$(date +%s)
+              timeout 900 java $JAVA_FLAGS -Dsmoke.phase=$ph $extra -jar server.jar --nogui < /dev/null > "$W/logs/smoke-$1-phase$ph.log" 2>&1
+              echo "fase $ph exit=$? en $(( $(date +%s) - s )) s: PASS=$(grep -c ^PASS compat-smoke-phase$ph.txt 2>/dev/null) FAIL=$(grep -c ^FAIL compat-smoke-phase$ph.txt 2>/dev/null)"
+              cp compat-smoke-phase$ph.txt "$W/results/$1/" 2>/dev/null
+              grep -E "Done \(|SEVERE|Could not load|Error occurred" "$W/logs/smoke-$1-phase$ph.log" | cut -c1-170 | head -8
+            done
+            cp compat-catalog.json compat-catalog.md registered-ids.tsv "$W/results/$1/" 2>/dev/null
+            cd "$W"
+            python3 tools/compat-smoke/compare_ids.py --dump ext/knowledge/data/slimefun-dump.json.gz --registered "results/$1/registered-ids.tsv" \
+              --aliases tools/compat-smoke/aliases.json --out "coverage/$1"
+            python3 tools/ecosystem/build_addons.py load-report --log "logs/smoke-$1-phase1.log" --plugins run/plugins --out "results/$1/load.json" >/dev/null
+          }
+          run_one off1 off; run_one on1 on; run_one on2 on; run_one off2 off
+          true
+      - name: Resumen ON vs OFF
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import glob, json, os
+          rows = ['| corrida | fase1 PASS/FAIL | fase2 PASS/FAIL | ids registrados | cobertura % | presentes | ausentes | jars con fallo de carga |', '|---|---|---|---|---|---|---|---|']
+          def cnt(f, p):
+              try: return sum(1 for l in open(f) if l.startswith(p))
+              except Exception: return '?'
+          for lab in ('off1', 'on1', 'on2', 'off2'):
+              r = 'results/' + lab
+              cov = {}
+              try: cov = json.load(open('coverage/%s/coverage.json' % lab)).get('totals', {})
+              except Exception: pass
+              try: lf = json.load(open(r + '/load.json'))['fallaron']
+              except Exception: lf = '?'
+              rows.append('| %s | %s/%s | %s/%s | %s | %s | %s | %s | %s |' % (lab, cnt(r + '/compat-smoke-phase1.txt', 'PASS'), cnt(r + '/compat-smoke-phase1.txt', 'FAIL'),
+                  cnt(r + '/compat-smoke-phase2.txt', 'PASS'), cnt(r + '/compat-smoke-phase2.txt', 'FAIL'), cov.get('registered', '?'),
+                  cov.get('coverage_pct', '?'), cov.get('present', '?'), cov.get('missing', '?'), lf))
+          os.makedirs('coverage', exist_ok=True)
+          open('coverage/hybrid-on-vs-off.md', 'w').write('\n'.join(rows) + '\n')
+          print('\n'.join(rows))
+          PY
+          { echo; echo "## Smoke Hybrid ON vs OFF"; cat coverage/hybrid-on-vs-off.md; } >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: ecosystem-build-report, path: ecosystem-build-report, if-no-files-found: warn }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: coverage, path: "coverage\nresults", if-no-files-found: warn }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: ecosystem-logs, path: "logs\nrun/logs/latest.log\nremoved-final.txt", if-no-files-found: warn }
+      - name: Veredicto (falla si Slimefun core o el servidor no arrancan; los addons rotos no fallan el job)
+        if: always()
+        run: |
+          rc=0
+          [ "$(cat base-ok.txt 2>/dev/null)" = 1 ] || { echo "::error::arranque base (Slimefun) no OK"; rc=1; }
+          [ "$(cat load-server-done.txt 2>/dev/null)" = 1 ] || { echo "::error::el servidor con el ecosistema no llego a 'Done (' en la ultima iteracion de carga"; rc=1; }
+          ok=0; for l in off1 on1 on2 off2; do grep -q 'Done (' "logs/smoke-$l-phase1.log" 2>/dev/null && ok=$((ok+1)); done
+          echo "arranques smoke fase 1 completos: $ok/4"; [ $ok -ge 1 ] || { echo "::error::ningun arranque smoke llego a 'Done ('"; rc=1; }
+          exit $rc

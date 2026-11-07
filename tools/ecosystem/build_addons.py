@@ -312,7 +312,8 @@ def process(e, a, dirs):
             res.update(status='timeout', reason='git clone supero 300 s')
             return res
         if rc != 0:
-            res.update(status='inaccesible', reason=' '.join(out.split())[-800:] or 'git clone rc=%s' % rc)
+            fatal = [l for l in out.splitlines() if re.search(r'fatal|error|remote:', l, re.I)]
+            res.update(status='inaccesible', reason=' | '.join(fatal or out.splitlines())[-800:] or 'git clone rc=%s' % rc)
             return res
 
         has_pom = os.path.isfile(os.path.join(src, 'pom.xml'))
@@ -455,5 +456,173 @@ def main():
     print('RESUMEN shard %d/%d: %s' % (si, sn, ', '.join('%s=%d' % kv for kv in sorted(summ.items())) or 'vacio'))
 
 
+# ---------------------------------------------------------------- subcomandos de integracion
+TS = re.compile(r'^\[\d\d:\d\d:\d\d')
+FAIL_KINDS = [  # (etiqueta, regex) en orden de prioridad
+    ('Unsupported API version', re.compile(r'Unsupported API version')),
+    ('Missing dependency', re.compile(r'Unknown/missing dependency|Missing dependency|missing dependency', re.I)),
+    ('UnsupportedClassVersionError', re.compile(r'UnsupportedClassVersionError|class file version')),
+    ('NoClassDefFoundError', re.compile(r'NoClassDefFoundError|ClassNotFoundException')),
+    ('onEnable', re.compile(r'Error occurred while enabling')),
+    ('Could not load', re.compile(r"Could not load '")),
+]
+
+
+def jar_plugin_name(jar):
+    try:
+        with zipfile.ZipFile(jar) as z:
+            for n in ('paper-plugin.yml', 'plugin.yml'):
+                if n in z.namelist():
+                    m = re.search(r'^name:\s*[\'"]?([^\'"\r\n#]+?)[\'"]?\s*$', z.read(n).decode('utf-8', 'replace'), re.M)
+                    if m:
+                        return m.group(1).strip()
+    except Exception:
+        pass
+    return None
+
+
+def load_report_main(argv):
+    ap = argparse.ArgumentParser(prog='build_addons.py load-report')
+    ap.add_argument('--log', required=True)
+    ap.add_argument('--plugins', required=True, help='directorio con los jars (plugins/ y plugins/BentoBox/addons)')
+    ap.add_argument('--out', required=True, help='JSON con el estado de carga por jar')
+    ap.add_argument('--remove-list', help='fichero donde escribir los nombres de jar que no cargaron')
+    ap.add_argument('--accumulate', help='JSON acumulado entre iteraciones: {"final": {jar: estado}, "iterations": [...]}')
+    ap.add_argument('--iteration', type=int, default=1)
+    ap.add_argument('--protect', default='slimefun', help='subcadenas (minusculas) de jars que no se retiran nunca')
+    a = ap.parse_args(argv)
+    jars = sorted(glob.glob(os.path.join(a.plugins, '**', '*.jar'), recursive=True))
+    byname = {}
+    info = {}
+    for j in jars:
+        n = jar_plugin_name(j)
+        info[j] = dict(jar=os.path.relpath(j, a.plugins), plugin=n, status='sin-datos', kind=None, reason='', runtime_errors=0)
+        if n:
+            byname[n] = j
+    lines = open(a.log, encoding='utf-8', errors='replace').read().splitlines()
+
+    def tail_reason(i):
+        out = []
+        for l in lines[i:i + 14]:
+            if l is not lines[i] and TS.match(l):
+                break
+            if re.search(r'Exception|Error|Caused by|Unsupported|issing|class file version', l):
+                out.append(l.strip())
+            if len(out) >= 4:
+                break
+        return ' | '.join(out or [lines[i].strip()])[:400]
+
+    def mark(j, kind, i):
+        d = info[j]
+        if d['status'] != 'fallo':
+            d.update(status='fallo', kind=kind, reason=tail_reason(i))
+        # una causa mas especifica sustituye a una generica
+        for lab, rx in FAIL_KINDS[:4]:
+            if d['kind'] in ('Could not load', 'onEnable') and rx.search(d['reason']):
+                d['kind'] = lab
+                break
+
+    for i, l in enumerate(lines):
+        m = re.search(r"Could not load '([^']+\.jar)'", l)
+        if m:
+            fn = os.path.basename(m.group(1))
+            for j in jars:
+                if os.path.basename(j) == fn:
+                    mark(j, 'Could not load', i)
+            continue
+        m = re.search(r'Error occurred while enabling (.+?) v', l)
+        if m and m.group(1) in byname:
+            mark(byname[m.group(1)], 'onEnable', i)
+            continue
+        m = re.search(r'\] Enabling (\S+) v', l)
+        if m and m.group(1) in byname and info[byname[m.group(1)]]['status'] == 'sin-datos':
+            info[byname[m.group(1)]]['status'] = 'cargo'
+        m = re.match(r'^\[[\d:]+ (?:ERROR|WARN)[^\]]*\]: \[([^\]]+)\]', l)
+        if m and m.group(1) in byname and re.search(r'Exception|Error', l):
+            info[byname[m.group(1)]]['runtime_errors'] += 1
+    for d in info.values():
+        if d['status'] == 'fallo' and d['kind'] == 'onEnable':
+            for lab, rx in FAIL_KINDS[:4]:
+                if rx.search(d['reason']):
+                    d['kind'] = lab
+                    break
+    done = any(re.search(r'Done \(', l) for l in lines)
+    rem = [d['jar'] for d in info.values() if d['status'] == 'fallo' and not any(p in d['jar'].lower() for p in a.protect.split(','))]
+    res = dict(server_done=done, total=len(info), cargaron=sum(d['status'] == 'cargo' for d in info.values()),
+               fallaron=sum(d['status'] == 'fallo' for d in info.values()), retirar=rem, jars=list(info.values()))
+    json.dump(res, open(a.out, 'w'), indent=1, ensure_ascii=False)
+    if a.accumulate:
+        acc = json.load(open(a.accumulate)) if os.path.isfile(a.accumulate) else dict(final={}, iterations=[])
+        for d in info.values():
+            key = os.path.basename(d['jar'])
+            if acc['final'].get(key, {}).get('status') == 'fallo':
+                continue  # ya retirado en una iteracion anterior; conserva su motivo
+            acc['final'][key] = dict(status=d['status'], kind=d['kind'], reason=d['reason'], plugin=d['plugin'],
+                                     runtime_errors=d['runtime_errors'], iteration=a.iteration)
+        acc['iterations'].append(dict(iteration=a.iteration, server_done=done, total=res['total'], cargaron=res['cargaron'],
+                                      fallaron=res['fallaron'], retirados=rem))
+        json.dump(acc, open(a.accumulate, 'w'), indent=1, ensure_ascii=False)
+    if a.remove_list:
+        open(a.remove_list, 'w').write('\n'.join(rem) + ('\n' if rem else ''))
+    print('carga: %d jars, %d cargaron, %d fallaron, a retirar %d, Done=%s' % (res['total'], res['cargaron'], res['fallaron'], len(rem), done))
+
+
+def report_main(argv):
+    ap = argparse.ArgumentParser(prog='build_addons.py report')
+    ap.add_argument('--results-dir', required=True, help='busca recursivamente */results/*.json')
+    ap.add_argument('--manifest', required=True)
+    ap.add_argument('--load-json', help='JSON final de carga (iteraciones) generado por el job integrate')
+    ap.add_argument('--excluded', default='', help='ids no integrados por estar ya en las suites')
+    ap.add_argument('--out', required=True)
+    a = ap.parse_args(argv)
+    os.makedirs(a.out, exist_ok=True)
+    got = {}
+    for f in glob.glob(os.path.join(a.results_dir, '**', 'results', '*.json'), recursive=True):
+        try:
+            r = json.load(open(f))
+            got[r['id']] = r
+        except Exception:
+            pass
+    ents = [x for x in json.load(open(a.manifest))['entries'] if x.get('category') == 'addon_slimefun']
+    for e in ents:
+        if ident(e) not in got:
+            got[ident(e)] = dict(id=ident(e), repo=e.get('repo'), branch=e.get('branch'), system=(e.get('build') or {}).get('system'),
+                                 status='sin-resultado', reason='el shard no produjo resultado (job cancelado o caido)',
+                                 slimefun_dep_resolved=None, java_required=None, seconds=0)
+    load = {}
+    if a.load_json and os.path.isfile(a.load_json):
+        load = json.load(open(a.load_json)).get('final', {})
+    excluded = {x for x in a.excluded.split(',') if x}
+    rows = []
+    for k in sorted(got, key=str.lower):
+        r = got[k]
+        lj = load.get(k + '.jar')
+        r['integrado'] = ('excluido (ya en suites)' if k in excluded else (lj or {}).get('status', 'no-instalado' if r['status'] != 'construido' else 'sin-datos'))
+        r['carga_motivo'] = (lj or {}).get('reason', '') if lj and lj.get('status') == 'fallo' else ''
+        rows.append(r)
+    tot = {}
+    for r in rows:
+        tot[r['status']] = tot.get(r['status'], 0) + 1
+    ltot = {}
+    for r in rows:
+        ltot[r['integrado']] = ltot.get(r['integrado'], 0) + 1
+    json.dump(dict(totales_build=tot, totales_carga=ltot, addons=rows), open(os.path.join(a.out, 'ecosystem-build-report.json'), 'w'), indent=1, ensure_ascii=False)
+    esc = lambda t: (t or '').replace('|', '/').replace('\n', ' ')[:140]
+    md = ['# Informe de build del ecosistema', '', '**Build:** ' + ', '.join('%s=%d' % kv for kv in sorted(tot.items())),
+          '', '**Carga en servidor:** ' + (', '.join('%s=%d' % kv for kv in sorted(ltot.items()))), '',
+          '| addon | build | sistema | java | slimefun resuelto | integracion | motivo |', '|---|---|---|---|---|---|---|']
+    for r in rows:
+        sf = ', '.join(r.get('slimefun_dep_resolved') or []) or '-'
+        md.append('| %s | %s | %s | %s | %s | %s | %s |' % (r['id'], r['status'], r.get('system') or '-', r.get('java_required') or '-',
+                                                            esc(sf)[:60], r['integrado'], esc(r.get('reason') or r.get('carga_motivo'))))
+    open(os.path.join(a.out, 'ecosystem-build-report.md'), 'w').write('\n'.join(md) + '\n')
+    print('\n'.join(md[:6]))
+
+
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == 'report':
+        report_main(sys.argv[2:])
+    elif len(sys.argv) > 1 and sys.argv[1] == 'load-report':
+        load_report_main(sys.argv[2:])
+    else:
+        main()
