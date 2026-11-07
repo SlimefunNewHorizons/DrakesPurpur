@@ -233,7 +233,13 @@ public final class HybridSelfTest {
 
             // 6) Density functions: NormalNoise nativo vs Java (puerta de decision antes de portar mas nodos)
             densityParity(out, level);
-            if (diffs != 0 || roundTripDiffs != 0 || densityMismatches != 0) {
+
+            // 7) Pipeline de chunks bajo un volador sintetico: lectura reactiva vs prefetch direccional
+            flyerBench(out, srv);
+
+            // 8) Comandos /drakes hybrid y GUI con datos reales
+            adminSmoke(out, srv);
+            if (diffs != 0 || roundTripDiffs != 0 || densityMismatches != 0 || adminFailures != 0) {
                 exit = 3;
                 line(out, "RESULTADO: FALLO DE PARIDAD");
             } else {
@@ -277,6 +283,133 @@ public final class HybridSelfTest {
     }
 
     private static long densityMismatches;
+    private static long adminFailures;
+
+    // ---- 7) volador sintetico ------------------------------------------------------------------------------
+    /**
+     * Modelo de demanda: un "volador" avanza por una fila de chunks a {@code speed} bloques/s; necesita cada columna
+     * (2R+1 chunks) cuando le quedan (R-2) columnas por delante. Estrategia REACTIVA: solicita columnas hasta R por
+     * delante (lo que hace el cargador de Paper con el radio de vision). Estrategia PREDICTIVA: ademas solicita {@code lead}
+     * columnas extra (prefetch). Mide cuantas columnas llegan despues de su plazo y cuanto. Usa la API publica
+     * {@code getChunkAtAsync}; es un modelo de CARGA sobre el sistema de chunks real, NO un cliente real.
+     */
+    private static void flyerBench(StringBuilder out, MinecraftServer srv) {
+        try {
+            org.bukkit.World w = org.bukkit.Bukkit.getWorlds().get(0);
+            final int R = 5, cols = 48;
+            final double speed = Double.parseDouble(System.getProperty("drakes.hybrid.selftest.flyer.speed", "64"));
+            final int lead = Integer.getInteger("drakes.hybrid.selftest.flyer.lead", 6);
+            line(out, String.format("[volador sintetico] R=%d chunks, %d columnas de %d chunks, %.0f bloques/s (%.1f columnas/s), lead=%d", R, cols, 2 * R + 1, speed, speed / 16, lead));
+            int[] order = {0, lead, lead, 0, 0, lead};   // reactiva/predictiva alternadas (A B B A A B)
+            java.util.Map<Integer, List<double[]>> res = new java.util.LinkedHashMap<>();
+            for (int run = 0; run < order.length; run++) {
+                int ld = order[run];
+                double[] r = flyerRun(w, R, cols, speed, ld, 12000 + run * 40, 3000 + run * 40);
+                res.computeIfAbsent(ld, k -> new ArrayList<>()).add(r);
+                line(out, String.format("  corrida %d (%s): columnas_estables=%d tarde=%d (%.0f%%) lateness p50=%.0f p95=%.0f max=%.0f ms, chunks=%d, total=%.1f s",
+                    run + 1, ld == 0 ? "reactiva" : "prefetch lead=" + ld, (int) r[0], (int) r[1], 100.0 * r[1] / Math.max(1, r[0]), r[2], r[3], r[4], (int) r[5], r[6]));
+            }
+            for (var e : res.entrySet()) {
+                double cols_ = 0, late = 0, p95 = 0, p50 = 0;
+                for (double[] r : e.getValue()) { cols_ += r[0]; late += r[1]; p95 += r[3]; p50 += r[2]; }
+                int n = e.getValue().size();
+                line(out, String.format("[volador sintetico] %s: media de %d corridas -> %.1f%% de columnas tarde, lateness p50 %.0f ms, p95 %.0f ms",
+                    e.getKey() == 0 ? "REACTIVA" : "PREFETCH lead=" + e.getKey(), n, 100.0 * late / Math.max(1, cols_), p50 / n, p95 / n));
+            }
+            line(out, "[volador sintetico] modelo de carga, no cliente real; se necesitan mas corridas y hardware dedicado para intervalos de confianza");
+        } catch (Throwable t) {
+            line(out, "[volador sintetico] ERROR: " + t);
+            LOG.log(Level.WARNING, "flyer", t);
+        }
+    }
+
+    /** @return {columnas_estables, tarde, lateness_p50_ms, p95, max, chunks, total_s} */
+    private static double[] flyerRun(org.bukkit.World w, int R, int cols, double speed, int lead, int startCx, int cz0) throws Exception {
+        final double secPerCol = 16.0 / speed;
+        long t0 = System.nanoTime();
+        @SuppressWarnings("unchecked")
+        List<java.util.concurrent.CompletableFuture<?>>[] futs = new List[cols];
+        final long[] doneAt = new long[cols];
+        int requestedUpTo = -1, chunks = 0;
+        while (true) {
+            double t = (System.nanoTime() - t0) / 1e9;
+            int posCol = (int) (t / secPerCol);
+            int want = Math.min(cols - 1, posCol + R + lead);
+            while (requestedUpTo < want) {
+                requestedUpTo++;
+                final int c = requestedUpTo;
+                boolean urgent = c <= posCol + R;      // necesario ya vs especulativo
+                futs[c] = new ArrayList<>();
+                for (int dz = -R; dz <= R; dz++) {
+                    chunks++;
+                    futs[c].add(w.getChunkAtAsync(startCx + c, cz0 + dz, true, urgent).whenComplete((ch, err) -> {
+                        long now = System.nanoTime() - t0;
+                        synchronized (doneAt) { if (now > doneAt[c]) doneAt[c] = now; }
+                    }));
+                }
+            }
+            if (posCol >= cols) break;
+            Thread.sleep(15);
+        }
+        for (var l : futs) if (l != null) for (var f : l) f.get(120, java.util.concurrent.TimeUnit.SECONDS);
+        List<Double> late = new ArrayList<>();
+        int stable = 0, tarde = 0;
+        for (int c = R + 2; c < cols; c++) {
+            double need = (c - (R - 2)) * secPerCol * 1e9;
+            double l = Math.max(0, doneAt[c] - need) / 1e6;
+            stable++;
+            if (l > 0) tarde++;
+            late.add(l);
+        }
+        double[] a = late.stream().mapToDouble(Double::doubleValue).sorted().toArray();
+        double p50 = a.length == 0 ? 0 : a[a.length / 2], p95 = a.length == 0 ? 0 : a[Math.min(a.length - 1, (int) (a.length * 0.95))];
+        return new double[] {stable, tarde, p50, p95, a.length == 0 ? 0 : a[a.length - 1], chunks, (System.nanoTime() - t0) / 1e9};
+    }
+
+    // ---- 8) comandos y GUI ---------------------------------------------------------------------------------
+    private static void adminSmoke(StringBuilder out, MinecraftServer srv) {
+        try {
+            final List<String> captured = new ArrayList<>();
+            org.bukkit.command.CommandSender fake = (org.bukkit.command.CommandSender) java.lang.reflect.Proxy.newProxyInstance(
+                org.bukkit.command.CommandSender.class.getClassLoader(), new Class<?>[] {org.bukkit.command.CommandSender.class}, (p, m, a) -> {
+                    switch (m.getName()) {
+                        case "sendMessage": if (a != null && a.length > 0 && a[0] instanceof String str) captured.add(str); return null;
+                        case "hasPermission": case "isOp": return true;
+                        case "getName": return "selftest";
+                        case "hashCode": return 1;
+                        case "equals": return p == a[0];
+                        case "toString": return "selftest-sender";
+                        default: return m.getReturnType() == boolean.class ? false : null;
+                    }
+                });
+            int ok = 0, bad = 0;
+            for (String sub : new String[] {"help", "status", "info", "chunks", "workers", "diagnostics", "benchmark", "gui"}) {
+                captured.clear();
+                String[] args = {sub};
+                boolean handled = onMain(srv, () -> org.purpurmc.purpur.hybrid.HybridAdmin.handle(fake, args));
+                boolean error = captured.stream().anyMatch(l -> l.contains("Error en /drakes hybrid"));
+                if (handled && !error && !captured.isEmpty()) ok++; else { bad++; line(out, "[comandos] FALLO en '" + sub + "': " + captured); }
+            }
+            // por la ruta real de comandos de Bukkit
+            Boolean viaBukkit = onMain(srv, () -> org.bukkit.Bukkit.dispatchCommand(org.bukkit.Bukkit.getConsoleSender(), "drakes hybrid help"));
+            // autocompletado
+            List<String> tab = onMain(srv, () -> org.purpurmc.purpur.hybrid.HybridAdmin.complete(new String[] {"st"}));
+            // GUI
+            org.bukkit.inventory.Inventory inv = onMain(srv, org.purpurmc.purpur.hybrid.HybridAdminMenu::build);
+            int filled = 0;
+            for (int i = 0; i < inv.getSize(); i++) if (inv.getItem(i) != null && inv.getItem(i).getItemMeta() != null && inv.getItem(i).getItemMeta().hasLore()) filled++;
+            line(out, String.format("[comandos] subcomandos ok=%d fallo=%d | dispatchCommand('drakes hybrid help')=%s | tab('st')=%s | GUI: %d slots, %d con datos (lore)",
+                ok, bad, viaBukkit, tab, inv.getSize(), filled));
+            adminFailures += bad + (Boolean.TRUE.equals(viaBukkit) ? 0 : 1) + (tab.contains("status") ? 0 : 1) + (filled >= 8 ? 0 : 1);
+            captured.clear();
+            onMain(srv, () -> org.purpurmc.purpur.hybrid.HybridAdmin.handle(fake, new String[] {"status"}));
+            for (String l : captured) line(out, "    " + org.bukkit.ChatColor.stripColor(l));
+        } catch (Throwable t) {
+            adminFailures++;
+            line(out, "[comandos] ERROR: " + t);
+            LOG.log(Level.WARNING, "admin", t);
+        }
+    }
 
     private static void densityParity(StringBuilder out, ServerLevel level) {
         if (!HybridNative.libraryLoaded()) {

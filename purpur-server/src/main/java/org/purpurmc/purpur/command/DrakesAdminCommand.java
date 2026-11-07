@@ -27,7 +27,7 @@ public final class DrakesAdminCommand extends Command {
     public DrakesAdminCommand(String name) {
         super(name);
         this.description = "DrakesPurpur Sovereign Kernel Administrator & Diagnostics";
-        this.usageMessage = "/drakes [status | test | security | threads | fastpath | gc | saori | credits | menu]";
+        this.usageMessage = "/drakes [status | test | security | threads | fastpath | gc | saori | credits | menu | hybrid]";
         this.setAliases(Arrays.asList("drakesadmin", "dpurpur"));
         this.setPermission("bukkit.command.purpur");
     }
@@ -210,6 +210,11 @@ public final class DrakesAdminCommand extends Command {
             return true;
         }
 
+        // Horizon Hybrid Engine (experimental): /drakes hybrid <status|info|chunks|workers|benchmark|diagnostics|gui|help>
+        if (args[0].equalsIgnoreCase("hybrid")) {
+            return org.purpurmc.purpur.hybrid.HybridAdmin.handle(sender, Arrays.copyOfRange(args, 1, args.length));
+        }
+
         // In-game GUI menu
         if (args[0].equalsIgnoreCase("menu") || args[0].equalsIgnoreCase("gui")) {
             if (!(sender instanceof Player player)) {
@@ -247,16 +252,20 @@ public final class DrakesAdminCommand extends Command {
         sender.sendMessage(ChatColor.YELLOW + "/drakes gc" + ChatColor.GRAY + " - Forzar ciclo de limpieza de memoria.");
         sender.sendMessage(ChatColor.YELLOW + "/drakes saori" + ChatColor.GRAY + " status|check|test - Integracion directa con SAORI.");
         sender.sendMessage(ChatColor.YELLOW + "/drakes menu" + ChatColor.GRAY + " - Abre el panel interactivo visual (GUI).");
+        sender.sendMessage(ChatColor.YELLOW + "/drakes hybrid" + ChatColor.GRAY + " [status|info|chunks|workers|benchmark|diagnostics|gui|help] - Horizon Hybrid Engine (experimental).");
         return true;
     }
 
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
         if (args.length == 1) {
-            return Arrays.asList("status", "test", "security", "credits", "threads", "fastpath", "gc", "saori", "menu")
+            return Arrays.asList("status", "test", "security", "credits", "threads", "fastpath", "gc", "saori", "menu", "hybrid")
                     .stream()
                     .filter(sub -> sub.startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
+        }
+        if (args.length >= 2 && args[0].equalsIgnoreCase("hybrid")) {
+            return org.purpurmc.purpur.hybrid.HybridAdmin.complete(Arrays.copyOfRange(args, 1, args.length));
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("saori")) {
             return Arrays.asList("status", "check", "test").stream().filter(sub -> sub.startsWith(args[1].toLowerCase())).collect(Collectors.toList());

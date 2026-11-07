@@ -77,6 +77,16 @@ public final class DrakesPerf {
             noise: false           # ruido de Perlin por lotes
             region: false          # analisis (solo lectura) de cabeceras .mca
             stats: false           # contadores por etapa (pack/unpack Java vs Rust) en el log del autotest
+            # Prefetch direccional: solicita (async, API publica de Paper) chunks por delante de quien se mueve rapido.
+            # EXPERIMENTAL: ver docs/hybrid/RESULTADOS.md antes de activarlo.
+            prefetch:
+              enabled: false
+              min-speed: 20.0        # bloques/s para considerar que se esta "volando"
+              lead-seconds: 3.0      # anticipacion
+              max-lookahead-chunks: 8
+              half-width-chunks: 2
+              max-in-flight: 24      # presupuesto de solicitudes simultaneas
+              interval-ms: 250
         # Copia de seguridad 7z: no compite con el tick ni con la red.
         backup:
           throttle: true           # nice 19 + ionice idle + hilos limitados
@@ -167,6 +177,10 @@ public final class DrakesPerf {
                 cfg.getBoolean("native.hybrid.bits", false), cfg.getBoolean("native.hybrid.noise", false),
                 cfg.getBoolean("native.hybrid.region", false), cfg.getInt("native.hybrid.min-batch", 2048)));
             org.purpurmc.purpur.hybrid.HybridStats.enabled = cfg.getBoolean("native.hybrid.stats", false);
+            org.purpurmc.purpur.hybrid.HybridChunkPrefetch.configure(cfg.getBoolean("native.hybrid.prefetch.enabled", false),
+                cfg.getDouble("native.hybrid.prefetch.min-speed", 20.0), cfg.getDouble("native.hybrid.prefetch.lead-seconds", 3.0),
+                cfg.getInt("native.hybrid.prefetch.max-lookahead-chunks", 8), cfg.getInt("native.hybrid.prefetch.half-width-chunks", 2),
+                cfg.getInt("native.hybrid.prefetch.max-in-flight", 24), cfg.getLong("native.hybrid.prefetch.interval-ms", 250));
             org.purpurmc.purpur.hybrid.HybridSelfTest.maybeStart(); // solo con -Ddrakes.hybrid.selftest=<radio>
         } catch (Throwable t) {
             LOGGER.log(Level.WARNING, "[Hybrid] init fallo (" + t + "); todo en Java.");

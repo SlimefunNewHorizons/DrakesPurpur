@@ -36,6 +36,10 @@ public final class HybridNative {
     private static volatile int minBatch = 2048;
     private static volatile Natives natives;
     private static volatile boolean initialized;
+    private static volatile String libraryPath;
+    private static volatile int libraryAbi = -1;
+    private static final java.util.concurrent.atomic.AtomicLong FAILURES = new java.util.concurrent.atomic.AtomicLong();
+    private static volatile String lastError = "";
 
     private HybridNative() {}
 
@@ -63,6 +67,8 @@ public final class HybridNative {
                 return;
             }
             natives = n;
+            libraryPath = lib.toString();
+            libraryAbi = abi;
             minBatch = Math.max(1, s.minBatch());
             bitsOn = s.bits();
             noiseOn = s.noise();
@@ -121,6 +127,7 @@ public final class HybridNative {
                 fail("bits", r);
             } catch (Throwable t) {
                 bitsOn = false;
+                recordFailure("bits", t);
                 LOG.warning("[Hybrid] bits nativo fallo (" + t + "); Java hasta reiniciar.");
             }
         }
@@ -137,6 +144,7 @@ public final class HybridNative {
                 fail("bits", r);
             } catch (Throwable t) {
                 bitsOn = false;
+                recordFailure("bits", t);
                 LOG.warning("[Hybrid] bits nativo fallo (" + t + "); Java hasta reiniciar.");
             }
         }
@@ -154,6 +162,7 @@ public final class HybridNative {
                 fail("noise", r);
             } catch (Throwable t) {
                 noiseOn = false;
+                recordFailure("noise", t);
                 LOG.warning("[Hybrid] noise nativo fallo (" + t + "); Java hasta reiniciar.");
             }
         }
@@ -172,6 +181,7 @@ public final class HybridNative {
                 fail("region", r);
             } catch (Throwable t) {
                 regionOn = false;
+                recordFailure("region", t);
                 LOG.warning("[Hybrid] region nativo fallo (" + t + "); Java hasta reiniciar.");
             }
         }
@@ -221,7 +231,23 @@ public final class HybridNative {
         return noiseOn && natives != null && n >= minBatch;
     }
 
+    private static void recordFailure(String what, Throwable t) {
+        FAILURES.incrementAndGet();
+        lastError = what + ": " + t;
+    }
+
+    /** Estado para /drakes hybrid: lo que la biblioteca y la configuracion realmente tienen ahora. */
+    public record Snapshot(boolean initialized, boolean libraryLoaded, String libraryPath, int libraryAbi, int expectedAbi,
+                           boolean bits, boolean noise, boolean region, int minBatch, long failures, String lastError) {}
+
+    public static Snapshot snapshot() {
+        return new Snapshot(initialized, natives != null, libraryPath, libraryAbi, ABI, bitsOn, noiseOn, regionOn, minBatch,
+            FAILURES.get(), lastError);
+    }
+
     private static void fail(String what, int code) {
+        FAILURES.incrementAndGet();
+        lastError = what + " devolvio " + code;
         throw new IllegalStateException(what + " devolvio " + code);
     }
 
