@@ -391,27 +391,32 @@ public final class HybridSelfTest {
             org.bukkit.World w = org.bukkit.Bukkit.getWorlds().get(0);
             final int R = 5, cols = Integer.getInteger("drakes.hybrid.selftest.flyer.cols", 36);
             final int lead = Integer.getInteger("drakes.hybrid.selftest.flyer.lead", 6);
-            String[] speeds = System.getProperty("drakes.hybrid.selftest.flyer.speeds", "24,40,64").split(",");
+            String[] speeds = System.getProperty("drakes.hybrid.selftest.flyer.speeds", "24").split(",");
+            // Matriz de prioridad (hallazgo de la investigacion: el A/B anterior mezclaba 'anticipar' con 'urgent=false').
+            // politica: 0 = urgent solo cuando la columna ya es necesaria, 1 = siempre urgent, 2 = nunca urgent, 3 = nunca urgent y se PROMUEVE al vencer.
+            final String[] names = {"R-urgent", "R-normal", "P-normal", "P-promovido"};
+            final int[] leads = {0, 0, lead, lead};
+            final int[] policy = {1, 2, 2, 3};
             int idx = 0;
             for (String sp : speeds) {
                 final double speed = Double.parseDouble(sp.trim());
                 line(out, String.format("[volador sintetico] R=%d chunks, %d columnas de %d chunks, %.0f bloques/s (demanda %.0f chunks/s), lead=%d", R, cols, 2 * R + 1, speed, speed / 16 * (2 * R + 1), lead));
-                int[] order = {0, lead, lead, 0};   // reactiva/predictiva alternadas (A B B A)
+                int[] order = {0, 1, 2, 3, 3, 2, 1, 0};   // ABCD DCBA: el orden no es una variable
                 java.util.Map<Integer, List<double[]>> res = new java.util.LinkedHashMap<>();
                 for (int run = 0; run < order.length; run++) {
-                    int ld = order[run];
-                    double[] r = flyerRun(w, R, cols, speed, ld, 12000 + idx * 60, 3000 + idx * 40);
+                    int m = order[run];
+                    double[] r = flyerRun(w, R, cols, speed, leads[m], policy[m], 12000 + idx * 60, 3000 + idx * 40);
                     idx++;
-                    res.computeIfAbsent(ld, k -> new ArrayList<>()).add(r);
-                    line(out, String.format("  %.0f b/s corrida %d (%s): estables=%d tarde=%d (%.0f%%) lateness p50=%.0f p95=%.0f max=%.0f ms, total=%.1f s",
-                        speed, run + 1, ld == 0 ? "reactiva" : "prefetch lead=" + ld, (int) r[0], (int) r[1], 100.0 * r[1] / Math.max(1, r[0]), r[2], r[3], r[4], r[6]));
+                    res.computeIfAbsent(m, k -> new ArrayList<>()).add(r);
+                    line(out, String.format("  %.0f b/s corrida %d (%s): estables=%d tarde=%d (%.0f%%) lateness p50=%.0f p95=%.0f max=%.0f ms, total=%.1f s %s",
+                        speed, run + 1, names[m], (int) r[0], (int) r[1], 100.0 * r[1] / Math.max(1, r[0]), r[2], r[3], r[4], r[6], entorno("v")));
                 }
                 for (var e : res.entrySet()) {
                     double cols_ = 0, late = 0, p95 = 0, p50 = 0;
                     for (double[] r : e.getValue()) { cols_ += r[0]; late += r[1]; p95 += r[3]; p50 += r[2]; }
                     int n = e.getValue().size();
                     line(out, String.format("[volador sintetico] %.0f b/s %s: %d corridas -> %.0f%% de columnas tarde, lateness p50 %.0f ms, p95 %.0f ms",
-                        speed, e.getKey() == 0 ? "REACTIVA" : "PREFETCH lead=" + e.getKey(), n, 100.0 * late / Math.max(1, cols_), p50 / n, p95 / n));
+                        speed, names[e.getKey()], n, 100.0 * late / Math.max(1, cols_), p50 / n, p95 / n));
                 }
             }
             line(out, "[volador sintetico] modelo de CARGA sobre el sistema de chunks real (no cliente real); cada corrida usa un corredor distinto: la variabilidad del terreno es grande; sin intervalos de confianza");
@@ -422,13 +427,13 @@ public final class HybridSelfTest {
     }
 
     /** @return {columnas_estables, tarde, lateness_p50_ms, p95, max, chunks, total_s} */
-    private static double[] flyerRun(org.bukkit.World w, int R, int cols, double speed, int lead, int startCx, int cz0) throws Exception {
+    private static double[] flyerRun(org.bukkit.World w, int R, int cols, double speed, int lead, int policy, int startCx, int cz0) throws Exception {
         final double secPerCol = 16.0 / speed;
         long t0 = System.nanoTime();
         @SuppressWarnings("unchecked")
         List<java.util.concurrent.CompletableFuture<?>>[] futs = new List[cols];
         final long[] doneAt = new long[cols];
-        int requestedUpTo = -1, chunks = 0;
+        int requestedUpTo = -1, promotedUpTo = -1, chunks = 0;
         while (true) {
             double t = (System.nanoTime() - t0) / 1e9;
             int posCol = (int) (t / secPerCol);
@@ -436,7 +441,7 @@ public final class HybridSelfTest {
             while (requestedUpTo < want) {
                 requestedUpTo++;
                 final int c = requestedUpTo;
-                boolean urgent = c <= posCol + R;      // necesario ya vs especulativo
+                boolean urgent = policy == 1 || (policy == 0 && c <= posCol + R);
                 futs[c] = new ArrayList<>();
                 for (int dz = -R; dz <= R; dz++) {
                     chunks++;
@@ -444,6 +449,14 @@ public final class HybridSelfTest {
                         long now = System.nanoTime() - t0;
                         synchronized (doneAt) { if (now > doneAt[c]) doneAt[c] = now; }
                     }));
+                }
+            }
+            if (policy == 3) {
+                // promocion: al entrar la columna en la ventana necesaria se re-solicita con urgent=true (Paper sube la prioridad de la tarea)
+                int need = Math.min(requestedUpTo, posCol + R);
+                while (promotedUpTo < need) {
+                    promotedUpTo++;
+                    for (int dz = -R; dz <= R; dz++) w.getChunkAtAsync(startCx + promotedUpTo, cz0 + dz, true, true);
                 }
             }
             if (posCol >= cols) break;

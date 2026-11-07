@@ -19,20 +19,22 @@ public final class HybridChunkOps {
     /** Equivale a {@code new SimpleBitStorage(bits, size, values).getRaw()}. */
     public static long[] packRaw(int bits, int size, int[] values) {
         if (values.length == size && HybridNative.bitsActive(size)) {
-            long t = HybridStats.enabled ? System.nanoTime() : 0L;
+            final boolean st = HybridStats.enabled;   // UNA sola lectura por llamada (ver nota en HybridStats)
+            long t = st ? System.nanoTime() : 0L;
             long[] out = new long[HybridNative.longCount(bits, size)];
             try {
                 HybridNative.packBits(bits, values, out);
-                if (HybridStats.enabled) HybridStats.PACK_NATIVE.add(t, size);
+                if (st) HybridStats.PACK_NATIVE.add(t, size);
                 return out;
             } catch (RuntimeException e) {
                 // HybridNative ya cayo a Java por dentro ante fallos nativos; esto solo cubre argumentos invalidos:
                 // dejamos que el codigo original de Mojang produzca su propio resultado/excepcion.
             }
         }
-        long t = HybridStats.enabled ? System.nanoTime() : 0L;
+        final boolean st = HybridStats.enabled;
+        long t = st ? System.nanoTime() : 0L;
         long[] raw = new SimpleBitStorage(bits, size, values).getRaw();
-        if (HybridStats.enabled) HybridStats.PACK_JAVA.add(t, size);
+        if (st) HybridStats.PACK_JAVA.add(t, size);
         return raw;
     }
 
@@ -40,13 +42,15 @@ public final class HybridChunkOps {
     public static void unpackInto(BitStorage storage, int[] output) {
         if (storage instanceof SimpleBitStorage simple && output.length >= simple.getSize()
             && HybridNative.bitsActive(simple.getSize())) {
-            long t = HybridStats.enabled ? System.nanoTime() : 0L;
+            final boolean st = HybridStats.enabled;
+            long t = st ? System.nanoTime() : 0L;
             HybridNative.unpackBits(simple.getBits(), simple.getSize(), simple.getRaw(), output);
-            if (HybridStats.enabled) HybridStats.UNPACK_NATIVE.add(t, simple.getSize());
+            if (st) HybridStats.UNPACK_NATIVE.add(t, simple.getSize());
             return;
         }
-        long t = HybridStats.enabled ? System.nanoTime() : 0L;
+        final boolean st = HybridStats.enabled;
+        long t = st ? System.nanoTime() : 0L;
         storage.unpack(output);
-        if (HybridStats.enabled) HybridStats.UNPACK_JAVA.add(t, storage.getSize());
+        if (st) HybridStats.UNPACK_JAVA.add(t, storage.getSize());
     }
 }

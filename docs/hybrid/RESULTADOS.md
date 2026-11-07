@@ -110,3 +110,18 @@ El coste por tile es casi constante (~1.8 ms/columna) con independencia del stri
 1. En el job ON, `/drakes hybrid status` mostro "Modo: JAVA original / bits=false" mientras la cabecera del autotest decia bits=true (el autotest fuerza el modo con `forceBits` durante la prueba; la linea `[stats paridad] llamadas nativas pack=0` convive con `bits.pack.rust calls=2617` del desglose). Hay que unificar lo que informa `status` con lo que el autotest fuerza, o documentar por que difieren.
 2. `bits.unpack.java` informa ~20.8 ms por llamada en el job OFF (anomalo; probable contaminacion del temporizador por el bloqueo del runner). Sin explicar.
 3. JFR (OFF): `worldgen:noise/density` 67.7 % de 13 282 muestras: el cuello real sigue siendo la generacion de ruido, no la serializacion.
+
+## Correcciones tras la investigacion de colas (revision del A/B del volador)
+
+La investigacion (`INVESTIGACION_COLAS_LOD.md`, verificada leyendo el codigo) mostro que **el A/B anterior no medía "anticipar vs no anticipar"**:
+
+- Modo "reactivo" = todas las peticiones `urgent=true`; modo "prefetch" = casi todas `urgent=false` y **nunca promovidas** al vencer el plazo. Se comparaban dos prioridades, no dos estrategias.
+- El volador usaba un prefetch propio sin tope ni carril; la clase de produccion `HybridChunkPrefetch` (tope 24 en vuelo, carril de 5) **no fue medida**. Por tanto "el prefetch empeora" **no aplica a la clase real**; sigue desactivada por la regla de no activar lo no demostrado.
+- n=2 corridas por modo, corredores distintos, sin IC: los numeros 26 % vs 64 % son indicativos, no conclusiones.
+
+Cambios aplicados: el volador mide ahora una matriz {R-urgent, R-normal, P-normal, P-promovido} en orden ABCD·DCBA, para separar el efecto de la prioridad del de la anticipacion (resultados: pendientes del siguiente CI).
+
+**Anomalias — causas identificadas (no hay mejora declarable hasta repetir en condiciones equivalentes):**
+1. `bits=false` en `status`: el autotest dejaba `forceBits(false)` antes del smoke de comandos → corregido (restaura el estado configurado).
+2. TPS ~5 (OFF) vs ~20 (ON): el OFF no ejecutaba flyer ni usaba las mismas banderas y leia el TPS justo tras generar ~289 chunks de forma sincrona en el hilo principal → artefacto de orden/ventana, no de Hybrid. El CI ahora alterna OFF/ON/ON/OFF con las mismas banderas y registra `loadavg`.
+3. `bits.unpack.java` ≈ 20 ms/llamada: **carrera de medicion** (`HybridStats.enabled` se activaba con una llamada en curso que empezo con t=0 y `add` sumaba el reloj monotono absoluto). Corregido leyendo el flag una sola vez por llamada, ignorando t=0 y reportando el maximo.

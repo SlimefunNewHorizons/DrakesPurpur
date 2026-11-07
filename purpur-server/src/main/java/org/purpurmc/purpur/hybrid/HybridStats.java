@@ -7,6 +7,11 @@ import java.util.concurrent.atomic.LongAdder;
  * ({@code native.hybrid.stats}); con ellos apagados cada sitio instrumentado cuesta una lectura de un boolean.
  */
 public final class HybridStats {
+    /**
+     * IMPORTANTE: quien instrumenta debe leer este campo UNA sola vez por llamada. Si se activa mientras otro hilo esta
+     * a mitad de una llamada que empezo con t=0, {@code add} sumaria el reloj monotono absoluto (miles de segundos):
+     * esa carrera explica los ~20 ms/llamada anomalos de bits.unpack.java en el CI run 42321107189.
+     */
     public static volatile boolean enabled;
 
     public static final class Stage {
@@ -21,6 +26,7 @@ public final class HybridStats {
 
         public void add(long startNanos, int itemCount) {
             calls.increment();
+            if (startNanos == 0L) return;   // la llamada empezo con las estadisticas apagadas
             long d = System.nanoTime() - startNanos;
             nanos.add(d);
             max.accumulate(d);
