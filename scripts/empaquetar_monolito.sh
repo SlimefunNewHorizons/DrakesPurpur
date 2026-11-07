@@ -7,6 +7,9 @@ OUT="$(cd "$(dirname "$0")/.." && pwd)/purpur-server/bundled/drakes-bundled"
 rm -rf "$OUT"; mkdir -p "$OUT"; : > "$OUT/index.txt"
 for j in "$SUITES"/*/target/*.jar; do
   b=$(basename "$j"); case "$b" in original-*|*-sources.jar|*-javadoc.jar) continue;; esac
+  # drakes-onechunk es un ADDON de BentoBox (addon.yml, sin plugin.yml): Paper lo rechaza en plugins/.
+  # Se instala en plugins/BentoBox/addons/, no se embebe como plugin.
+  case "$b" in *onechunk*) echo "omitido (addon de BentoBox, no plugin): $b"; continue;; esac
   cp "$j" "$OUT/$b"; echo "$b" >> "$OUT/index.txt"
 done
 echo "Compilar con: BUILD_NUMBER=${BUILD_NUMBER:-134} ./gradlew createPaperclipJar (sin BUILD_NUMBER la versión es 26.2.local-SNAPSHOT y rompe addons que parsean Bukkit.getBukkitVersion)"
