@@ -72,3 +72,41 @@ Ruido de la corrida en este runner: el control Java vario 12-23 % entre ejecucio
 - Aunque el ruido fuese infinitamente rapido, el tiempo propio de las funciones de ruido (~14 %) acota la ganancia; el resto del grafo (interpoladores, caches, splines, aquifer, Climate) es codigo con muchas ramas y estado de `NoiseChunk` que Rust no acelera de forma evidente.
 - Horizon documenta que su compilacion de density functions **no cubre aun el grafo completo** y que no ha medido mejora de juego completo (`docs/density-functions.md`).
 - **Conclusion:** no hay evidencia de que portar el resto del grafo a Rust dé un beneficio a nivel de chunk que justifique el coste y el riesgo de paridad. No se enlaza `NormalNoise` nativo al pipeline de generacion (no se activa nada que no haya demostrado ganancia). El camino con mas potencial medible sigue siendo arquitectonico (paralelismo/colas), no el lenguaje del kernel.
+
+## Fase 4/5 — volador sintetico y muestreo LOD (CI run 42321107189, commit 70c4942)
+
+Fuente: logs del job "Full server build + in-server selftest" (runner compartido de 4 vCPU; **sin intervalos de confianza**, 2 corridas por modo, cada corrida usa un corredor distinto → la variabilidad del terreno es grande). Es un modelo de **carga** sobre el sistema de chunks real, no un cliente real.
+
+| Velocidad (demanda) | Reactiva: columnas tarde / p95 | Prefetch lead=6: columnas tarde / p95 |
+|---|---|---|
+| 24 b/s (17 chunks/s) | 26 % / 2476 ms | 64 % / 8534 ms |
+| 40 b/s (28 chunks/s) | 100 % / 8184 ms | 100 % / 12746 ms |
+| 64 b/s (44 chunks/s) | 100 % / 13720 ms | 100 % / 15339 ms |
+
+**Conclusion honesta:** el prefetch direccional **empeora** el resultado en las tres velocidades (compite con la carga urgente por el mismo generador). Por encima de ~17 chunks/s la generacion no da abasto en este runner, con o sin prefetch. Por la regla del proyecto (no activar lo que no demuestra beneficio) **`prefetch` queda desactivado por defecto y no se presenta como mejora**. Un prefetch util necesitaria prioridad de cola (urgente > anticipado) en el planificador de generacion, no probada.
+
+### Autotest ON vs OFF (misma ejecucion)
+
+- Paridad NBT real Rust == Java: 13 872 contenedores, 0 diferencias, 0 diferencias de ida y vuelta. Density (NormalNoise): 200 000 puntos × 3 ruidos, 0 diferencias bit a bit, max_ulp = 0.
+- Guardado: x1.071 y carga: x1.042 a favor de Rust; density x1.03–1.10. **Todo dentro del ruido del runner (12–23 % de varianza de control)**: no se declara mejora.
+- Bridge aislado (lotes de 4096): bits pack+unpack x3.2–4.1 y ruido mejorado x1.15 a favor de Rust, pero con lotes de 256 es x0.6–1.0; en el servidor el empaquetado es ~1 % del tiempo de un chunk, por eso no se traduce en mejora medible.
+- Comandos `/drakes hybrid`: 8/8 subcomandos, `dispatchCommand`, tab-complete y GUI de 27 slots OK. Clics reales de jugador: **no probados**.
+- Codec `horizon:lod` v1: 0 comprobaciones fallidas (vectores derivados de la especificacion, **no contrastados con un cliente/servidor Horizon real**).
+
+### Muestreo LOD (sonda: altura `WORLD_SURFACE_WG` del generador, sin generar chunks)
+
+| stride | ms por tile 16×16 | generar los chunks equivalentes (≈48 ms/chunk) | relacion |
+|---|---|---|---|
+| 1 | 441–455 | ~48 ms | **~9× mas caro que generar** |
+| 2 | 443–457 | ~192 ms | ~2.3× mas caro |
+| 4 | 462–458 | ~770 ms | ~1.7× mas barato |
+| 8 | 461–468 | ~3078 ms | ~7× mas barato |
+| 16 | 484–486 | ~12 313 ms | ~25× mas barato |
+
+El coste por tile es casi constante (~1.8 ms/columna) con independencia del stride: el LOD solo compensa a stride ≥ 4. **Limites de esta medicion:** la sonda mide solo la altura (sin spans, biomas, agua, luz) y es secuencial; el job OFF corrio a TPS ~5 (MSPT 177 ms) frente a ~20 en el ON, asi que el absoluto esta contaminado por carga del runner. El backend LOD **no esta conectado** a clientes y no se enviara a clientes sin negociar `horizon:lod`.
+
+### Anomalias abiertas (no resueltas)
+
+1. En el job ON, `/drakes hybrid status` mostro "Modo: JAVA original / bits=false" mientras la cabecera del autotest decia bits=true (el autotest fuerza el modo con `forceBits` durante la prueba; la linea `[stats paridad] llamadas nativas pack=0` convive con `bits.pack.rust calls=2617` del desglose). Hay que unificar lo que informa `status` con lo que el autotest fuerza, o documentar por que difieren.
+2. `bits.unpack.java` informa ~20.8 ms por llamada en el job OFF (anomalo; probable contaminacion del temporizador por el bloqueo del runner). Sin explicar.
+3. JFR (OFF): `worldgen:noise/density` 67.7 % de 13 282 muestras: el cuello real sigue siendo la generacion de ruido, no la serializacion.

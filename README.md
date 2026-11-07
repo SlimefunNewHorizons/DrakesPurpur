@@ -159,7 +159,7 @@ Entorno: GitHub Actions (4 vCPU compartidas), servidor real compilado de esta ra
 | Bit-packing (guardado/carga de secciones) | paridad NBT exacta (13.872 contenedores reales); velocidad ×1,00–1,07: **sin mejora demostrable** |
 | `NormalNoise` nativo | paridad **bit a bit** (3 ruidos × 200.000 puntos); velocidad ×0,98–1,21: **sin mejora demostrable** |
 | Donde va el tiempo | generar un chunk nuevo ≈ 38–60 ms; guardarlo ≈ 0,3–0,5 ms; preparar su paquete ≈ 0,03–0,07 ms |
-| Prefetch direccional / volador sintetico | ver `RESULTADOS.md` (seccion fase 4) |
+| Prefetch direccional / volador sintetico | **peor** que reactivo a 24/40/64 b/s (64 % vs 26 % de columnas tarde a 24 b/s); desactivado por defecto — ver `RESULTADOS.md` (fase 4/5) |
 
 ## Estado de Slimefun y StarSuites
 
