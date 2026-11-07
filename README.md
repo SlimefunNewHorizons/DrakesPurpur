@@ -28,7 +28,8 @@ DrakesPurpur es el fork de [Purpur](https://github.com/PurpurMC/Purpur) (sobre P
 - un puente **Java 25 ↔ Rust** por FFM (Panama) con **ABI versionada**, buffers prestados (sin copias, sin memoria que Java deba liberar) y **fallback automatico a Java**;
 - enganches en el pipeline real de chunks (parche `0023`, `PalettedContainer`) y un **evaluador nativo de ruido** (`NormalNoise`) con paridad bit a bit demostrada;
 - **instrumentacion** del recorrido de chunks (generar, guardar, cargar, preparar envio) y un autotest dentro del servidor real;
-- **prefetch direccional** experimental de chunks para quien se desplaza rapido (Elytra/vuelo);
+- **prefetch direccional con retencion de tickets (120 ticks / 6 s)** de chunks para quien se desplaza rapido (Elytra/vuelo), evitando descargas prematuras por Moonrise;
+- generador de manifiesto de modpacks del servidor **`/drakes hybrid manifest`** con hashes SHA-256 para delta-sync en DrakeStar-Launcher;
 - administracion in-game: **`/drakes hybrid`** y un panel (GUI) con datos reales;
 - un **auditor de catalogo** de Slimefun y un servidor de pruebas de compatibilidad en CI.
 
@@ -144,6 +145,7 @@ Permiso `drakes.hybrid.admin` (operadores por defecto). Con autocompletado.
 | `/drakes hybrid workers` | hilos por familia y estado, CPU |
 | `/drakes hybrid benchmark [confirm]` | microbenchmark sintetico (no toca mundos) |
 | `/drakes hybrid diagnostics` | errores nativos, JVM, GC, compatibilidad, etapas |
+| `/drakes hybrid manifest` | genera `drakes-data/client-manifest.json` con hashes SHA-256 de `client-mods/*.jar` para delta-sync |
 | `/drakes hybrid gui` | panel in-game |
 
 ## GUI
