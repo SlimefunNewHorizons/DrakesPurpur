@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-labelledby="t d">
+  <title id="t">DrakesPurpur Horizon Hybrid Engine</title>
+  <desc id="d">Banner experimental: cuadricula de chunks, circuitos y un enlace animado entre un nodo Java y un nodo Rust.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#04130d"/><stop offset="0.55" stop-color="#0a2a1c"/><stop offset="1" stop-color="#06201f"/>
+    </linearGradient>
+    <linearGradient id="ink" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#34f5a1"/><stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <radialGradient id="glowG" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#34f5a1" stop-opacity=".55"/><stop offset="1" stop-color="#34f5a1" stop-opacity="0"/></radialGradient>
+    <radialGradient id="glowC" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#22d3ee" stop-opacity=".55"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#34f5a1" stroke-opacity=".10" stroke-width="1"/>
+    </pattern>
+    <clipPath id="round"><rect width="1200" height="320" rx="18"/></clipPath>
+  </defs>
+  <style>
+    .sans{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .drift{animation:drift 22s linear infinite}
+    .flow{stroke-dasharray:10 14;animation:flow 2.4s linear infinite}
+    .flow2{stroke-dasharray:6 18;animation:flow 3.6s linear infinite reverse}
+    .pulse{animation:pulse 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+    .pulse2{animation:pulse 3.2s ease-in-out -1.6s infinite;transform-box:fill-box;transform-origin:center}
+    .chunk{animation:chunk 6s ease-in-out infinite}
+    .c2{animation-delay:-1.2s}.c3{animation-delay:-2.4s}.c4{animation-delay:-3.6s}.c5{animation-delay:-4.8s}
+    @keyframes drift{from{transform:translate(0,0)}to{transform:translate(-40px,-40px)}}
+    @keyframes flow{to{stroke-dashoffset:-96}}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.18);opacity:1}}
+    @keyframes chunk{0%,100%{fill-opacity:.06}50%{fill-opacity:.32}}
+    @media (prefers-reduced-motion: reduce){*{animation:none!important}}
+  </style>
+  <g clip-path="url(#round)">
+    <rect width="1200" height="320" fill="url(#bg)"/>
+    <g class="drift"><rect x="0" y="0" width="1280" height="400" fill="url(#grid)"/></g>
+    <!-- chunks: celdas que "se cargan" -->
+    <g fill="#34f5a1">
+      <rect class="chunk" x="40"  y="40"  width="80" height="80"/>
+      <rect class="chunk c3" x="120" y="120" width="80" height="80"/>
+      <rect class="chunk c2" x="1000" y="40"  width="80" height="80"/>
+      <rect class="chunk c4" x="1080" y="200" width="80" height="80"/>
+      <rect class="chunk c5" x="920" y="200" width="80" height="80"/>
+      <rect class="chunk c2" x="40"  y="200" width="80" height="80"/>
+    </g>
+    <!-- circuitos -->
+    <g fill="none" stroke-linecap="round" stroke-width="2">
+      <path class="flow"  d="M250 160 H420 L450 130 H560" stroke="#34f5a1" stroke-opacity=".75"/>
+      <path class="flow2" d="M640 130 H750 L780 160 H950" stroke="#22d3ee" stroke-opacity=".75"/>
+      <path class="flow"  d="M300 230 H520 L545 205 H600" stroke="#22d3ee" stroke-opacity=".35"/>
+      <path class="flow2" d="M900 90 H800 L775 115 H720" stroke="#34f5a1" stroke-opacity=".35"/>
+    </g>
+    <!-- nodo Java -->
+    <circle class="pulse" cx="215" cy="160" r="70" fill="url(#glowG)"/>
+    <circle cx="215" cy="160" r="30" fill="#04130d" stroke="#34f5a1" stroke-width="3"/>
+    <text x="215" y="166" text-anchor="middle" class="mono" font-size="17" font-weight="700" fill="#34f5a1">Java</text>
+    <!-- nodo Rust -->
+    <circle class="pulse2" cx="985" cy="160" r="70" fill="url(#glowC)"/>
+    <circle cx="985" cy="160" r="30" fill="#04130d" stroke="#22d3ee" stroke-width="3"/>
+    <text x="985" y="166" text-anchor="middle" class="mono" font-size="17" font-weight="700" fill="#22d3ee">Rust</text>
+    <!-- enlace FFM -->
+    <rect x="565" y="112" width="70" height="36" rx="8" fill="#04130d" stroke="url(#ink)" stroke-width="2"/>
+    <text x="600" y="135" text-anchor="middle" class="mono" font-size="14" font-weight="700" fill="#e8fff6">FFM</text>
+    <!-- titulo -->
+    <text x="600" y="205" text-anchor="middle" class="sans" font-size="46" font-weight="800" fill="url(#ink)">DrakesPurpur</text>
+    <text x="600" y="246" text-anchor="middle" class="sans" font-size="26" font-weight="600" fill="#d7fbe9">Horizon Hybrid Engine</text>
+    <text x="600" y="286" text-anchor="middle" class="mono" font-size="14" fill="#7fe8c0" fill-opacity=".9">Java 25 · Rust (FFM, ABI versionada) · Paper/Purpur 26.2 · experimental · fallback Java siempre</text>
+  </g>
+  <rect x="1" y="1" width="1198" height="318" rx="18" fill="none" stroke="#34f5a1" stroke-opacity=".35"/>
+</svg>
