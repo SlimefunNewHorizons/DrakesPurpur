@@ -27,6 +27,9 @@ jobs:
       - name: Checkout Drakes-Suites (read-only)
         uses: actions/checkout@v7
         with: { repository: SlimefunNewHorizons/Drakes-Suites, ref: 26.x, path: ext/suites }
+      - name: Checkout Slimefun-Knowledge-Drake (volcado de produccion, solo lectura)
+        uses: actions/checkout@v7
+        with: { repository: JackStar6677-1/Slimefun-Knowledge-Drake, path: ext/knowledge }
       - name: Build Slimefun
         id: bsf
         continue-on-error: true
@@ -47,7 +50,7 @@ jobs:
           printf 'online-mode=false\nserver-port=25598\nlevel-seed=12345\nview-distance=4\nsimulation-distance=4\nspawn-protection=0\n' > server.properties
           mkdir -p plugins drakes-data && printf 'native:\n  hybrid:\n    enabled: true\n    bits: true\n' > drakes-data/perf.yml
           cp ../ext/slimefun/target/*.jar plugins/ 2>/dev/null; ls ../ext/slimefun/target/*.jar
-          for j in ../ext/suites/*/target/*.jar; do case "$j" in *sources*|*original-*|*javadoc*) ;; *) cp "$j" plugins/ ;; esac; done
+          for j in ../ext/suites/*/target/*.jar; do case "$j" in *sources*|*original-*|*javadoc*) ;; *onechunk*) mkdir -p plugins/BentoBox/addons && cp "$j" plugins/BentoBox/addons/ ;; *) cp "$j" plugins/ ;; esac; done
           rm -f plugins/*sources*.jar plugins/original-*.jar; ls plugins
           # primer arranque solo para extraer el servidor parcheado (cache/patched_*.jar)
           (timeout 600 java -Xmx2G -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../boot0.log 2>&1 &) ; sleep 150; pkill -f server.jar || true; sleep 3
@@ -58,16 +61,30 @@ jobs:
           unzip -l plugins/$(ls plugins | grep -i slimefun | head -1) | grep -E "/SlimefunItem.class|/BlockStorage.class|/Slimefun.class" | head -5
           mkdir -p ../smoke-out && (javac -proc:none -Xmaxerrs 8 -cp "$CP" -d ../smoke-out ../tools/compat-smoke/src/HybridCompatSmoke.java 2>&1 | head -30)
           cp ../tools/compat-smoke/plugin.yml ../smoke-out/ && (cd ../smoke-out && jar cf ../run/plugins/HybridCompatSmoke.jar .)
+      - name: Esperado desde Slimefun-Knowledge-Drake
+        run: |
+          python3 - <<'PY'
+          import gzip, json, collections
+          d = json.load(gzip.open('ext/knowledge/data/slimefun-dump.json.gz'))
+          c = collections.Counter(i.get('addon') for i in d['items'])
+          with open('expected.properties', 'w') as f:
+              f.write('__items=%d\n__groups=%d\n__researches=%d\n' % (len(d['items']), len(d['groups']), len(d['researches'])))
+              for k, v in c.items():
+                  f.write('%s=%d\n' % (str(k).replace(' ', '\\ ').replace(':', '\\:').replace('=', '\\='), v))
+          print('esperado:', len(d['items']), 'items,', len(c), 'addons,', len(d['groups']), 'grupos,', len(d['researches']), 'investigaciones; generado', d['generated_at'], d['server'], d['slimefun'])
+          PY
       - name: Smoke fase 1
         if: steps.bsf.outcome == 'success'
         run: |
           cd run; set +e
-          timeout 420 java -Xmx2G -Dsmoke.phase=1 -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../smoke1.log 2>&1
+          timeout 420 java -Xmx2G -Dsmoke.phase=1 -Dcatalog.expected=$GITHUB_WORKSPACE/expected.properties -Ddrakes.native.dir=$GITHUB_WORKSPACE/native-lib --enable-native-access=ALL-UNNAMED -jar server.jar --nogui < /dev/null > ../smoke1.log 2>&1
           echo "exit=$?"
           echo "== resultado fase 1: PASS=$(grep -c ^PASS compat-smoke-phase1.txt) FAIL=$(grep -c ^FAIL compat-smoke-phase1.txt)"; grep -v -E "^PASS (getById|getByItem)|^plugin " compat-smoke-phase1.txt | head -40
           echo "== log servidor fase 1"
           grep -E "Enabling|Disabling|Done \(|HybridNative|SEVERE|ERROR" ../smoke1.log | cut -c1-170 | head -40
           tail -12 ../smoke1.log | cut -c1-170
+          echo "== catalogo"; cp compat-catalog.json compat-catalog.md .. 2>/dev/null; grep -E "^catalog:" compat-smoke-phase1.txt; head -22 compat-catalog.md | cut -c1-160
+          python3 -c "import json;d=json.load(open('compat-catalog.json'));print('ausentes:',len(d['expected_addons_missing']),d['expected_addons_missing'][:12]);print('parciales:',d['expected_addons_partial'][:8]);print('no esperados:',d['found_addons_not_in_expected'][:8])"
       - name: Smoke fase 2 (persistencia tras reinicio)
         if: steps.bsf.outcome == 'success'
         run: |
@@ -87,6 +104,9 @@ jobs:
           echo "== clases Slimefun en jars:"; for j in plugins/*lime*.jar plugins/*Slime*.jar; do [ -f "$j" ] && unzip -l "$j" | grep -E "/SlimefunItem.class|/BlockStorage.class|implementation/Slimefun.class" | head -4; done
           CP=$(find cache libraries -name '*.jar' | tr '\n' ':')$(ls plugins/*.jar | tr '\n' ':')
           echo "== javac:"; mkdir -p /tmp/sm && javac -proc:none -Xmaxerrs 6 -cp "$CP" -d /tmp/sm ../tools/compat-smoke/src/HybridCompatSmoke.java 2>&1 | head -24; echo "javac exit=${PIPESTATUS[0]}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: hybrid-compat-catalog, path: "compat-catalog.json\ncompat-catalog.md\nexpected.properties\nsmoke1.log\nsmoke2.log" }
       - name: Errores en logs
         if: always()
         run: grep -h -E "ERROR|SEVERE|Exception" smoke1.log smoke2.log 2>/dev/null | cut -c1-200 | sort | uniq -c | sort -rn | head -15
