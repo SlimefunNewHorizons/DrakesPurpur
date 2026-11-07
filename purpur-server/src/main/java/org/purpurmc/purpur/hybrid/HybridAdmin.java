@@ -95,6 +95,7 @@ public final class HybridAdmin {
         var n = HybridNative.snapshot();
         header(s, "estado");
         line(s, "Biblioteca Rust", n.libraryLoaded() ? "CARGADA (" + n.libraryPath() + ")" : "no cargada -> todo corre en Java");
+        line(s, "Plataforma / origen", n.platform() + " / " + (n.libraryLoaded() ? n.libraryOrigin() : "-"));
         line(s, "ABI (biblioteca / esperada)", n.libraryAbi() + " / " + n.expectedAbi() + (n.libraryLoaded() && n.libraryAbi() != n.expectedAbi() ? "  <-- INCOMPATIBLE" : ""));
         line(s, "Modo", n.libraryLoaded() && (n.bits() || n.noise() || n.region()) ? "HIBRIDO (aceleraciones activas)" : "JAVA original");
         line(s, "Aceleraciones", "bits=" + n.bits() + " noise=" + n.noise() + " region=" + n.region() + " min-batch=" + n.minBatch());
@@ -108,7 +109,7 @@ public final class HybridAdmin {
     private static void info(CommandSender s) {
         header(s, "configuracion");
         var cfg = DrakesPerf_cfg();
-        String[] keys = {"native.hybrid.enabled", "native.hybrid.min-batch", "native.hybrid.bits", "native.hybrid.noise", "native.hybrid.region",
+        String[] keys = {"hybrid.engine.enabled", "native.hybrid.enabled", "native.hybrid.min-batch", "native.hybrid.bits", "native.hybrid.noise", "native.hybrid.region",
             "native.hybrid.stats", "native.hybrid.prefetch.enabled", "native.hybrid.prefetch.min-speed", "native.hybrid.prefetch.lead-seconds",
             "native.hybrid.prefetch.max-lookahead-chunks", "native.hybrid.prefetch.max-in-flight", "native.dir"};
         for (String k : keys) line(s, k, String.valueOf(cfg == null ? "(perf.yml no cargado)" : cfg.get(k, "(por defecto)")));

@@ -54,6 +54,12 @@ public final class DrakesPerf {
           min-send-view-distance: 6
           min-simulation-distance: 4
           max-steps: 6
+        # Horizon Hybrid Engine (Java + Rust). Interruptor unico del motor. Pasa a true por defecto SOLO cuando un componente
+        # cumpla docs/hybrid/CRITERIOS_ESTABLE.md; hoy ninguna aceleracion nativa tiene mejora demostrada, asi que es false.
+        # -Ddrakes.hybrid.engine.enabled=true lo fuerza (entornos de prueba controlados). Equivale a native.hybrid.enabled.
+        hybrid:
+          engine:
+            enabled: false
         # Bibliotecas nativas (Rust) por Panama. APAGADO: en el benchmark (docs/NATIVO.md) Java gano en todo.
         # Si falta el .so/.dll o la ABI no coincide se usa Java sin avisar a nadie mas que el log.
         native:
@@ -160,6 +166,13 @@ public final class DrakesPerf {
         }
     }
 
+    /** Interruptor unico: propiedad del sistema > hybrid.engine.enabled > native.hybrid.enabled (compatibilidad). */
+    private static boolean engineEnabled() {
+        String p = System.getProperty("drakes.hybrid.engine.enabled");
+        if (p != null) return Boolean.parseBoolean(p);
+        return cfg.getBoolean("hybrid.engine.enabled", cfg.getBoolean("native.hybrid.enabled", false));
+    }
+
     private static void initNative() {
         try {
             org.purpurmc.purpur.nativelib.DrakesNative.init(new org.purpurmc.purpur.nativelib.DrakesNative.Settings(
@@ -173,7 +186,7 @@ public final class DrakesPerf {
         }
         try {
             org.purpurmc.purpur.nativelib.HybridNative.init(new org.purpurmc.purpur.nativelib.HybridNative.Settings(
-                cfg.getBoolean("native.hybrid.enabled", false), cfg.getString("native.dir", "natives"),
+                engineEnabled(), cfg.getString("native.dir", "natives"),
                 cfg.getBoolean("native.hybrid.bits", false), cfg.getBoolean("native.hybrid.noise", false),
                 cfg.getBoolean("native.hybrid.region", false), cfg.getInt("native.hybrid.min-batch", 2048)));
             org.purpurmc.purpur.hybrid.HybridStats.enabled = cfg.getBoolean("native.hybrid.stats", false);

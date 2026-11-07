@@ -37,6 +37,7 @@ public final class HybridNative {
     private static volatile Natives natives;
     private static volatile boolean initialized;
     private static volatile String libraryPath;
+    private static volatile String libraryOrigin = "-";
     private static volatile int libraryAbi = -1;
     private static final java.util.concurrent.atomic.AtomicLong FAILURES = new java.util.concurrent.atomic.AtomicLong();
     private static volatile String lastError = "";
@@ -68,6 +69,7 @@ public final class HybridNative {
             }
             natives = n;
             libraryPath = lib.toString();
+            libraryOrigin = lib.toString().contains("embedded-") ? "embebida en el JAR (extraida y verificada por SHA-256)" : "archivo externo";
             libraryAbi = abi;
             minBatch = Math.max(1, s.minBatch());
             bitsOn = s.bits();
@@ -111,7 +113,52 @@ public final class HybridNative {
             Path p = Path.of(d, file);
             if (Files.isRegularFile(p)) return p.toAbsolutePath();
         }
-        return null;
+        return extractEmbedded(file);
+    }
+
+    /** Plataforma en el formato de las carpetas embebidas: linux-x86_64, linux-aarch64, windows-x86_64, macos-aarch64... */
+    public static String platformKey() {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        String arch = System.getProperty("os.arch", "").toLowerCase();
+        String o = os.contains("win") ? "windows" : os.contains("mac") ? "macos" : os.contains("linux") ? "linux" : os.replaceAll("\\s+", "");
+        String a = arch.equals("amd64") || arch.equals("x86_64") ? "x86_64" : arch.equals("aarch64") || arch.equals("arm64") ? "aarch64" : arch;
+        return o + "-" + a;
+    }
+
+    /**
+     * Biblioteca nativa EMBEBIDA en el JAR ({@code drakes-natives/<plataforma>/<archivo>} + {@code .sha256}): se extrae a
+     * {@code drakes-data/natives/embedded-<sha>/} solo si falta o difiere y se verifica su SHA-256 contra el registrado en el JAR
+     * antes de cargarla. Devuelve null si el JAR no trae una para esta plataforma (=> modo Java).
+     */
+    private static Path extractEmbedded(String file) {
+        String base = "drakes-natives/" + platformKey() + "/" + file;
+        ClassLoader cl = HybridNative.class.getClassLoader();
+        try (var in = cl.getResourceAsStream(base)) {
+            if (in == null) return null;
+            byte[] data = in.readAllBytes();
+            String sha = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(data));
+            try (var sin = cl.getResourceAsStream(base + ".sha256")) {
+                if (sin != null) {
+                    String want = new String(sin.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).trim().split("\\s+")[0].toLowerCase();
+                    if (!want.equals(sha)) {
+                        LOG.warning("[Hybrid] la biblioteca embebida NO coincide con su SHA-256 (" + sha + " != " + want + "); no se carga.");
+                        return null;
+                    }
+                }
+            }
+            Path dir = Path.of("drakes-data", "natives", "embedded-" + sha.substring(0, 12));
+            Files.createDirectories(dir);
+            Path out = dir.resolve(file);
+            if (!Files.isRegularFile(out) || Files.size(out) != data.length) {
+                Path tmp = dir.resolve(file + ".tmp");
+                Files.write(tmp, data);
+                Files.move(tmp, out, java.nio.file.StandardCopyOption.REPLACE_EXISTING, java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+            }
+            return out.toAbsolutePath();
+        } catch (Throwable t) {
+            LOG.warning("[Hybrid] no se pudo extraer la biblioteca embebida: " + t);
+            return null;
+        }
     }
 
     // ---- API publica (siempre funciona; nativo solo si esta activo y el lote lo justifica) ----------------
@@ -237,11 +284,11 @@ public final class HybridNative {
     }
 
     /** Estado para /drakes hybrid: lo que la biblioteca y la configuracion realmente tienen ahora. */
-    public record Snapshot(boolean initialized, boolean libraryLoaded, String libraryPath, int libraryAbi, int expectedAbi,
+    public record Snapshot(boolean initialized, boolean libraryLoaded, String libraryPath, String libraryOrigin, String platform, int libraryAbi, int expectedAbi,
                            boolean bits, boolean noise, boolean region, int minBatch, long failures, String lastError) {}
 
     public static Snapshot snapshot() {
-        return new Snapshot(initialized, natives != null, libraryPath, libraryAbi, ABI, bitsOn, noiseOn, regionOn, minBatch,
+        return new Snapshot(initialized, natives != null, libraryPath, libraryOrigin, platformKey(), libraryAbi, ABI, bitsOn, noiseOn, regionOn, minBatch,
             FAILURES.get(), lastError);
     }
 

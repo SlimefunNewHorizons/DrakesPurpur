@@ -239,7 +239,11 @@ public final class HybridSelfTest {
 
             // 8) Comandos /drakes hybrid y GUI con datos reales
             adminSmoke(out, srv);
-            if (diffs != 0 || roundTripDiffs != 0 || densityMismatches != 0 || adminFailures != 0) {
+
+            // 9) DrakesLOD: codec horizon:lod v1 y coste de muestrear terreno lejano sin generar chunks
+            lodCodecTest(out);
+            lodSamplerProbe(out, srv, level, chunks.size() == 0 ? 0 : genMs);
+            if (diffs != 0 || roundTripDiffs != 0 || densityMismatches != 0 || adminFailures != 0 || lodFailures != 0) {
                 exit = 3;
                 line(out, "RESULTADO: FALLO DE PARIDAD");
             } else {
@@ -284,6 +288,87 @@ public final class HybridSelfTest {
 
     private static long densityMismatches;
     private static long adminFailures;
+    private static long lodFailures;
+
+    // ---- 9) DrakesLOD -------------------------------------------------------------------------------------
+    private static boolean eq(byte[] a, String hex) {
+        return java.util.HexFormat.of().formatHex(a).equals(hex);
+    }
+
+    /** Vectores derivados a mano de la especificacion (lod_net.rs); NO se han contrastado con el binario de Horizon. */
+    private static void lodCodecTest(StringBuilder out) {
+        try {
+            var P = org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.class;
+            int bad = 0;
+            var offer = org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Offer.of(64);
+            if (!eq(offer.encode(), "01400840")) bad++;
+            if (!offer.equals(org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Offer.decode(offer.encode()))) bad++;
+            if (org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Offer.decode(new byte[] {2, 0x40, 8, 0x40}) != null) bad++;   // otra version
+            if (org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Offer.decode(new byte[] {1, 0, 8, 0x40}) != null) bad++;      // distancia 0 = apagado
+            var q = new org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Request(3, -512, 1024, 4, true);
+            if (!eq(q.encode(), "03fffffe0000000400" + "0401")) bad++;
+            if (!q.equals(org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Request.decode(q.encode()))) bad++;
+            // permitido: tile alineado cerca / no alineado / demasiado lejos / stride no potencia de dos
+            if (!new org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Request(1, 0, 0, 4, false).allowed(64, 10, 10)) bad++;
+            if (new org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Request(1, 8, 0, 4, false).allowed(64, 10, 10)) bad++;
+            if (new org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Request(1, 64 * 1000, 0, 4, false).allowed(64, 0, 0)) bad++;
+            if (new org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Request(1, 0, 0, 3, false).allowed(64, 0, 0)) bad++;
+            // respuesta: ida y vuelta de un tile de 256 columnas y limites
+            var cols = new ArrayList<org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Column>();
+            for (int i = 0; i < 256; i++) {
+                var surf = i % 3 == 0 ? null : new org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Surface(60 + i % 7, 9,
+                    i % 5 == 0 ? new org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Water(62, 86) : null, i % 2 == 0 ? "minecraft:plains" : "minecraft:forest");
+                cols.add(new org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Column(surf, List.of(
+                    new org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Span(-64, 50, 1, "minecraft:plains", 0),
+                    new org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Span(50, 60 + i % 7, 9, "minecraft:forest", 15))));
+            }
+            byte[] reply = org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.encodeReply(7, cols);
+            if (!cols.equals(org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.decodeReply(reply, 30000))) bad++;
+            if (org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.decodeReply(org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.encodeReply(7, cols.subList(0, 10)), 30000) != null) bad++; // no es tile entero -> rechazo
+            try { org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.decodeReply(reply, 5); bad++; } catch (IllegalArgumentException expected) { }   // estado desconocido
+            var bucket = new org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.Bucket(64, 8, 0);
+            int taken = 0;
+            for (int i = 0; i < 20; i++) if (bucket.take(0)) taken++;
+            if (taken != 8) bad++;
+            lodFailures += bad;
+            line(out, "[LOD codec horizon:lod v1] comprobaciones fallidas=" + bad + " | respuesta de ejemplo: " + reply.length + " bytes (limite " + org.purpurmc.purpur.hybrid.lod.HorizonLodProtocol.MAX_REPLY + ") | vectores derivados de la especificacion, sin contrastar con el binario de Horizon");
+        } catch (Throwable t) {
+            lodFailures++;
+            line(out, "[LOD codec] ERROR: " + t);
+        }
+    }
+
+    /** Coste de muestrear alturas del generador (sin generar chunks) para un tile de 16x16 columnas a distintos strides. */
+    private static void lodSamplerProbe(StringBuilder out, MinecraftServer srv, ServerLevel level, List<Double> genMsPerChunk) {
+        try {
+            var gen = level.getChunkSource().getGenerator();
+            var rs = level.getChunkSource().randomState();
+            double meanGen = genMsPerChunk == null || genMsPerChunk.isEmpty() ? 0 : genMsPerChunk.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+            line(out, String.format("[LOD sampler] muestreo de altura WORLD_SURFACE_WG del generador (sin generar chunks); referencia: generar un chunk completo = %.1f ms de media", meanGen));
+            for (int stride : new int[] {1, 2, 4, 8, 16}) {
+                final int st = stride;
+                long[] best = {Long.MAX_VALUE};
+                int[] sink = {0};
+                for (int rep = 0; rep < 5; rep++) {
+                    final int r = rep;
+                    long t0 = System.nanoTime();
+                    for (int cz = 0; cz < 16; cz++) for (int cx = 0; cx < 16; cx++) {
+                        sink[0] += gen.getBaseHeight(500000 + r * 4096 + cx * st, 500000 + cz * st, net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG, level, rs);
+                    }
+                    best[0] = Math.min(best[0], System.nanoTime() - t0);
+                }
+                double msTile = best[0] / 1e6;
+                int chunksCovered = Math.max(1, (16 * st / 16) * (16 * st / 16));
+                line(out, String.format("  stride %2d: tile 16x16 columnas cubre %dx%d bloques (=%d chunks) -> muestreo %.2f ms/tile (%.1f us/columna); generar esos chunks costaria ~%.0f ms (x%.0f)",
+                    st, 16 * st, 16 * st, chunksCovered, msTile, msTile * 1000 / 256, meanGen * chunksCovered, meanGen * chunksCovered / Math.max(msTile, 1e-6)));
+                if (sink[0] == Integer.MIN_VALUE) line(out, "");
+            }
+            line(out, "[LOD sampler] muestrea solo la altura de superficie del generador; un tile del protocolo ademas necesita spans por columna (getBaseColumn), bioma, agua y luz: el coste real sera mayor");
+        } catch (Throwable t) {
+            line(out, "[LOD sampler] ERROR: " + t);
+            LOG.log(Level.WARNING, "lod sampler", t);
+        }
+    }
 
     // ---- 7) volador sintetico ------------------------------------------------------------------------------
     /**
