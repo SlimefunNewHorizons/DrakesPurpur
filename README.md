@@ -52,6 +52,10 @@ The suites and addons that run on this kernel come from the Universal line of th
 
 **Minecraft versions older than 1.21.11 are not supported and not tested.**
 
+The 26.2 development line includes a [sculk world-generation backport for
+MC-307918](docs/MC-307918.md), based on Mojang 26.3 cursor movement limits.
+Its runtime evidence is recorded separately from compilation and deployment.
+
 ## Core Architectural Pillars
 
 ### 1. Kernel Crash Guard & Self-Healing (Zero Server Crashes)
