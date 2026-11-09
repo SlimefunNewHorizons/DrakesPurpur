@@ -21,6 +21,10 @@
 > **Estado honesto.** Esta rama (`experimental/horizon-rust-hybrid-engine`, PR #1, borrador) integra un puente Java↔Rust real y comprobado, pero **ninguna aceleracion nativa ha demostrado hoy una mejora de rendimiento** frente a Java. Todo lo experimental esta **apagado por defecto**. No esta lista para produccion. Ver [Benchmarks verificados](#benchmarks-verificados) y [Limitaciones](#limitaciones).
 > El README del monolito de produccion se conserva integro en [`docs/README_MONOLITO.md`](docs/README_MONOLITO.md).
 
+El backport de generacion sculk [MC-307918](docs/MC-307918.md) se porta desde
+la linea modular. Su compilacion y prueba en este monolito se registran aparte;
+el ensayo modular no acredita el despliegue ni la ejecucion de esta rama.
+
 ## Que es
 
 DrakesPurpur es el fork de [Purpur](https://github.com/PurpurMC/Purpur) (sobre Paper) que ejecuta DrakesCraft: kernel propio, 9 StarSuites embebidas y Slimefun sobre un nucleo nativo. El **Hybrid Engine** anade, de forma modular y desactivable:

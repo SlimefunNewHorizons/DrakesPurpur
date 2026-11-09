@@ -1,0 +1,51 @@
+--- a/net/minecraft/world/level/block/SculkSpreader.java
++++ b/net/minecraft/world/level/block/SculkSpreader.java
+@@ -27,3 +_,4 @@
+ import net.minecraft.tags.TagKey;
++import net.minecraft.util.Mth;
+ import net.minecraft.util.RandomSource;
+ import net.minecraft.util.Util;
+@@ -279,12 +_,12 @@
+                     } else {
+-                        BlockPos transferPos = getValidMovementPos(level, this.pos, random);
++                        // Drakes - backport MC-307918 from Mojang 26.3: bound movement before reading its destination.
++                        BlockPos transferPos = getValidMovementPos(level, this.pos, random, originPos, spreader);
+                         if (transferPos != null) {
+                             sculkBehaviour.onDischarged(level, currentState, this.pos, random);
+                             this.pos = transferPos.immutable();
+-                            if (spreader.isWorldGeneration() && !this.pos.closerThan(new Vec3i(originPos.getX(), this.pos.getY(), originPos.getZ()), 15.0)) {
+-                                this.charge = 0;
+-                                return;
+-                            }
+-
+                             currentState = level.getBlockState(transferPos);
++                        } else if (spreader.isWorldGeneration()) {
++                            sculkBehaviour.onDischarged(level, currentState, this.pos, random);
++                            this.charge = 0;
++                            return;
+                         }
+@@ -319,3 +_,4 @@
+-        private static @Nullable BlockPos getValidMovementPos(final LevelAccessor level, final BlockPos pos, final RandomSource random) {
++        private static @Nullable BlockPos getValidMovementPos(final LevelAccessor level, final BlockPos pos, final RandomSource random,
++                                                              final BlockPos originPos, final SculkSpreader spreader) {
+             BlockPos.MutableBlockPos sculkPosition = pos.mutable();
+             BlockPos.MutableBlockPos neighbour = pos.mutable();
+@@ -323,3 +_,6 @@
+             for (Vec3i offset : getRandomizedNonCornerNeighbourOffsets(random)) {
+                 neighbour.setWithOffset(pos, offset);
++                if (!canMoveToPos(originPos, neighbour, spreader)) {
++                    continue;
++                }
+                 BlockState transferee = level.getBlockState(neighbour);
+@@ -339,1 +_,11 @@
++        private static boolean canMoveToPos(final BlockPos originPos, final BlockPos target, final SculkSpreader spreader) {
++            if (!spreader.isWorldGeneration()) {
++                return true;
++            }
++            // Mojang 26.3 uses a horizontal radius of 12 (squared distance <= 144).
++            int distanceSquared = Mth.square(originPos.getX() - target.getX())
++                + Mth.square(originPos.getZ() - target.getZ());
++            return distanceSquared <= 144;
++        }
++
+         private static boolean isMovementUnobstructed(final LevelAccessor level, final BlockPos from, final BlockPos to) {
