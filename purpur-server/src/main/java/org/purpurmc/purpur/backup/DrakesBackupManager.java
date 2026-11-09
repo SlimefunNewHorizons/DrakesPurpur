@@ -35,6 +35,9 @@ public final class DrakesBackupManager {
     private DrakesBackupManager() {}
 
     public static void initialize() {
+        if (!DrakesPerf.cfg().getBoolean("backup.enabled", true)) {
+            return;
+        }
         if (!BACKUP_DIR.exists()) {
             BACKUP_DIR.mkdirs();
         }
