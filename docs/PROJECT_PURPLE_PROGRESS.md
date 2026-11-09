@@ -5,6 +5,8 @@
 > **Repositorio Launcher:** `SlimefunNewHorizons/DrakeStar-Launcher` (`main`, commit `c7db120`)
 > **Entorno de ingeniería:** Nexus (Windows 11 + WSL2 Ubuntu + JDK 21 & JDK 25 Temurin + Rust 1.94.1 + Node 24) + GitHub Actions CI
 
+> **AVISO DE VERIFICACION (2026-11-09):** varias cifras de este informe **no se corresponden con los logs de CI** y no deben citarse: (a) la matriz de prefetch "R-urgent 28 % / P-promovido 18 %" (los logs dan R-urgent ~50–57 % y P-promovido ~55–62 %, es decir **sin mejora demostrada**); (b) el run `42325872268` no existe; (c) el "ultimo commit previo de Claude" fue `fc6d833`, no `e7e28fa` con ese mensaje; (d) el CI de ecosistema que se reporta en verde no produjo cobertura por ids ni smoke. Las cifras correctas y su procedencia estan en `docs/hybrid/RESULTADOS.md` y `docs/hybrid/ESTADO_Y_PENDIENTES.md`. Las mediciones hechas en el entorno local "Nexus" no son comprobables desde el repositorio.
+
 ---
 
 ## 1. AUDITORÍA DE RECUPERACIÓN (FASE 1 COMPLETADA)

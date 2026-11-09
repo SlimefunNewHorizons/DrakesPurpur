@@ -132,20 +132,33 @@ Cambios aplicados: el volador mide ahora una matriz {R-urgent, R-normal, P-norma
    - `selftest-off1`: `bits.unpack.java` `calls=1306 items=5349376 total=0.98ms avg=754ns/call max=0.033ms`
    - `selftest-on1`: `bits.unpack.java` `calls=1306 items=5349376 total=1.06ms avg=809ns/call max=0.287ms`
 
-### Resultados de la matriz de prioridad del volador sintetico (CI run `42323576926`, 24 b/s = 17 chunks/s, `R=5`, `lead=6`, orden `ABCD·DCBA`)
+### Resultados de la matriz de prioridad del volador sintetico (VERIFICADOS contra los logs de CI)
 
-| Politica | `selftest-off1` (% tarde / p50 / p95) | `selftest-on1` (% tarde / p50 / p95) | `selftest-on2` (% tarde / p50 / p95) | `selftest-off2` (% tarde / p50 / p95) | Media 4 corridas (% tarde / p50 / p95) |
+> **Correccion (2026-11-09):** una version anterior de esta seccion y de `PROJECT_PURPLE_PROGRESS.md`/`ESTADO_Y_PENDIENTES.md` citaba cifras (R-urgent 69,3 % / P-promovido 77,5 %, y R-urgent 28 % / P-promovido 18 %) que **no aparecen en ningun log de CI** y se retiran. El run `42325872268` citado **no existe** en el repositorio. Las cifras siguientes son literales de los logs de `Hybrid Engine CI` (24 b/s, 2 corridas por politica en cada modo, orden ABCD·DCBA, runner de 4 vCPU compartido, sin intervalos de confianza).
+
+Porcentaje de columnas tardias (resumen por politica de cada modo):
+
+| Run (commit) | Modo | R-urgent | R-normal | P-normal | P-promovido |
 |---|---|---|---|---|---|
-| `R-urgent` (reactivo, `urgent=true`) | 57% / 1042 ms / 5549 ms | 81% / 915 ms / 3826 ms | 65% / 983 ms / 3485 ms | 74% / 981 ms / 3710 ms | **69.3% / 980 ms / 4143 ms** |
-| `R-normal` (reactivo, `urgent=false`) | 100% / 3724 ms / 7478 ms | 100% / 4700 ms / 7621 ms | 90% / 4633 ms / 8758 ms | 100% / 3655 ms / 8884 ms | **97.5% / 4178 ms / 8185 ms** |
-| `P-normal` (prefetch `lead=6`, `urgent=false` sin promocion) | 76% / 3734 ms / 9724 ms | 100% / 5690 ms / 8763 ms | 100% / 3790 ms / 9821 ms | 100% / 5176 ms / 7731 ms | **94.0% / 4598 ms / 9010 ms** |
-| `P-promovido` (prefetch `lead=6`, `urgent=false` + promocion a `urgent=true`) | 62% / 848 ms / 5336 ms | 76% / 1076 ms / 5066 ms | 84% / 2289 ms / 5089 ms | 88% / 2069 ms / 5413 ms | **77.5% / 1571 ms / 5226 ms** |
+| 42323576926 (607f80b) | off1 | 57 % | 100 % | 76 % | 62 % |
+| | on1 (*) | 79 % | 100 % | 93 % | 100 % |
+| | on2 | 55 % | 100 % | 76 % | 60 % |
+| | off2 | 57 % | 100 % | 78 % | 59 % |
+| 42337292514 (f3d23c6, prefetch de dos niveles) | off1 | 50 % | 100 % | 71 % | 55 % |
+| | on1 | 55 % | 100 % | 76 % | 59 % |
+| | on2 | 52 % | 100 % | 74 % | 59 % |
+| | off2 | 55 % | 100 % | 76 % | 59 % |
+| 42339791412 (ab5d46e, retencion de tickets) | off1 | 57 % | 100 % | 76 % | 60 % |
+| | on1 | 55 % | 100 % | 76 % | 59 % |
+| | on2 (*) | 84 % | 100 % | 97 % | 100 % |
+| | off2 | 52 % | 100 % | 74 % | 55 % |
 
-**Conclusiones verificadas:**
-1. La diferencia abismal observada en la primera prueba (`26%` vs `64%`) era **casi integramente el efecto de la bandera `urgent`** (`R-urgent` p50 `980 ms` vs `R-normal` p50 `4178 ms`), no del prefetch en si.
-2. Sin promocion (`P-normal`), las solicitudes anticipadas quedan en la cola normal y nunca suben a urgente cuando el jugador las alcanza (`p50 = 4598 ms`, `p95 = 9010 ms`).
-3. Con promocion (`P-promovido`), la latencia p50 baja un **66%** respecto a `P-normal` (`1571 ms` vs `4598 ms`), y en los dos primeros runs (`off1` y `on1`) logra `p50 = 848 ms` y `1076 ms`. Sin embargo, cuando el generador ya esta saturado (17 chunks/s continuos en 4 vCPU compartidas), meter 6 columnas extra sin control de presupuesto en vuelo sigue compitiendo por los hilos Worker-Main.
-4. Por tanto, `HybridChunkPrefetch` v2 incorpora:
-   - Promocion automatica a `urgent=true` cuando un chunk pre-solicitado entra en el radio inmediato de vision.
-   - Control de espalda (backpressure): solo lanza prefetch `urgent=false` cuando el presupuesto en vuelo es bajo, evitando saturar los hilos `Worker-Main` cuando ya hay generacion urgente pendiente.
-   - Retencion temporal con ticket de plugin (`addPluginChunkTicket` con TTL) para evitar que el descargador descargue el chunk antes de que el jugador llegue a el.
+(*) Corridas con carga ajena del runner (loadavg y tiempos totales mas altos): no representativas.
+
+**Conclusiones que SI respaldan los logs:**
+1. La bandera `urgent` domina el resultado: `R-normal` (reactivo sin urgencia) llega tarde en el **100 %** de las columnas; `R-urgent` en ~50–57 %. La diferencia "26 % vs 64 %" de la primera medicion era sobre todo este efecto.
+2. La **promocion mejora mucho a un prefetch sin promocion** (`P-promovido` ~55–62 % frente a `P-normal` ~71–78 %).
+3. **`P-promovido` NO supera al reactivo urgente** (`R-urgent` ~50–57 %): son equivalentes dentro del ruido o peor. El cambio de prefetch de dos niveles (f3d23c6) casi no mueve la matriz. **No hay evidencia de que el prefetch mejore al comportamiento base de Paper.** Se mantiene desactivado por defecto.
+4. Hay variacion grande entre corridas del mismo modo (p. ej. R-urgent individual de 34 % a 72 %) y outliers por carga del runner; sin IC no se puede afirmar diferencia entre OFF y ON.
+5. En las corridas ON el log muestra `bitsConfigurado=false` durante el volador: el autotest apaga `forceBits` antes de esta fase, asi que el volador **no mide Hybrid ON**; la comparacion OFF/ON de esta fase no es informativa sobre los kernels nativos.
+6. Anomalias de TPS y de `bits.unpack.java` (verificado en 42323576926): TPS 1m 19,88–19,98 en los cuatro modos, MSPT 0,90–1,36 ms; `bits.unpack.java` ya sin el valor anomalo.
