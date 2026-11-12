@@ -2,7 +2,7 @@
 
 ## English
 
-**Status: everything native is OFF by default. In the benchmark Java won (or tied) on every path.**
+**Status (2026-11-12): Java + Rust are ACTIVE together in production on Dallas and tested by the owner with very good performance. The "OFF by default" below is the shipped default and the result of the early benchmark (Java won or tied on every path); it is not the Dallas configuration.**
 
 ### What exists
 | Library | Repo | ABI | Bridge in the engine |
