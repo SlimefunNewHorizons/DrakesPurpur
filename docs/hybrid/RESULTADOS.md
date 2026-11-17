@@ -149,3 +149,22 @@ Cambios aplicados: el volador mide ahora una matriz {R-urgent, R-normal, P-norma
    - Promocion automatica a `urgent=true` cuando un chunk pre-solicitado entra en el radio inmediato de vision.
    - Control de espalda (backpressure): solo lanza prefetch `urgent=false` cuando el presupuesto en vuelo es bajo, evitando saturar los hilos `Worker-Main` cuando ya hay generacion urgente pendiente.
    - Retencion temporal con ticket de plugin (`addPluginChunkTicket` con TTL) para evitar que el descargador descargue el chunk antes de que el jugador llegue a el.
+
+---
+
+# Fase 4 — A/B alternado en WSL (17-nov-2026)
+
+Entorno: WSL2 Ubuntu en Nexus (12 vCPU, JDK 25.0.5), jar publicado `v26.2.140-stable` + `libdrakes_hybrid_ffi.so` del mismo release, semilla 12345, mundo nuevo en cada corrida, radio 8 (289 chunks), `-Ddrakes.hybrid.selftest=8`. 5 pares alternados Rust OFF / ON (`native.enabled`, `native.hybrid.enabled`, `bits`, `noise`, `stats`), biblioteca cargada confirmada (`lib=true`).
+
+| Corrida | Generar chunk, media ms (OFF / ON) | Guardar us/chunk (OFF / ON) | Rust vs Java en el mismo proceso (guardado) |
+|---|---|---|---|
+| 1 | 40.8 / 33.2 | 358 / 336 | x1.069 |
+| 2 | 39.4 / 61.0 | 383 / 440 | x1.028 |
+| 3 | 36.5 / 36.7 | 392 / 347 | x1.011 |
+| 4 | 44.6 / 39.3 | 466 / 378 | x1.140 |
+| 5 | 34.4 / 36.4 | 352 / 315 | x1.035 |
+| Media | 39.1 / 41.3 | 391 / 364 | x1.017–1.140 |
+
+**Veredicto: sin mejora demostrable de extremo a extremo.** La generacion con Rust ON no es mas rapida (39.1 vs 41.3 ms de media; la dispersion entre corridas, 33–61 ms, supera cualquier diferencia). El empaquetado nativo gana 1–14 % en el micro-paso de guardado, dentro del ruido y sobre ~0.3 ms de ~40 ms por chunk. Con 5 pares no se cumple el criterio 8 de `CRITERIOS_ESTABLE.md` (>= 10 corridas, IC 95 %), asi que `hybrid.engine.enabled` sigue en `false` por defecto. Donde Rust si gana es el micro-benchmark aislado (pack+unpack de 4096 valores, x4.4–6.3); el objetivo con ganancia potencial real sigue siendo el grafo de density functions/ruido (>50 % del coste de generacion).
+
+Nota de reproduccion: la compilacion local de la rama monolito en WSL falla en `paper-server` (`CraftEntity.java:123`, "method does not override"); este A/B se hizo con el jar publicado.
