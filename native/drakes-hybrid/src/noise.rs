@@ -27,27 +27,44 @@ fn floor(v: f64) -> i32 {
     if v < i as f64 { i - 1 } else { i }
 }
 
+#[inline(always)]
 pub fn improved(p: &[u8], x: f64, y: f64, z: f64) -> f64 {
-    let (xf, yf, zf) = (floor(x), floor(y), floor(z));
-    let (xr, yr, zr) = (x - xf as f64, y - yf as f64, z - zf as f64);
-    let pm = |i: i32| p[(i & 0xFF) as usize] as i32;
-    let (x0, y0, z0) = (xf, yf, zf);
-    let a = pm(x0);
-    let b = pm(x0 + 1);
-    let aa = pm(a + y0);
-    let ab = pm(a + y0 + 1);
-    let ba = pm(b + y0);
-    let bb = pm(b + y0 + 1);
-    let h = |hh: i32, dx: f64, dy: f64, dz: f64| grad_dot((hh & 0xFF) as u8, dx, dy, dz);
-    let d000 = h(pm(aa + z0), xr, yr, zr);
-    let d100 = h(pm(ba + z0), xr - 1.0, yr, zr);
-    let d010 = h(pm(ab + z0), xr, yr - 1.0, zr);
-    let d110 = h(pm(bb + z0), xr - 1.0, yr - 1.0, zr);
-    let d001 = h(pm(aa + z0 + 1), xr, yr, zr - 1.0);
-    let d101 = h(pm(ba + z0 + 1), xr - 1.0, yr, zr - 1.0);
-    let d011 = h(pm(ab + z0 + 1), xr, yr - 1.0, zr - 1.0);
-    let d111 = h(pm(bb + z0 + 1), xr - 1.0, yr - 1.0, zr - 1.0);
-    let (fx, fy, fz) = (fade(xr), fade(yr), fade(zr));
+    let xf = floor(x);
+    let yf = floor(y);
+    let zf = floor(z);
+    let xr = x - xf as f64;
+    let yr = y - yf as f64;
+    let zr = z - zf as f64;
+
+    let xi = (xf & 0xFF) as usize;
+    let yi = (yf & 0xFF) as usize;
+    let zi = (zf & 0xFF) as usize;
+
+    let x0 = p[xi] as usize;
+    let x1 = p[(xi + 1) & 0xFF] as usize;
+
+    let aa = p[(x0 + yi) & 0xFF] as usize;
+    let ab = p[(x0 + yi + 1) & 0xFF] as usize;
+    let ba = p[(x1 + yi) & 0xFF] as usize;
+    let bb = p[(x1 + yi + 1) & 0xFF] as usize;
+
+    let xr1 = xr - 1.0;
+    let yr1 = yr - 1.0;
+    let zr1 = zr - 1.0;
+
+    let d000 = grad_dot(p[(aa + zi) & 0xFF], xr, yr, zr);
+    let d100 = grad_dot(p[(ba + zi) & 0xFF], xr1, yr, zr);
+    let d010 = grad_dot(p[(ab + zi) & 0xFF], xr, yr1, zr);
+    let d110 = grad_dot(p[(bb + zi) & 0xFF], xr1, yr1, zr);
+    let d001 = grad_dot(p[(aa + zi + 1) & 0xFF], xr, yr, zr1);
+    let d101 = grad_dot(p[(ba + zi + 1) & 0xFF], xr1, yr, zr1);
+    let d011 = grad_dot(p[(ab + zi + 1) & 0xFF], xr, yr1, zr1);
+    let d111 = grad_dot(p[(bb + zi + 1) & 0xFF], xr1, yr1, zr1);
+
+    let fx = fade(xr);
+    let fy = fade(yr);
+    let fz = fade(zr);
+
     let x00 = lerp(fx, d000, d100);
     let x10 = lerp(fx, d010, d110);
     let x01 = lerp(fx, d001, d101);

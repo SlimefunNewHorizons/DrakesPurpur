@@ -37,7 +37,6 @@ fn lerp3(a1: f64, a2: f64, a3: f64, x000: f64, x100: f64, x010: f64, x110: f64, 
 #[inline] fn wrap(x: f64) -> f64 { x - floor_l(x / 3.3554432E7 + 0.5) as f64 * 3.3554432E7 }
 
 impl Improved {
-    #[inline] fn p(&self, i: i32) -> i32 { self.p[(i & 0xFF) as usize] as i32 }
     #[inline] fn grad(&self, hash: i32, x: f64, y: f64, z: f64) -> f64 { dot(&GRADIENT[(hash & 15) as usize], x, y, z) }
     fn noise(&self, ix: f64, iy: f64, iz: f64, y_scale: f64, y_fudge: f64) -> f64 {
         let x = ix + self.xo; let y = iy + self.yo; let z = iz + self.zo;
@@ -49,22 +48,33 @@ impl Improved {
         } else { 0.0 };
         self.sample(xf, yf, zf, xr, yr - yr_fudge, zr, yr)
     }
+    #[inline(always)]
     #[allow(clippy::too_many_arguments)]
     fn sample(&self, x: i32, y: i32, z: i32, xr: f64, yr: f64, zr: f64, yr_orig: f64) -> f64 {
-        let x0 = self.p(x);
-        let x1 = self.p(x.wrapping_add(1));
-        let xy00 = self.p(x0.wrapping_add(y));
-        let xy01 = self.p(x0.wrapping_add(y).wrapping_add(1));
-        let xy10 = self.p(x1.wrapping_add(y));
-        let xy11 = self.p(x1.wrapping_add(y).wrapping_add(1));
-        let d000 = self.grad(self.p(xy00.wrapping_add(z)), xr, yr, zr);
-        let d100 = self.grad(self.p(xy10.wrapping_add(z)), xr - 1.0, yr, zr);
-        let d010 = self.grad(self.p(xy01.wrapping_add(z)), xr, yr - 1.0, zr);
-        let d110 = self.grad(self.p(xy11.wrapping_add(z)), xr - 1.0, yr - 1.0, zr);
-        let d001 = self.grad(self.p(xy00.wrapping_add(z).wrapping_add(1)), xr, yr, zr - 1.0);
-        let d101 = self.grad(self.p(xy10.wrapping_add(z).wrapping_add(1)), xr - 1.0, yr, zr - 1.0);
-        let d011 = self.grad(self.p(xy01.wrapping_add(z).wrapping_add(1)), xr, yr - 1.0, zr - 1.0);
-        let d111 = self.grad(self.p(xy11.wrapping_add(z).wrapping_add(1)), xr - 1.0, yr - 1.0, zr - 1.0);
+        let xi = (x & 0xFF) as usize;
+        let yi = (y & 0xFF) as usize;
+        let zi = (z & 0xFF) as usize;
+
+        let x0 = self.p[xi] as usize;
+        let x1 = self.p[(xi + 1) & 0xFF] as usize;
+
+        let xy00 = self.p[(x0 + yi) & 0xFF] as usize;
+        let xy01 = self.p[(x0 + yi + 1) & 0xFF] as usize;
+        let xy10 = self.p[(x1 + yi) & 0xFF] as usize;
+        let xy11 = self.p[(x1 + yi + 1) & 0xFF] as usize;
+
+        let xr1 = xr - 1.0;
+        let yr1 = yr - 1.0;
+        let zr1 = zr - 1.0;
+
+        let d000 = self.grad(self.p[(xy00 + zi) & 0xFF] as i32, xr, yr, zr);
+        let d100 = self.grad(self.p[(xy10 + zi) & 0xFF] as i32, xr1, yr, zr);
+        let d010 = self.grad(self.p[(xy01 + zi) & 0xFF] as i32, xr, yr1, zr);
+        let d110 = self.grad(self.p[(xy11 + zi) & 0xFF] as i32, xr1, yr1, zr);
+        let d001 = self.grad(self.p[(xy00 + zi + 1) & 0xFF] as i32, xr, yr, zr1);
+        let d101 = self.grad(self.p[(xy10 + zi + 1) & 0xFF] as i32, xr1, yr, zr1);
+        let d011 = self.grad(self.p[(xy01 + zi + 1) & 0xFF] as i32, xr, yr1, zr1);
+        let d111 = self.grad(self.p[(xy11 + zi + 1) & 0xFF] as i32, xr1, yr1, zr1);
         let xa = smooth(xr); let ya = smooth(yr_orig); let za = smooth(zr);
         lerp3(xa, ya, za, d000, d100, d010, d110, d001, d101, d011, d111)
     }

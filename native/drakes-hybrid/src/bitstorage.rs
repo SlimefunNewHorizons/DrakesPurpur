@@ -12,20 +12,60 @@ pub fn long_count(bits: u32, count: usize) -> usize {
     count.div_ceil(vpl)
 }
 
+macro_rules! unrolled_pack {
+    ($vpl:literal, $bits:literal, $values:expr, $out:expr) => {{
+        let mask = (1u64 << $bits) - 1;
+        let chunks = $values.chunks_exact($vpl);
+        let rem = chunks.remainder();
+        let mut out_idx = 0;
+        for chunk in chunks {
+            let mut w = 0u64;
+            for i in 0..$vpl {
+                w |= ((chunk[i] as u64) & mask) << (i * $bits);
+            }
+            $out[out_idx] = w;
+            out_idx += 1;
+        }
+        if !rem.is_empty() {
+            let mut w = 0u64;
+            for (i, &v) in rem.iter().enumerate() {
+                w |= ((v as u64) & mask) << (i * $bits);
+            }
+            $out[out_idx] = w;
+        }
+    }};
+}
+
 pub fn pack(bits: u32, values: &[u32], out: &mut [u64]) -> i32 {
     let need = long_count(bits, values.len());
     if out.len() < need { return ERR_RANGE; }
-    let vpl = values_per_long(bits);
-    let mask: u64 = if bits == 32 { 0xFFFF_FFFF } else { (1u64 << bits) - 1 };
-    for (word, chunk) in out[..need].iter_mut().zip(values.chunks(vpl)) {
-        let mut w = 0u64;
-        let mut shift = 0u32;
-        for &v in chunk {
-            // Vanilla `SimpleBitStorage(bits, size, int[])` masks (`values[i] & mask`); it never rejects.
-            w |= ((v as u64) & mask) << shift;
-            shift += bits;
+    match bits {
+        4 => unrolled_pack!(16, 4, values, out),
+        5 => unrolled_pack!(12, 5, values, out),
+        6 => unrolled_pack!(10, 6, values, out),
+        7 => unrolled_pack!(9, 7, values, out),
+        8 => unrolled_pack!(8, 8, values, out),
+        9 => unrolled_pack!(7, 9, values, out),
+        10 => unrolled_pack!(6, 10, values, out),
+        11 => unrolled_pack!(5, 11, values, out),
+        12 => unrolled_pack!(5, 12, values, out),
+        13 => unrolled_pack!(4, 13, values, out),
+        14 => unrolled_pack!(4, 14, values, out),
+        15 => unrolled_pack!(4, 15, values, out),
+        16 => unrolled_pack!(4, 16, values, out),
+        _ => {
+            let vpl = values_per_long(bits);
+            let mask: u64 = if bits == 32 { 0xFFFF_FFFF } else { (1u64 << bits) - 1 };
+            for (word, chunk) in out[..need].iter_mut().zip(values.chunks(vpl)) {
+                let mut w = 0u64;
+                let mut shift = 0u32;
+                for &v in chunk {
+                    w |= ((v as u64) & mask) << shift;
+                    shift += bits;
+                }
+                *word = w;
+            }
         }
-        *word = w;
     }
     need as i32
 }
