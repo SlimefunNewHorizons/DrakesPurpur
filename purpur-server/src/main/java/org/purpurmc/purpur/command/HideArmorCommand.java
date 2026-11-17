@@ -31,10 +31,13 @@ public class HideArmorCommand {
         );
     }
 
+    // Estado por jugador. El filtrado visual de paquetes (ServerPlayer.hideArmor) no esta implementado aun: hoy solo se guarda el estado.
+    private static final java.util.Set<java.util.UUID> HIDDEN = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
     private static int execute(CommandSourceStack sender, Collection<ServerPlayer> targets) {
         for (ServerPlayer player : targets) {
-            boolean newState = !player.hideArmor();
-            player.hideArmor(newState);
+            boolean newState = !HIDDEN.contains(player.getUUID());
+            if (newState) HIDDEN.add(player.getUUID()); else HIDDEN.remove(player.getUUID());
 
             // Re-transmitir paquete de equipamiento a todos los jugadores que rastrean a este jugador y a sí mismo
             List<Pair<EquipmentSlot, ItemStack>> slots = Lists.newArrayList();
