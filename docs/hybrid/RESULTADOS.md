@@ -168,3 +168,24 @@ Entorno: WSL2 Ubuntu en Nexus (12 vCPU, JDK 25.0.5), jar publicado `v26.2.140-st
 **Veredicto: sin mejora demostrable de extremo a extremo.** La generacion con Rust ON no es mas rapida (39.1 vs 41.3 ms de media; la dispersion entre corridas, 33–61 ms, supera cualquier diferencia). El empaquetado nativo gana 1–14 % en el micro-paso de guardado, dentro del ruido y sobre ~0.3 ms de ~40 ms por chunk. Con 5 pares no se cumple el criterio 8 de `CRITERIOS_ESTABLE.md` (>= 10 corridas, IC 95 %), asi que `hybrid.engine.enabled` sigue en `false` por defecto. Donde Rust si gana es el micro-benchmark aislado (pack+unpack de 4096 valores, x4.4–6.3); el objetivo con ganancia potencial real sigue siendo el grafo de density functions/ruido (>50 % del coste de generacion).
 
 Nota de reproduccion: la compilacion local de la rama monolito en WSL falla en `paper-server` (`CraftEntity.java:123`, "method does not override"); este A/B se hizo con el jar publicado.
+
+---
+
+# Fase 5 — Prefetch multijugador (17-nov-2026)
+
+Cambio: el prefetch reparte el presupuesto en vuelo entre los jugadores que vuelan (cuota equitativa con desempate rotatorio), lo escala con el numero de voladores (`per-player-in-flight`) y se reduce/pausa con el MSPT (`throttle-mspt` 38, `pause-mspt` 46). Antes: un presupuesto global servido en orden de llegada. Test de logica pura: `tools/prefetch-test/`.
+
+Modelo de carga (`-Ddrakes.hybrid.selftest.multi=N`, N voladores a 24 b/s, radio 4, tope 24 chunks en vuelo, 2 corridas por politica en orden alterno, jar compilado de esta rama, WSL):
+
+| N | Politica | Retraso p95 | Peor jugador (media) |
+|---|---|---|---|
+| 4 | reactiva (sin prefetch) | 5734 ms | 4134 ms |
+| 4 | prefetch primero-que-llega | 5155 ms | 3750 ms |
+| 4 | prefetch equitativo | 5302 ms | 3700 ms |
+| 8 | reactiva | 15580 ms | 13476 ms |
+| 8 | prefetch primero-que-llega | 15567 ms | 13544 ms |
+| 8 | prefetch equitativo | 14251 ms | 12315 ms |
+
+**Veredicto: sin mejora demostrable.** Con N>=4 a 24 b/s la demanda supera la capacidad de generacion del servidor (el 100 % de las columnas llega tarde en todas las politicas) y el prefetch no crea capacidad: solo reordena. Las diferencias (hasta ~9 % a favor del equitativo con N=8) estan dentro de la dispersion entre corridas (2 por politica). El cuello de botella es el rendimiento de generacion (density functions/ruido, ver Fase 1), no la planificacion. Lo que si aporta el cambio es no dejar sin prefetch a jugadores por orden de lista y no competir con el tick bajo carga; esto ultimo no esta medido con jugadores reales.
+
+Nota: en la rama monolito, HEAD (`656aac2e0`) no compila: `HideArmorCommand` usa `ServerPlayer.hideArmor()` que no esta en ningun commit. Para estas pruebas se compilo un clon con el estado movido a un `Set<UUID>` en el comando (cambio no incluido aqui).

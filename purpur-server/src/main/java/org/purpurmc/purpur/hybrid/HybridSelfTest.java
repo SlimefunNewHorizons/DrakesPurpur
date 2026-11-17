@@ -238,6 +238,7 @@ public final class HybridSelfTest {
 
             // 7) Pipeline de chunks bajo un volador sintetico: lectura reactiva vs prefetch direccional
             flyerBench(out, srv);
+            multiFlyerBench(out);
 
             // 8) Comandos /drakes hybrid y GUI con datos reales (con el estado CONFIGURADO, no el que dejo el autotest)
             HybridNative.forceBits(initialBits);
@@ -486,6 +487,110 @@ public final class HybridSelfTest {
         double[] a = late.stream().mapToDouble(Double::doubleValue).sorted().toArray();
         double p50 = a.length == 0 ? 0 : a[a.length / 2], p95 = a.length == 0 ? 0 : a[Math.min(a.length - 1, (int) (a.length * 0.95))];
         return new double[] {stable, tarde, p50, p95, a.length == 0 ? 0 : a[a.length - 1], chunks, (System.nanoTime() - t0) / 1e9};
+    }
+
+
+    // ---- 7b) varios voladores a la vez (modelo de carga multijugador) -------------------------------------
+    /**
+     * N voladores (uno por carril) avanzan a la vez a {@code speed} b/s. Politicas: 0 = reactiva (solo R columnas por
+     * delante, sin prefetch), 1 = prefetch con tope global de chunks en vuelo y primero-que-llega (comportamiento antiguo),
+     * 2 = prefetch con el mismo tope pero cuota equitativa por jugador ({@link HybridChunkPrefetch#quotas}).
+     * Mide el retraso de las columnas y, sobre todo, el PEOR jugador (equidad). Modelo de carga sobre el sistema real de
+     * chunks (getChunkAtAsync); no es un cliente real. Se activa con -Ddrakes.hybrid.selftest.multi=N.
+     */
+    private static void multiFlyerBench(StringBuilder out) {
+        int n = Integer.getInteger("drakes.hybrid.selftest.multi", 0);
+        if (n <= 0) return;
+        try {
+            org.bukkit.World w = org.bukkit.Bukkit.getWorlds().get(0);
+            final int R = 4, cols = Integer.getInteger("drakes.hybrid.selftest.multi.cols", 24), lead = 4;
+            final double speed = Double.parseDouble(System.getProperty("drakes.hybrid.selftest.multi.speed", "24"));
+            final int cap = Integer.getInteger("drakes.hybrid.selftest.multi.cap", 24);
+            final String[] names = {"reactiva", "prefetch-FCFS", "prefetch-equitativo"};
+            int[] order = {0, 1, 2, 2, 1, 0};
+            java.util.Map<Integer, List<double[]>> res = new java.util.LinkedHashMap<>();
+            for (int run = 0; run < order.length; run++) {
+                int m = order[run];
+                double[] r = multiRun(w, n, R, cols, lead, speed, cap, m, 30000 + run * 400);
+                res.computeIfAbsent(m, k -> new ArrayList<>()).add(r);
+                line(out, String.format("  multi N=%d %.0f b/s corrida %d (%s): tarde=%.0f%% lateness medio-por-jugador p95=%.0f ms, PEOR jugador (media) = %.0f ms, total=%.1f s",
+                    n, speed, run + 1, names[m], r[0], r[1], r[2], r[3]));
+            }
+            for (var e : res.entrySet()) {
+                double late = 0, p95 = 0, worst = 0;
+                for (double[] r : e.getValue()) { late += r[0]; p95 += r[1]; worst += r[2]; }
+                int k = e.getValue().size();
+                line(out, String.format("[multi] N=%d %.0f b/s tope=%d %s: %d corridas -> %.0f%% tarde, p95 %.0f ms, peor jugador %.0f ms",
+                    n, speed, cap, names[e.getKey()], k, late / k, p95 / k, worst / k));
+            }
+            line(out, "[multi] modelo de CARGA (no cliente real); corredores distintos por corrida: lectura solo comparando medias de ordenes alternados.");
+        } catch (Throwable t) {
+            line(out, "[multi] ERROR: " + t);
+            LOG.log(Level.WARNING, "multi", t);
+        }
+    }
+
+    /** @return {pct_tarde, p95_ms_de_todas, peor_jugador_medio_ms, total_s} */
+    private static double[] multiRun(org.bukkit.World w, int n, int R, int cols, int lead, double speed, int cap, int policy, int cx0) throws Exception {
+        final double secPerCol = 16.0 / speed;
+        final long t0 = System.nanoTime();
+        final int width = 2 * R + 1;
+        final long[][] doneAt = new long[n][cols];
+        final int[] requestedUpTo = new int[n];
+        Arrays.fill(requestedUpTo, -1);
+        final java.util.concurrent.atomic.AtomicInteger inFlight = new java.util.concurrent.atomic.AtomicInteger();
+        final List<CompletableFuture<?>> all = new ArrayList<>();
+        int rot = 0;
+        while (true) {
+            double t = (System.nanoTime() - t0) / 1e9;
+            int posCol = (int) (t / secPerCol);
+            int[] quota = HybridChunkPrefetch.quotas(Math.max(0, cap - inFlight.get()), n, rot++);
+            for (int k = 0; k < n; k++) {
+                int pl = (policy == 1) ? k : Math.floorMod(k + rot, n);   // FCFS: siempre el mismo orden de servicio
+                int mustWant = Math.min(cols - 1, posCol + R);
+                int want = policy == 0 ? mustWant : Math.min(cols - 1, posCol + R + lead);
+                int budgetCols = policy == 2 ? Math.max(0, quota[pl] / width) : Integer.MAX_VALUE;
+                int used = 0;
+                while (requestedUpTo[pl] < want) {
+                    boolean required = requestedUpTo[pl] + 1 <= mustWant;
+                    if (!required) {
+                        if (policy == 0) break;
+                        if (inFlight.get() + width > cap) break;         // tope global
+                        if (policy == 2 && used >= budgetCols) break;      // cuota propia
+                        used++;
+                    }
+                    requestedUpTo[pl]++;
+                    final int c = requestedUpTo[pl], who = pl;
+                    for (int dz = -R; dz <= R; dz++) {
+                        inFlight.incrementAndGet();
+                        all.add(w.getChunkAtAsync(cx0 + c, 6000 + pl * 40 + dz, true, required).whenComplete((ch, err) -> {
+                            inFlight.decrementAndGet();
+                            long now = System.nanoTime() - t0;
+                            synchronized (doneAt) { if (now > doneAt[who][c]) doneAt[who][c] = now; }
+                        }));
+                    }
+                }
+            }
+            if (posCol >= cols) break;
+            Thread.sleep(15);
+        }
+        for (var f : all) f.get(300, java.util.concurrent.TimeUnit.SECONDS);
+        List<Double> lates = new ArrayList<>();
+        int tarde = 0, count = 0;
+        double worst = 0;
+        for (int pl = 0; pl < n; pl++) {
+            double sum = 0; int cn = 0;
+            for (int c = R + 2; c < cols; c++) {
+                double need = (c - (R - 2)) * secPerCol * 1e9;
+                double l = Math.max(0, doneAt[pl][c] - need) / 1e6;
+                lates.add(l); sum += l; cn++; count++;
+                if (l > 0) tarde++;
+            }
+            worst = Math.max(worst, cn == 0 ? 0 : sum / cn);
+        }
+        double[] a = lates.stream().mapToDouble(Double::doubleValue).sorted().toArray();
+        double p95 = a.length == 0 ? 0 : a[Math.min(a.length - 1, (int) (a.length * 0.95))];
+        return new double[] {100.0 * tarde / Math.max(1, count), p95, worst, (System.nanoTime() - t0) / 1e9};
     }
 
     // ---- 8) comandos y GUI ---------------------------------------------------------------------------------
