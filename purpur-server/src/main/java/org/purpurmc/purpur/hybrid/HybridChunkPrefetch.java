@@ -37,13 +37,18 @@ public final class HybridChunkPrefetch {
     private static volatile int maxInFlight = 32;
     private static volatile int maxUrgentInFlight = 6;  // presupuesto maximo de promociones urgentes en el borde de vision
     private static volatile long intervalMs = 150;
+    private static volatile int perPlayerInFlight = 6;      // presupuesto por jugador en vuelo rapido (multijugador)
+    private static volatile double throttleMspt = 38.0;     // por encima: mitad de presupuesto
+    private static volatile double pauseMspt = 46.0;        // por encima: sin prefetch (el tick manda)
+    private static int rotation;                            // rota el desempate entre jugadores (solo hilo principal)
     private static final long TICKET_TTL_TICKS = 120L;  // 6 s de retencion de ticket para evitar descarga prematura
     private static ScheduledExecutorService ex;
 
     public static final LongAdder REQUESTED = new LongAdder(), PROMOTED = new LongAdder(),
         SKIPPED_LOADED = new LongAdder(), SKIPPED_PENDING = new LongAdder(),
-        DROPPED_BUDGET = new LongAdder(), COMPLETED = new LongAdder(), FAILED = new LongAdder(),
+        DROPPED_BUDGET = new LongAdder(), DEFERRED_LOAD = new LongAdder(), COMPLETED = new LongAdder(), FAILED = new LongAdder(),
         LATENCY_NANOS = new LongAdder(), TICKETS_RETAINED = new LongAdder();
+    private static volatile int lastFlyers;
     private static final AtomicInteger IN_FLIGHT = new AtomicInteger();
     private static final AtomicInteger URGENT_IN_FLIGHT = new AtomicInteger();
     private static final AtomicInteger HELD_TICKETS = new AtomicInteger();
@@ -77,11 +82,40 @@ public final class HybridChunkPrefetch {
     }
 
     public static String describe() {
-        return String.format("enabled=%s min-speed=%.0f b/s lead=%.1fs lookahead=%d anchura=%d en-vuelo=%d/%d urgentes=%d/%d tickets-ttl=%d | solicitados=%d promovidos=%d completados=%d retenidos=%d fallidos=%d omitidos(cargado)=%d omitidos(duplicado)=%d descartados(presupuesto)=%d latencia-media=%.1f ms",
+        return String.format("enabled=%s min-speed=%.0f b/s lead=%.1fs lookahead=%d anchura=%d en-vuelo=%d/%d urgentes=%d/%d tickets-ttl=%d | solicitados=%d promovidos=%d completados=%d retenidos=%d fallidos=%d omitidos(cargado)=%d omitidos(duplicado)=%d descartados(presupuesto)=%d latencia-media=%.1f ms | volando=%d presupuesto-efectivo=%d aplazados(MSPT)=%d",
             enabled, minSpeed, leadSeconds, maxLookahead, halfWidth * 2 + 1, IN_FLIGHT.get(), maxInFlight, URGENT_IN_FLIGHT.get(), maxUrgentInFlight, HELD_TICKETS.get(),
             REQUESTED.sum(), PROMOTED.sum(), COMPLETED.sum(), TICKETS_RETAINED.sum(),
             FAILED.sum(), SKIPPED_LOADED.sum(), SKIPPED_PENDING.sum(), DROPPED_BUDGET.sum(),
-            COMPLETED.sum() == 0 ? 0.0 : LATENCY_NANOS.sum() / 1e6 / COMPLETED.sum());
+            COMPLETED.sum() == 0 ? 0.0 : LATENCY_NANOS.sum() / 1e6 / COMPLETED.sum(),
+            lastFlyers, effectiveMax(lastFlyers), DEFERRED_LOAD.sum());
+    }
+
+    /** Presupuesto global en vuelo segun cuantos jugadores vuelan: perPlayer*n acotado a [min(6,max), maxInFlight]. */
+    static int effectiveMax(int flyers) {
+        return Math.min(maxInFlight, Math.max(Math.min(6, maxInFlight), perPlayerInFlight * Math.max(1, flyers)));
+    }
+
+    /** Reparte {@code free} solicitudes entre {@code n} jugadores de forma equitativa; el resto rota con {@code rot}. */
+    static int[] quotas(int free, int n, int rot) {
+        int[] q = new int[n];
+        if (n == 0 || free <= 0) return q;
+        int base = free / n, rem = free % n;
+        for (int i = 0; i < n; i++) q[i] = base;
+        for (int i = 0; i < rem; i++) q[Math.floorMod(rot + i, n)]++;
+        return q;
+    }
+
+    /** Factor de carga segun MSPT medio: 1 normal, 0.5 bajo carga, 0 si el tick ya va justo. */
+    static double loadFactor(double mspt) {
+        if (mspt >= pauseMspt) return 0.0;
+        if (mspt >= throttleMspt) return 0.5;
+        return 1.0;
+    }
+
+    public static synchronized void tune(int perPlayer, double throttle, double pause) {
+        perPlayerInFlight = Math.max(1, perPlayer);
+        throttleMspt = throttle;
+        pauseMspt = Math.max(throttle, pause);
     }
 
     public static synchronized void configure(boolean on, double minSpeedBps, double lead, int lookahead, int width, int inFlightMax, long periodMs) {
@@ -121,10 +155,16 @@ public final class HybridChunkPrefetch {
         }
     }
 
-    /** Hilo principal: lee posiciones, estima rumbo y solicita (async) los chunks por delante con promocion en el borde. */
+    private record Flyer(World w, State st, double speed) {}
+
+    /**
+     * Hilo principal: actualiza velocidades; los jugadores en vuelo rapido se reparten el presupuesto global de forma
+     * equitativa (cuota por jugador, desempate rotatorio) y el total se reduce o se pausa segun el MSPT del servidor.
+     */
     private static void tick() {
         if (!enabled) return;
         long now = System.nanoTime();
+        var flyers = new java.util.ArrayList<Flyer>();
         for (Player p : Bukkit.getOnlinePlayers()) {
             Location l = p.getLocation();
             World w = l.getWorld();
@@ -145,23 +185,18 @@ public final class HybridChunkPrefetch {
             st.z = l.getZ();
             st.t = now;
             double speed = Math.hypot(st.vx, st.vz);
-            if (speed < minSpeed || speed > 400) continue; // 400 b/s: salto/teletransporte, no desplazamiento
-            double ux = st.vx / speed, uz = st.vz / speed;
-            int viewR = w.getViewDistance();
-            int look = Math.min(maxLookahead, (int) Math.ceil(speed * leadSeconds / 16.0));
-            for (int step = viewR + 1; step <= viewR + look; step++) {
-                boolean boundaryUrgent = (step == viewR + 1);
-                for (int off = -halfWidth; off <= halfWidth; off++) {
-                    double px = st.x + ux * step * 16 - uz * off * 16;
-                    double pz = st.z + uz * step * 16 + ux * off * 16;
-                    int cx = (int) Math.floor(px / 16.0);
-                    int cz = (int) Math.floor(pz / 16.0);
-                    if (boundaryUrgent && Math.abs(off) <= 1) {
-                        requestOrPromote(w, cx, cz);
-                    } else {
-                        request(w, cx, cz);
-                    }
-                }
+            if (speed >= minSpeed && speed <= 400) flyers.add(new Flyer(w, st, speed)); // 400 b/s: teletransporte
+        }
+        lastFlyers = flyers.size();
+        if (!flyers.isEmpty()) {
+            double f = loadFactor(Bukkit.getAverageTickTime());
+            int cap = (int) Math.floor(effectiveMax(flyers.size()) * f);
+            int free = cap - IN_FLIGHT.get();
+            if (f == 0.0 || free <= 0) {
+                if (f < 1.0) DEFERRED_LOAD.increment();
+            } else {
+                int[] quota = quotas(free, flyers.size(), rotation++);
+                for (int i = 0; i < flyers.size(); i++) planFor(flyers.get(i), quota[i], cap);
             }
         }
         if (STATES.size() > 4 * Math.max(1, Bukkit.getOnlinePlayers().size())) {
@@ -171,14 +206,36 @@ public final class HybridChunkPrefetch {
         }
     }
 
+    /** Solicita hasta {@code quota} chunks nuevos por delante de un jugador, del borde hacia fuera y del eje al lado. */
+    private static void planFor(Flyer fl, int quota, int cap) {
+        World w = fl.w();
+        State st = fl.st();
+        double ux = st.vx / fl.speed(), uz = st.vz / fl.speed();
+        int viewR = w.getViewDistance();
+        int look = Math.min(maxLookahead, (int) Math.ceil(fl.speed() * leadSeconds / 16.0));
+        int used = 0;
+        for (int step = viewR + 1; step <= viewR + look && used < quota; step++) {
+            boolean boundaryUrgent = (step == viewR + 1);
+            for (int k = 0; k <= 2 * halfWidth && used < quota; k++) {
+                int off = (k % 2 == 0) ? k / 2 : -(k + 1) / 2;   // 0, -1, 1, -2, 2...: eje central primero
+                double px = st.x + ux * step * 16 - uz * off * 16;
+                double pz = st.z + uz * step * 16 + ux * off * 16;
+                int cx = (int) Math.floor(px / 16.0);
+                int cz = (int) Math.floor(pz / 16.0);
+                boolean issued = (boundaryUrgent && Math.abs(off) <= 1) ? requestOrPromote(w, cx, cz, cap) : request(w, cx, cz, cap);
+                if (issued) used++;
+            }
+        }
+    }
+
     /**
      * Solicita o promueve a urgente un chunk en el borde inmediato del radio de vision ({@code step == viewR + 1},
      * eje central del rumbo), respetando {@code maxUrgentInFlight} para no saturar la cola urgente de Moonrise.
      */
-    static void requestOrPromote(World w, int cx, int cz) {
+    static boolean requestOrPromote(World w, int cx, int cz, int cap) {
         if (w.isChunkLoaded(cx, cz)) {
             SKIPPED_LOADED.increment();
-            return;
+            return false;
         }
         Key key = new Key(w.getUID(), cx, cz);
         if (PENDING.contains(key) && URGENT_IN_FLIGHT.get() < maxUrgentInFlight && PROMOTED_KEYS.add(key)) {
@@ -193,25 +250,25 @@ public final class HybridChunkPrefetch {
                     retainTicketBriefly(w, cx, cz);
                 }
             });
-            return;
+            return true;
         }
-        request(w, cx, cz);
+        return request(w, cx, cz, cap);
     }
 
-    static void request(World w, int cx, int cz) {
+    static boolean request(World w, int cx, int cz, int cap) {
         if (w.isChunkLoaded(cx, cz)) {
             SKIPPED_LOADED.increment();
-            return;
+            return false;
         }
         Key key = new Key(w.getUID(), cx, cz);
         if (!PENDING.add(key)) {
             SKIPPED_PENDING.increment();
-            return;
+            return false;
         }
-        if (IN_FLIGHT.get() >= maxInFlight) {
+        if (IN_FLIGHT.get() >= cap) {
             PENDING.remove(key);
             DROPPED_BUDGET.increment();
-            return;
+            return false;
         }
         IN_FLIGHT.incrementAndGet();
         REQUESTED.increment();
@@ -227,6 +284,7 @@ public final class HybridChunkPrefetch {
                 FAILED.increment();
             }
         });
+        return true;
     }
 
     /**

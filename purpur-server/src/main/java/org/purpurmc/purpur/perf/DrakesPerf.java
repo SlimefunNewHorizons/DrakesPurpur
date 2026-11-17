@@ -92,6 +92,9 @@ public final class DrakesPerf {
               max-lookahead-chunks: 8
               half-width-chunks: 2
               max-in-flight: 24      # presupuesto de solicitudes simultaneas
+      per-player-in-flight: 6   # multijugador: presupuesto efectivo = esto x jugadores en vuelo (tope max-in-flight), repartido a partes iguales
+      throttle-mspt: 38.0    # MSPT medio desde el que se usa la mitad del presupuesto
+      pause-mspt: 46.0       # MSPT medio desde el que se pausa el prefetch (el tick manda)
               interval-ms: 250
         # Copia de seguridad 7z: no compite con el tick ni con la red.
         backup:
@@ -194,6 +197,8 @@ public final class DrakesPerf {
                 cfg.getDouble("native.hybrid.prefetch.min-speed", 20.0), cfg.getDouble("native.hybrid.prefetch.lead-seconds", 3.0),
                 cfg.getInt("native.hybrid.prefetch.max-lookahead-chunks", 8), cfg.getInt("native.hybrid.prefetch.half-width-chunks", 2),
                 cfg.getInt("native.hybrid.prefetch.max-in-flight", 24), cfg.getLong("native.hybrid.prefetch.interval-ms", 250));
+            org.purpurmc.purpur.hybrid.HybridChunkPrefetch.tune(cfg.getInt("native.hybrid.prefetch.per-player-in-flight", 6),
+                cfg.getDouble("native.hybrid.prefetch.throttle-mspt", 38.0), cfg.getDouble("native.hybrid.prefetch.pause-mspt", 46.0));
             org.purpurmc.purpur.hybrid.HybridSelfTest.maybeStart(); // solo con -Ddrakes.hybrid.selftest=<radio>
         } catch (Throwable t) {
             LOGGER.log(Level.WARNING, "[Hybrid] init fallo (" + t + "); todo en Java.");
