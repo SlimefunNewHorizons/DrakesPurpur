@@ -18,7 +18,7 @@
 
 > **Un solo producto, un solo proceso, una sola autoridad del mundo.** Rust no es un servidor aparte: es una biblioteca nativa que va **dentro del JAR**, se extrae por plataforma, se verifica por SHA-256 y se carga sola; si falta o falla, todo sigue en Java.
 >
-> **Estado honesto.** Esta rama (`experimental/horizon-rust-hybrid-engine`, PR #1, borrador) integra un puente Java↔Rust real y comprobado, pero **ninguna aceleracion nativa ha demostrado hoy una mejora de rendimiento** frente a Java. Todo lo experimental esta **apagado por defecto**. No esta lista para produccion. Ver [Benchmarks verificados](#benchmarks-verificados) y [Limitaciones](#limitaciones).
+> **Estado honesto.** La rama principal es `feat/slimefun-native-engine` (monolito; la linea modular es `ver/26.2`). El puente Java↔Rust esta activo en el servidor de produccion (DrakesCraft) con fallback a Java, pero en los A/B de 17-nov-2026 (WSL, 5 pares, generacion de chunks y prefetch multijugador) **no hay mejora medible de extremo a extremo**; el micro-benchmark aislado de empaquetado si gana (x4-6). Detalle y cifras en [`docs/hybrid/RESULTADOS.md`](docs/hybrid/RESULTADOS.md). Integra un puente Java↔Rust real y comprobado, pero **ninguna aceleracion nativa ha demostrado hoy una mejora de rendimiento** frente a Java. Los interruptores `native.hybrid.*` estan apagados por defecto en el repo. Ver [Benchmarks verificados](#benchmarks-verificados) y [Limitaciones](#limitaciones).
 > El README del monolito de produccion se conserva integro en [`docs/README_MONOLITO.md`](docs/README_MONOLITO.md).
 
 El backport de generacion sculk [MC-307918](docs/MC-307918.md) se porta desde
@@ -94,7 +94,7 @@ JDK 25 · Linux x86_64 (unica plataforma nativa construida y probada) · `cargo`
 
 ```bash
 git clone https://github.com/SlimefunNewHorizons/DrakesPurpur && cd DrakesPurpur
-git checkout experimental/horizon-rust-hybrid-engine
+git checkout feat/slimefun-native-engine
 git config user.name "tu-nombre" && git config user.email "tu@correo"
 ./gradlew applyAllPatches
 ./gradlew createPaperclipJar            # purpur-server/build/libs/*paperclip*.jar
