@@ -221,3 +221,13 @@ Lectura:
 4. Caveat: 10 hilos comparten CPU con el propio generador de carga; en Dallas (8 CPUs, servidor ocioso) el valor razonable es 5-6 (hilo principal y Netty usan el resto). Modelo de carga, no jugadores reales.
 
 Recomendacion para Dallas (aplicar tras la apertura, con `reinicio_seguro.py` y rollback): `chunk-system.worker-threads: 6` en `config/paper-global.yml` y `native.hybrid.prefetch.enabled: true`.
+
+---
+
+# Fase 8 — Gobernador adaptativo de hilos de chunks (17-nov-2026)
+
+`ChunkThreadGovernor` (`threads.chunk-gen.*` en `perf.yml`, apagado por defecto): mueve en caliente el tope del pool de trabajo de Moonrise (`WORKER_POOL.adjustThreadCount`) entre `min-threads` y `max-threads` (0 = CPUs detectadas - `reserve-cores`). Sube de uno en uno con el servidor sano; baja un hilo por paso si el MSPT >= `shrink-mspt` o la CPU del sistema >= `shrink-cpu`, y de golpe al minimo si MSPT >= `hard-mspt`. Los `reserve-cores` quedan libres para el hilo principal, Netty, Slimefun/async, base de datos y respaldos. Estado en `/drakes hybrid workers`.
+
+- Logica de decision (puro, sin servidor): `tools/prefetch-test/.../ChunkThreadGovernorTest.java`, incluye simulacion de 200 s con carga y recuperacion (baja a 2 y vuelve a 6 sin oscilar).
+- En vivo (Nexus, `max-threads: 6`): arranca en 6; con el tick cargado baja a 2 y se recupera un hilo cada 4 s (`6 -> 2 -> 3 -> 4`); forzado con umbrales bajos se queda en 2 (comprobado).
+- Banco multijugador, 4 voladores, 2 repeticiones (la generacion sincrona del propio autotest dispara el MSPT al inicio y el gobernador reduce de forma legitima): gobernador ON 70-85 % tarde (p95 4.5 s) y prefetch equitativo 25-31 % (p95 0.9-1.1 s); gobernador OFF (3 hilos por defecto en 12 CPUs) 100 % tarde (p95 5.4-5.9 s). Con 6 hilos fijos (Fase 7) el resultado fue mejor (11-15 %, p95 0.3-0.5 s) porque no hay rampa. Conclusion: el gobernador conserva casi toda la ganancia y reduce hilos cuando el tick sufre; el coste es la rampa de recuperacion.

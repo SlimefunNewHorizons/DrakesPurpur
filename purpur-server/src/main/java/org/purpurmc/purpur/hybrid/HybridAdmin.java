@@ -159,6 +159,7 @@ public final class HybridAdmin {
         }
         for (var e : fam.entrySet()) line(s, e.getKey(), "total=" + e.getValue()[0] + " ejecutando=" + e.getValue()[1] + " en espera=" + e.getValue()[2]);
         line(s, "Prefetch en vuelo", HybridChunkPrefetch.inFlight() + " solicitudes");
+        line(s, "Hilos de chunks", ChunkThreadGovernor.describe());
         line(s, "CPU del proceso", cpu());
     }
 

@@ -96,6 +96,23 @@ public final class DrakesPerf {
       throttle-mspt: 38.0    # MSPT medio desde el que se usa la mitad del presupuesto
       pause-mspt: 46.0       # MSPT medio desde el que se pausa el prefetch (el tick manda)
               interval-ms: 250
+        # Hilos de generacion/carga de chunks (pool de trabajo de Moonrise) con gobernador adaptativo.
+        # Paper deja por defecto nucleos/4 hilos (2 en 8 CPUs) y no los cambia. Con enabled=true el tope se mueve en caliente
+        # entre min y max: sube cuando el servidor esta sano (varios jugadores explorando) y baja un hilo por paso cuando el
+        # MSPT o la CPU del sistema pasan los umbrales (de golpe al minimo si el tick esta en peligro).
+        # max-threads: 0 = automatico = CPUs detectadas - reserve-cores. Los reserve-cores quedan libres para el hilo principal,
+        # Netty, Slimefun/async, base de datos y respaldos. Mide antes de subirlo: docs/hybrid/RESULTADOS.md (Fase 7 y 8).
+        threads:
+          chunk-gen:
+            enabled: false
+            min-threads: 2
+            max-threads: 0
+            reserve-cores: 2
+            shrink-mspt: 38.0      # MSPT medio desde el que se baja un hilo por paso
+            hard-mspt: 46.0        # desde aqui se baja directamente al minimo
+            shrink-cpu: 0.88       # CPU total del sistema (0-1) desde la que se baja; hard = +0.07
+            grow-seconds: 4        # espera entre subidas (de un hilo en un hilo)
+            shrink-seconds: 1      # espera entre bajadas
         # Copia de seguridad 7z: no compite con el tick ni con la red.
         backup:
           throttle: true           # nice 19 + ionice idle + hilos limitados
@@ -199,6 +216,11 @@ public final class DrakesPerf {
                 cfg.getInt("native.hybrid.prefetch.max-in-flight", 24), cfg.getLong("native.hybrid.prefetch.interval-ms", 250));
             org.purpurmc.purpur.hybrid.HybridChunkPrefetch.tune(cfg.getInt("native.hybrid.prefetch.per-player-in-flight", 6),
                 cfg.getDouble("native.hybrid.prefetch.throttle-mspt", 38.0), cfg.getDouble("native.hybrid.prefetch.pause-mspt", 46.0));
+            org.purpurmc.purpur.hybrid.ChunkThreadGovernor.configure(cfg.getBoolean("threads.chunk-gen.enabled", false),
+                cfg.getInt("threads.chunk-gen.min-threads", 2), cfg.getInt("threads.chunk-gen.max-threads", 0),
+                cfg.getInt("threads.chunk-gen.reserve-cores", 2), cfg.getDouble("threads.chunk-gen.shrink-mspt", 38.0),
+                cfg.getDouble("threads.chunk-gen.hard-mspt", 46.0), cfg.getDouble("threads.chunk-gen.shrink-cpu", 0.88),
+                cfg.getLong("threads.chunk-gen.grow-seconds", 4), cfg.getLong("threads.chunk-gen.shrink-seconds", 1));
             org.purpurmc.purpur.hybrid.HybridSelfTest.maybeStart(); // solo con -Ddrakes.hybrid.selftest=<radio>
         } catch (Throwable t) {
             LOGGER.log(Level.WARNING, "[Hybrid] init fallo (" + t + "); todo en Java.");
