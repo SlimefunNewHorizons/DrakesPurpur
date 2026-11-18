@@ -189,3 +189,13 @@ Modelo de carga (`-Ddrakes.hybrid.selftest.multi=N`, N voladores a 24 b/s, radio
 **Veredicto: sin mejora demostrable.** Con N>=4 a 24 b/s la demanda supera la capacidad de generacion del servidor (el 100 % de las columnas llega tarde en todas las politicas) y el prefetch no crea capacidad: solo reordena. Las diferencias (hasta ~9 % a favor del equitativo con N=8) estan dentro de la dispersion entre corridas (2 por politica). El cuello de botella es el rendimiento de generacion (density functions/ruido, ver Fase 1), no la planificacion. Lo que si aporta el cambio es no dejar sin prefetch a jugadores por orden de lista y no competir con el tick bajo carga; esto ultimo no esta medido con jugadores reales.
 
 Nota: en la rama monolito, HEAD (`656aac2e0`) no compila: `HideArmorCommand` usa `ServerPlayer.hideArmor()` que no esta en ningun commit. Para estas pruebas se compilo un clon con el estado movido a un `Set<UUID>` en el comando (cambio no incluido aqui).
+
+---
+
+# Fase 6 — Techo de ganancia de portar `final_density` a Rust (17-nov-2026)
+
+Antes de escribir el port (grafo de density functions evaluado por lotes en Rust) se midio cuanto cuesta hoy lo que ese port reemplazaria: `NoiseChunk.fillSlice` (relleno de los interpoladores, donde se evalua el grafo en las esquinas de celda). Instrumentacion temporal en un clon (no incluida), jar compilado de esta rama, WSL, semilla 12345, radio 8.
+
+- Coste por llamada a `fillSlice` (5 por chunk): ~0.2-0.3 ms en regimen estable, ~0.57 ms medio incluyendo calentamiento de JIT -> **~1.3-2.9 ms por chunk de ~36 ms (4-8 %)**.
+- Con Rust 2x mas rapido en esa parte (optimista) el chunk bajaria **~2-4 %**, por debajo del ruido entre corridas (12-23 %). **No se implementa**: no habria forma de demostrarlo.
+- El resto del 53 % de "ruido/density" del perfil JFR se gasta **por bloque**, no por esquina de celda: interpolacion trilineal (`updateForX/Y/Z`, ~98 000 bloques por chunk), `Aquifer.computeSubstance`, reglas de material y vetas. Un port con ganancia real tendria que ser el bucle completo de relleno (`NoiseBasedChunkGenerator.doFill`), no el grafo de densidad.
