@@ -199,3 +199,25 @@ Antes de escribir el port (grafo de density functions evaluado por lotes en Rust
 - Coste por llamada a `fillSlice` (5 por chunk): ~0.2-0.3 ms en regimen estable, ~0.57 ms medio incluyendo calentamiento de JIT -> **~1.3-2.9 ms por chunk de ~36 ms (4-8 %)**.
 - Con Rust 2x mas rapido en esa parte (optimista) el chunk bajaria **~2-4 %**, por debajo del ruido entre corridas (12-23 %). **No se implementa**: no habria forma de demostrarlo.
 - El resto del 53 % de "ruido/density" del perfil JFR se gasta **por bloque**, no por esquina de celda: interpolacion trilineal (`updateForX/Y/Z`, ~98 000 bloques por chunk), `Aquifer.computeSubstance`, reglas de material y vetas. Un port con ganancia real tendria que ser el bucle completo de relleno (`NoiseBasedChunkGenerator.doFill`), no el grafo de densidad.
+
+---
+
+# Fase 7 — Hilos del chunk system (17-nov-2026): la mejora real
+
+Dallas (consulta de solo lectura, 17-nov): 8 CPUs visibles, proceso al 1 % y sistema al 2 %, `chunk-system.worker-threads: -1` (automatico) -> **2 hilos** de generacion (`/drakes hybrid workers`), `player-max-chunk-generate-rate: -1`.
+
+Banco multijugador (4 voladores a 24 b/s, radio 4, tope 24 en vuelo, jar de esta rama, Nexus Ryzen 5 5500 de 12 hilos, banco y servidor en la misma maquina; 2 repeticiones por valor, 2 corridas por politica en cada una):
+
+| worker-threads | Reactiva (sin prefetch): tarde / p95 / peor jugador | Prefetch equitativo: tarde / p95 / peor jugador |
+|---|---|---|
+| 2 | 100 % / 12 217 y 11 349 ms / 10 108 y 9 123 ms | 100 % / 10 771 y 9 941 ms / 8 968 y 8 235 ms |
+| 6 | 40 y 36 % / 1 543 y 1 434 ms / 429 y 428 ms | 11 y 15 % / 317 y 474 ms / 62 y 106 ms |
+| 10 | 21 y 20 % / 869 y 775 ms / 159 y 141 ms | 6 y 5 % / 205 y 70 ms / 21 y 23 ms |
+
+Lectura:
+1. **2 -> 6 hilos reduce el retraso p95 unas 8 veces** (reactiva) y el peor jugador unas 23 veces; las dos repeticiones coinciden. Es mucho mayor que cualquier efecto de Rust.
+2. **Con capacidad disponible el prefetch si ayuda**: a 6 hilos baja el p95 de ~1.5 s a ~0.4 s; a 10, de ~0.8 s a ~0.14 s. Con 2 hilos (saturado) no ayuda, como en la Fase 5.
+3. La generacion sincrona por chunk (media ~50 ms) no cambia con los hilos: la ganancia es de **paralelismo**, no de velocidad por chunk.
+4. Caveat: 10 hilos comparten CPU con el propio generador de carga; en Dallas (8 CPUs, servidor ocioso) el valor razonable es 5-6 (hilo principal y Netty usan el resto). Modelo de carga, no jugadores reales.
+
+Recomendacion para Dallas (aplicar tras la apertura, con `reinicio_seguro.py` y rollback): `chunk-system.worker-threads: 6` en `config/paper-global.yml` y `native.hybrid.prefetch.enabled: true`.
