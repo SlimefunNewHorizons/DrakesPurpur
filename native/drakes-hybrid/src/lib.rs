@@ -22,6 +22,9 @@ pub mod aabb;
 pub mod anvil_async;
 pub mod compress;
 pub mod energy_net;
+pub mod block_collision_scan;
+pub mod inventory_tick;
+pub mod piston_movement;
 
 pub const ABI_VERSION: i32 = 1;
 
@@ -310,5 +313,124 @@ mod hybrid_v2_tests {
             assert_eq!(out_lens[i] as usize, payload.len());
             assert_eq!(&out_buf[i * slot..i * slot + payload.len()], &payload[..]);
         }
+    }
+}
+
+
+// --- Horizon World Kernels (block_collision_scan, piston_movement, inventory_tick) ---
+
+#[no_mangle]
+pub unsafe extern "C" fn drakes_block_collision_scan(
+    origin_x: i32, origin_y: i32, origin_z: i32,
+    sx: i32, sy: i32, sz: i32,
+    blocks: *const u8, blocks_len: i32,
+    ent_min_x: f64, ent_min_y: f64, ent_min_z: f64,
+    ent_max_x: f64, ent_max_y: f64, ent_max_z: f64,
+    out_coords: *mut i32, out_cap: i32,
+) -> i32 {
+    guard(|| {
+        if sx <= 0 || sy <= 0 || sz <= 0 || blocks_len < 0 || out_cap < 0 { return ERR_ARG; }
+        let (Some(b), Some(o)) = (rd(blocks, blocks_len as usize), wr(out_coords, out_cap as usize)) else { return ERR_NULL };
+        block_collision_scan::scan_collisions(
+            origin_x, origin_y, origin_z, sx as usize, sy as usize, sz as usize, b,
+            ent_min_x, ent_min_y, ent_min_z, ent_max_x, ent_max_y, ent_max_z, o
+        )
+    })
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn drakes_piston_resolve(
+    sx: i32, sy: i32, sz: i32,
+    grid: *const u8, grid_len: i32,
+    start_x: i32, start_y: i32, start_z: i32,
+    dx: i32, dy: i32, dz: i32,
+    out_move: *mut i32, out_move_cap: i32,
+    out_destroy: *mut i32, out_destroy_cap: i32,
+    out_destroy_count: *mut i32,
+) -> i32 {
+    guard(|| {
+        if sx <= 0 || sy <= 0 || sz <= 0 || grid_len < 0 || out_move_cap < 0 || out_destroy_cap < 0 || out_destroy_count.is_null() {
+            return ERR_ARG;
+        }
+        let (Some(g), Some(om), Some(od)) = (
+            rd(grid, grid_len as usize), wr(out_move, out_move_cap as usize), wr(out_destroy, out_destroy_cap as usize)
+        ) else { return ERR_NULL };
+        piston_movement::resolve_push(
+            sx as usize, sy as usize, sz as usize, g, start_x, start_y, start_z, dx, dy, dz,
+            om, od, &mut *out_destroy_count
+        )
+    })
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn drakes_inventory_pickup_batch(
+    n_items: i32, item_x: *const f64, item_y: *const f64, item_z: *const f64, item_delay: *const i32,
+    n_players: i32, player_x: *const f64, player_y: *const f64, player_z: *const f64,
+    pickup_radius_sq: f64,
+    out_pairs: *mut i32, out_cap: i32,
+) -> i32 {
+    guard(|| {
+        if n_items < 0 || n_players < 0 || out_cap < 0 { return ERR_ARG; }
+        let ni = n_items as usize;
+        let np = n_players as usize;
+        let (Some(ix), Some(iy), Some(iz), Some(id), Some(px), Some(py), Some(pz), Some(out)) = (
+            rd(item_x, ni), rd(item_y, ni), rd(item_z, ni), rd(item_delay, ni),
+            rd(player_x, np), rd(player_y, np), rd(player_z, np), wr(out_pairs, out_cap as usize)
+        ) else { return ERR_NULL };
+        inventory_tick::resolve_pickups(ix, iy, iz, id, px, py, pz, pickup_radius_sq, out)
+    })
+}
+
+#[cfg(test)]
+mod horizon_world_tests {
+    use super::*;
+
+    #[test]
+    fn block_collision_scan_full_and_slab() {
+        let mut grid = vec![block_collision_scan::BLOCK_AIR; 4 * 4 * 4];
+        // (1,0,1) full cube, (2,0,1) lower slab
+        grid[(0 * 4 + 1) * 4 + 1] = block_collision_scan::BLOCK_FULL;
+        grid[(0 * 4 + 1) * 4 + 2] = block_collision_scan::BLOCK_SLAB_LOWER;
+        let mut out = [0i32; 12];
+        // Entity at y=[0.6, 2.4] hits full cube (1,0,1) but clears lower slab (2,0,1)
+        let hits = block_collision_scan::scan_collisions(
+            10, 64, 20, 4, 4, 4, &grid,
+            11.2, 64.6, 21.2, 12.8, 66.4, 21.8, &mut out
+        );
+        assert_eq!(hits, 1);
+        assert_eq!(&out[..3], &[11, 64, 21]);
+    }
+
+    #[test]
+    fn piston_push_slime_honey_and_limit() {
+        // 16x4x4 grid, push along +X from (1,1,1)
+        let (sx, sy, sz) = (16, 4, 4);
+        let idx = |x: usize, y: usize, z: usize| (y * sz + z) * sx + x;
+        let mut grid = vec![piston_movement::P_AIR; sx * sy * sz];
+        grid[idx(1, 1, 1)] = piston_movement::P_SLIME;
+        grid[idx(1, 2, 1)] = piston_movement::P_NORMAL;  // sticks to slime
+        grid[idx(1, 1, 2)] = piston_movement::P_HONEY;   // does NOT stick to slime
+        grid[idx(2, 1, 1)] = piston_movement::P_DESTROY; // crushed by slime
+        let mut mv = [0i32; 16];
+        let mut ds = [0i32; 16];
+        let mut dc = 0i32;
+        let moved = piston_movement::resolve_push(sx, sy, sz, &grid, 1, 1, 1, 1, 0, 0, &mut mv, &mut ds, &mut dc);
+        assert_eq!(moved, 2); // slime + normal block above it (honey stays put)
+        assert_eq!(dc, 1);    // destroyable block crushed
+    }
+
+    #[test]
+    fn inventory_pickup_batch_respects_delay_and_nearest() {
+        let ix = [1.0, 1.2, 50.0];
+        let iy = [64.0, 64.0, 64.0];
+        let iz = [1.0, 1.0, 50.0];
+        let delay = [0, 10, 0]; // item 1 has pickup delay, item 2 too far
+        let px = [0.5, 1.1];
+        let py = [64.0, 64.0];
+        let pz = [1.0, 1.0];
+        let mut out = [-1i32; 8];
+        let n = inventory_tick::resolve_pickups(&ix, &iy, &iz, &delay, &px, &py, &pz, 2.25, &mut out);
+        assert_eq!(n, 1);
+        assert_eq!(&out[..2], &[0, 1]); // item 0 claimed by nearest player 1
     }
 }
