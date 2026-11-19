@@ -1,12 +1,15 @@
 [package]
 name = "drakes-hybrid-ffi"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "GPL-3.0-only"
-description = "DrakesPurpur Horizon Hybrid Engine: batch kernels for chunk work (ABI v1, loaded via Panama FFM)"
+description = "DrakesPurpur Horizon Hybrid Engine: zero-copy zlib-rs, Slimefun flat energy graph, SIMD AABB & parallel Anvil kernels (ABI v1, Panama FFM)"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+flate2 = { version = "1.1", default-features = false, features = ["zlib-rs"] }
 
 [profile.release]
 opt-level = 3

@@ -77,7 +77,7 @@ public final class DrakesPerf {
             tick-engine: false     # SlimefunRustEngine (solo cuenta ticks; sin logica real)
           # Horizon Hybrid Engine (EXPERIMENTAL, docs/hybrid/). Apagado: nada cambia. Java sigue siendo la autoridad del mundo.
           hybrid:
-            enabled: false         # interruptor maestro del puente libdrakes_hybrid_ffi
+            enabled: true          # interruptor maestro del puente libdrakes_hybrid_ffi (Rust permanente con fallback seguro a Java)
             min-batch: 2048        # bajo este tamano de lote se usa Java (el coste de la llamada FFM no compensa)
             bits: false            # empaquetado SimpleBitStorage por lotes
             noise: false           # ruido de Perlin por lotes
@@ -190,7 +190,7 @@ public final class DrakesPerf {
     private static boolean engineEnabled() {
         String p = System.getProperty("drakes.hybrid.engine.enabled");
         if (p != null) return Boolean.parseBoolean(p);
-        return cfg.getBoolean("hybrid.engine.enabled", cfg.getBoolean("native.hybrid.enabled", false));
+        return cfg.getBoolean("hybrid.engine.enabled", cfg.getBoolean("native.hybrid.enabled", true));
     }
 
     private static void initNative() {
