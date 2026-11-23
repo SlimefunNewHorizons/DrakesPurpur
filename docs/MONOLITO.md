@@ -12,6 +12,7 @@ BUILD_NUMBER=137 ./gradlew createPaperclipJar
 
 # monolito
 scripts/empaquetar_monolito.sh [ruta/a/Drakes-Suites] slimefun-core-26.x.jar   # llena purpur-server/bundled/drakes-bundled/ (9 suites + Slimefun + index.txt); falla si un plugin.yml es inválido, falta un recurso (target/ viejo) o un depend no va embebido
+scripts/test_empaquetar_monolito.sh   # 5 casos del validador con jars sintéticos (sin gradle); vacía purpur-server/bundled/drakes-bundled/
 DRAKES_BUNDLE=1 BUILD_NUMBER=137 ./gradlew createPaperclipJar   # o -PdrakesBundle
 ```
 
