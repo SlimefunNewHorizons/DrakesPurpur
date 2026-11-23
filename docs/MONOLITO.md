@@ -11,7 +11,7 @@ El monolito contiene todo el modular (se fusiona `origin/ver/26.2` en el, con me
 BUILD_NUMBER=137 ./gradlew createPaperclipJar
 
 # monolito
-scripts/empaquetar_monolito.sh [ruta/a/Drakes-Suites]   # llena purpur-server/bundled/drakes-bundled/ (9 jars + index.txt)
+scripts/empaquetar_monolito.sh [ruta/a/Drakes-Suites] slimefun-core-26.x.jar   # llena purpur-server/bundled/drakes-bundled/ (9 suites + Slimefun + index.txt); falla si un plugin.yml es inválido, falta un recurso (target/ viejo) o un depend no va embebido
 DRAKES_BUNDLE=1 BUILD_NUMBER=137 ./gradlew createPaperclipJar   # o -PdrakesBundle
 ```
 

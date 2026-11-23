@@ -58,7 +58,7 @@ One jar, one process: Purpur 26.2 + the DrakesPurpur kernel + **9 embedded suite
 4. First boot creates `plugins/` (suites extracted) and `drakes-data/` (`suites.yml`, `perf.yml`, `bundled-state.yml`). Add your third-party plugins, restart, tune each add-on in `plugins/Drakes<Suite>/modules/<addon>.yml` and reload with `/drakessuites reload <suite> [module]`.
 5. Full guide: [`docs/INSTALACION_MOTOR.md`](docs/INSTALACION_MOTOR.md). Updating one add-on or suite: [section below](#updating-a-single-add-on-monolith).
 
-**Build it yourself:** JDK 25, then `scripts/empaquetar_monolito.sh [path/to/Drakes-Suites]` and `DRAKES_BUNDLE=1 BUILD_NUMBER=<N> ./gradlew createPaperclipJar`. Details in [`docs/MONOLITO.md`](docs/MONOLITO.md).
+**Build it yourself:** JDK 25, then `scripts/empaquetar_monolito.sh [path/to/Drakes-Suites] slimefun-core-26.x.jar` and `DRAKES_BUNDLE=1 BUILD_NUMBER=<N> ./gradlew createPaperclipJar`. Details in [`docs/MONOLITO.md`](docs/MONOLITO.md).
 
 **Resumen (ES):** esta rama es el monolito: un solo jar con el motor y las 9 suites embebidas, base de la T2 (Minecraft 26.2, Java 25). Al arrancar extrae las suites a `plugins/` si cambia su SHA-256; se eligen en `drakes-data/suites.yml` (`true`/`false`/`keep`). Lo nativo (Rust) viene apagado. Se descarga desde Releases con `SHA256SUMS`. La produccion (Dallas, 1.21.11) es otro stack y no se toca desde aqui. El modular (`ver/26.2`) queda como linea secundaria.
 
