@@ -1,0 +1,61 @@
+name: Monolito
+# Arma el monolito (Purpur + suites Drakes + núcleo Slimefun 26.x) en CI: en Star la carga deja build_seguro en espera.
+on:
+  push:
+    branches: [feat/slimefun-native-engine]
+    paths: [.github/workflows/monolito.yml, scripts/empaquetar_monolito.sh]
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: BUILD_NUMBER del jar (sin él la versión rompe addons que parsean getBukkitVersion)
+        default: "141"
+      suites_ref:
+        description: Rama o SHA de Drakes-Suites
+        default: 26.x
+
+jobs:
+  monolito:
+    runs-on: ubuntu-latest
+    env:
+      SF_URL: https://maven.drakescraft.cl/com/github/drakescraft_labs/slimefun-core/11.0-Universal-26.x-SNAPSHOT/slimefun-core-11.0-Universal-26.x-20261124.023000-3.jar
+      SF_FALLBACK_URL: https://raw.githubusercontent.com/SlimefunNewHorizons/maven-repo/main/com/github/drakescraft_labs/slimefun-core/11.0-Universal-26.x-SNAPSHOT/slimefun-core-11.0-Universal-26.x-20261124.023000-3.jar
+      SF_SHA256: 3941762f3cb99f2b5a0eaeae234b2380527cf495c5039660d989bddbe6455579
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: SlimefunNewHorizons/Drakes-Suites
+          ref: ${{ inputs.suites_ref || '26.x' }}
+          path: suites
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: gradle
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Compilar suites
+        run: mvn -B -ntp -f suites/pom.xml -Ppurpur-26 -DskipTests package
+      - name: Núcleo Slimefun
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/Slimefun.jar" "$SF_URL" || curl -fsSL -o "$RUNNER_TEMP/Slimefun.jar" "$SF_FALLBACK_URL"
+          echo "$SF_SHA256  $RUNNER_TEMP/Slimefun.jar" | sha256sum -c
+      - name: Validar y empaquetar
+        run: |
+          scripts/test_empaquetar_monolito.sh
+          scripts/empaquetar_monolito.sh "$PWD/suites" "$RUNNER_TEMP/Slimefun.jar"
+      - name: Compilar monolito
+        env:
+          DRAKES_BUNDLE: "1"
+          BUILD_NUMBER: ${{ inputs.build_number || '141' }}
+        run: |
+          git config --global user.email "no-reply@github.com" && git config --global user.name "Github Actions"
+          ./gradlew applyAllPatches createPaperclipJar --stacktrace
+          cd purpur-server/build/libs && sha256sum *.jar | tee SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monolito-b${{ inputs.build_number || '141' }}
+          path: |
+            purpur-server/build/libs/*.jar
+            purpur-server/build/libs/SHA256SUMS
+            purpur-server/bundled/drakes-bundled/index.txt
+          retention-days: 14
