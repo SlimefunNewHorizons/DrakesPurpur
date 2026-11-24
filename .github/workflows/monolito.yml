@@ -3,7 +3,7 @@ name: Monolito
 on:
   push:
     branches: [feat/slimefun-native-engine]
-    paths: [.github/workflows/monolito.yml, scripts/empaquetar_monolito.sh]
+    paths: [.github/workflows/monolito.yml, scripts/empaquetar_monolito.sh, build.gradle.kts]
   workflow_dispatch:
     inputs:
       build_number:

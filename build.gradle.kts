@@ -105,11 +105,16 @@ subprojects {
 
     repositories {
         mavenLocal()
-        maven("https://maven.drakescraft.cl") {
-            name = "drakescraft-maven"
-        }
         mavenCentral()
         maven(paperMavenPublicUrl)
+        maven("https://maven.drakescraft.cl") {
+            name = "drakescraft-maven"
+            content {
+                includeGroupByRegex("com\\.github\\..*")
+                includeGroupByRegex("org\\.purpurmc\\..*")
+                includeGroupByRegex("io\\.github\\..*")
+            }
+        }
     }
 
     extensions.configure<PublishingExtension> {
