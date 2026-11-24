@@ -113,7 +113,14 @@ public final class DrakesPerf {
             shrink-cpu: 0.88       # CPU total del sistema (0-1) desde la que se baja; hard = +0.07
             grow-seconds: 4        # espera entre subidas (de un hilo en un hilo)
             shrink-seconds: 1      # espera entre bajadas
-        # Copia de seguridad 7z: no compite con el tick ni con la red.
+        # Mapas de exploracion (cartografo y loot con ExplorationMapFunction). La vista previa de biomas muestrea 16384
+            # posiciones en el hilo principal y colgo el servidor 10 s (ticket #435); por eso treasure-maps.enabled esta en false.
+            # Con step 2 o 4 se muestrea 4x o 16x menos (solo cambia el contorno de agua dibujado); la estructura y el marcador
+            # "+" son iguales. 0 = sin vista previa. Mide con /drakes hybrid workers antes de activar treasure-maps.
+            maps:
+              biome-preview-step: 1    # 1 vanilla | 2 | 4 | 8 | 0 sin vista previa
+              biome-preview-warn-ms: 50
+            # Copia de seguridad 7z: no compite con el tick ni con la red.
         backup:
           throttle: true           # nice 19 + ionice idle + hilos limitados
           threads: 2
@@ -148,7 +155,31 @@ public final class DrakesPerf {
         backupRunning = b;
     }
 
-    public static double msptNow() {
+    // ---- mapas de exploracion (cartografo / loot): vista previa de biomas acotada ----
+        private static final java.util.concurrent.atomic.LongAdder MAP_PREVIEWS = new java.util.concurrent.atomic.LongAdder(), MAP_PREVIEW_MS = new java.util.concurrent.atomic.LongAdder();
+        private static volatile long mapPreviewMaxMs;
+
+        /** maps.biome-preview-step: 1 = vanilla (128x128 muestras), 2 = 4x menos, 4 = 16x menos, 0 = sin vista previa. */
+        public static int mapPreviewStep() {
+            int v = cfg.getInt("maps.biome-preview-step", 1);
+            return v == 0 ? 0 : (v == 2 || v == 4 || v == 8 ? v : 1);
+        }
+
+        public static void noteMapPreview(long ms) {
+            MAP_PREVIEWS.increment();
+            MAP_PREVIEW_MS.add(ms);
+            if (ms > mapPreviewMaxMs) mapPreviewMaxMs = ms;
+            if (ms >= cfg.getLong("maps.biome-preview-warn-ms", 50)) {
+                LOGGER.warning("[Perf] vista previa de mapa tardo " + ms + " ms en el hilo principal (maps.biome-preview-step=" + mapPreviewStep() + ")");
+            }
+        }
+
+        public static String mapPreviewStats() {
+            long n = MAP_PREVIEWS.sum();
+            return "mapas=" + n + " media=" + (n == 0 ? 0 : MAP_PREVIEW_MS.sum() / n) + " ms max=" + mapPreviewMaxMs + " ms step=" + mapPreviewStep();
+        }
+
+        public static double msptNow() {
         try {
             return Bukkit.getAverageTickTime();
         } catch (Throwable t) {

@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: JackStar6677-1 <171525905+JackStar6677-1@users.noreply.github.com>
+Date: Tue, 24 Nov 2026 18:59:23 -0300
+Subject: [PATCH] Drakes: bounded explorer map biome preview
+
+
+diff --git a/net/minecraft/world/item/MapItem.java b/net/minecraft/world/item/MapItem.java
+index 5d9d776bd5ce9109ec473cc31aa9b9e4f6823fbd..b75c7a1899ed64653a6d455159fc7c79e03efd77 100644
+--- a/net/minecraft/world/item/MapItem.java
++++ b/net/minecraft/world/item/MapItem.java
+@@ -203,6 +203,13 @@ public class MapItem extends Item {
+         MapItemSavedData data = getSavedData(mapItemStack, level);
+         if (data != null) {
+             data.isExplorerMap = true; // Purpur - Explorer Map API
++            // Drakes start - bounded explorer map biome preview (la vista previa de 16384 biomas colgo el hilo principal 10 s: ticket #435)
++            final int drakesStep = org.purpurmc.purpur.perf.DrakesPerf.mapPreviewStep();
++            if (drakesStep == 0) {
++                return;
++            }
++            final long drakesT0 = System.nanoTime();
++            // Drakes end
+             if (level.dimension() == data.dimension) {
+                 int scale = 1 << data.scale;
+                 int centerX = data.centerX;
+@@ -214,11 +221,20 @@ public class MapItem extends Item {
+ 
+                 for (int row = 0; row < 128; row++) {
+                     for (int column = 0; column < 128; column++) {
++                        // Drakes start - muestreo grueso: 1 muestra por bloque de step x step pixeles
++                        final int drakesRow = row - row % drakesStep, drakesCol = column - column % drakesStep;
++                        if (drakesRow != row || drakesCol != column) {
++                            isBiomeWatery[row * 128 + column] = isBiomeWatery[drakesRow * 128 + drakesCol];
++                            continue;
++                        }
++                        // Drakes end
+                         Holder<Biome> biome = level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock((unscaledStartX + column) * scale), net.minecraft.core.QuartPos.fromBlock(0), net.minecraft.core.QuartPos.fromBlock((unscaledStartZ + row) * scale)); // Paper - Perf: Use seed based lookup for treasure maps
+                         isBiomeWatery[row * 128 + column] = biome.is(BiomeTags.WATER_ON_MAP_OUTLINES);
+                     }
+                 }
+ 
++                org.purpurmc.purpur.perf.DrakesPerf.noteMapPreview((System.nanoTime() - drakesT0) / 1_000_000L); // Drakes
++
+                 for (int mx = 1; mx < 127; mx++) {
+                     for (int mz = 1; mz < 127; mz++) {
+                         int waterCount = 0;

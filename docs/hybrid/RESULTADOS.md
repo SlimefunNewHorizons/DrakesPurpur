@@ -231,3 +231,23 @@ Recomendacion para Dallas (aplicar tras la apertura, con `reinicio_seguro.py` y 
 - Logica de decision (puro, sin servidor): `tools/prefetch-test/.../ChunkThreadGovernorTest.java`, incluye simulacion de 200 s con carga y recuperacion (baja a 2 y vuelve a 6 sin oscilar).
 - En vivo (Nexus, `max-threads: 6`): arranca en 6; con el tick cargado baja a 2 y se recupera un hilo cada 4 s (`6 -> 2 -> 3 -> 4`); forzado con umbrales bajos se queda en 2 (comprobado).
 - Banco multijugador, 4 voladores, 2 repeticiones (la generacion sincrona del propio autotest dispara el MSPT al inicio y el gobernador reduce de forma legitima): gobernador ON 70-85 % tarde (p95 4.5 s) y prefetch equitativo 25-31 % (p95 0.9-1.1 s); gobernador OFF (3 hilos por defecto en 12 CPUs) 100 % tarde (p95 5.4-5.9 s). Con 6 hilos fijos (Fase 7) el resultado fue mejor (11-15 %, p95 0.3-0.5 s) porque no hay rampa. Conclusion: el gobernador conserva casi toda la ganancia y reduce hilos cuando el tick sufre; el coste es la rampa de recuperacion.
+
+---
+
+# Fase 9 — Mapas de exploracion: vista previa de biomas acotada (24-nov-2026)
+
+Contexto: `treasure-maps.enabled: false` en Dallas desde el ticket #435 (24-oct): un `VillagerTrades$TreasureMapForEmeralds.getOffer` bloqueo el hilo principal 10 s en `MapItem.renderBiomePreviewMap`, que muestrea 16 384 biomas sin cache (`getUncachedNoiseBiome`). Con el ajuste en `false` los mapas de loot/cartografo salen en blanco y sin guia (tickets #390 de jugadores).
+
+Cambio (patch `0024-Drakes-bounded-explorer-map-biome-preview`, ajuste `maps.biome-preview-step` en `perf.yml`; por defecto 1 = vanilla): muestrea 1 de cada `step x step` pixeles y replica el resultado; `0` omite la vista previa. La estructura y el marcador "+" no cambian: solo el contorno de agua dibujado. Cada vista previa que tarde >= `maps.biome-preview-warn-ms` (50) deja un aviso en el log.
+
+Medicion (autotest `[mapas]`, WSL, mundo nuevo vanilla, zoom 2, hilo principal, 24 muestras por paso, 2 corridas identicas):
+
+| step | mediana | p95 | pixeles distintos vs vanilla |
+|---|---|---|---|
+| 1 (vanilla) | 151 ms | 177 ms | - |
+| 2 | 38 ms | 45 ms | 5,4 % |
+| 4 | 9,6 ms | 11,6 ms | 9,5 % |
+| 8 | 2,5 ms | 3,2 ms | 12,2 % |
+| 0 | 0 ms | 0 ms | sin vista previa |
+
+Es la fuente de biomas vanilla; con Terralith y datapacks (Dallas) cada muestra cuesta mas. Esto NO prueba que `treasure-maps.enabled: true` sea seguro: queda por medir en Dallas con la busqueda de estructura (`findNearestMapStructure`) y el MSPT, tras el congelamiento del 1-dic. Recomendacion para esa prueba: `treasure-maps.enabled: true` con `maps.biome-preview-step: 4`.

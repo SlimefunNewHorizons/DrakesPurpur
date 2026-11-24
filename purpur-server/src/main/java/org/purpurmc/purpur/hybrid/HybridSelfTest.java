@@ -237,6 +237,7 @@ public final class HybridSelfTest {
             densityParity(out, level);
 
             // 7) Pipeline de chunks bajo un volador sintetico: lectura reactiva vs prefetch direccional
+            mapPreviewBench(out, srv);
             flyerBench(out, srv);
             multiFlyerBench(out);
 
@@ -383,6 +384,63 @@ public final class HybridSelfTest {
         } catch (Throwable t) {
             line(out, "[LOD sampler] ERROR: " + t);
             LOG.log(Level.WARNING, "lod sampler", t);
+        }
+    }
+
+
+    // ---- 7a) vista previa de mapas de exploracion (cartografo/loot) ----------------------------------------
+    /**
+     * Mide {@code MapItem.renderBiomePreviewMap} (16384 biomas sin cache en el hilo principal; ticket #435) con
+     * {@code maps.biome-preview-step} = 1 (vanilla), 2, 4, 8 y 0, sobre los mismos 12 centros, y cuantos pixeles del
+     * mapa difieren respecto a vanilla. Alterna el orden de los pasos para que el calentamiento no favorezca a nadie.
+     */
+    private static void mapPreviewBench(StringBuilder out, MinecraftServer srv) {
+        try {
+            final ServerLevel lvl = srv.overworld();
+            final org.bukkit.configuration.file.YamlConfiguration cfg = org.purpurmc.purpur.perf.DrakesPerf.cfg();
+            final int[] centers = new int[24];
+            for (int i = 0; i < 12; i++) { centers[i * 2] = 20000 + i * 9000; centers[i * 2 + 1] = -15000 + i * 7000; }
+            final int[] steps = {1, 2, 4, 8, 0, 8, 4, 2, 1};
+            final java.util.Map<Integer, List<Double>> ms = new java.util.LinkedHashMap<>();
+            final java.util.Map<Integer, List<Double>> diff = new java.util.LinkedHashMap<>();
+            final byte[][] vanilla = new byte[12][];
+            for (int pass = 0; pass < 2; pass++) {
+                for (int step : steps) {
+                    cfg.set("maps.biome-preview-step", step);
+                    for (int i = 0; i < 12; i++) {
+                        final int cx = centers[i * 2], cz = centers[i * 2 + 1], idx = i;
+                        final long[] dt = new long[1];
+                        final byte[] colors = onMain(srv, () -> {
+                            net.minecraft.world.item.ItemStack map = net.minecraft.world.item.MapItem.create(lvl, cx, cz, (byte) 2, true, true);
+                            long t0 = System.nanoTime();
+                            net.minecraft.world.item.MapItem.renderBiomePreviewMap(lvl, map);
+                            dt[0] = System.nanoTime() - t0;
+                            var data = net.minecraft.world.item.MapItem.getSavedData(map, lvl);
+                            return data == null ? new byte[0] : data.colors.clone();
+                        });
+                        ms.computeIfAbsent(step, k -> new ArrayList<>()).add(dt[0] / 1e6);
+                        if (step == 1 && vanilla[idx] == null) vanilla[idx] = colors;
+                        if (step != 1 && vanilla[idx] != null && colors.length == vanilla[idx].length) {
+                            int d = 0;
+                            for (int k = 0; k < colors.length; k++) if (colors[k] != vanilla[idx][k]) d++;
+                            diff.computeIfAbsent(step, k -> new ArrayList<>()).add(100.0 * d / colors.length);
+                        }
+                    }
+                }
+            }
+            cfg.set("maps.biome-preview-step", 1);
+            line(out, "[mapas] renderBiomePreviewMap, 24 muestras por paso (zoom 2, hilo principal, mundo nuevo):");
+            for (var e : ms.entrySet()) {
+                double[] a = e.getValue().stream().mapToDouble(Double::doubleValue).sorted().toArray();
+                double med = a[a.length / 2], p95 = a[Math.min(a.length - 1, (int) (a.length * 0.95))], mx = a[a.length - 1];
+                List<Double> d = diff.get(e.getKey());
+                double dm = d == null || d.isEmpty() ? 0 : d.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+                line(out, String.format("  step=%d: mediana %.2f ms, p95 %.2f ms, max %.2f ms%s", e.getKey(), med, p95, mx,
+                    e.getKey() == 1 ? " (vanilla)" : e.getKey() == 0 ? " (sin vista previa)" : String.format(" | pixeles distintos vs vanilla: %.2f %%", dm)));
+            }
+        } catch (Throwable t) {
+            line(out, "[mapas] ERROR: " + t);
+            LOG.log(Level.WARNING, "mapas", t);
         }
     }
 
