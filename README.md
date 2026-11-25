@@ -56,6 +56,10 @@ The 26.2 development line includes a [sculk world-generation backport for
 MC-307918](docs/MC-307918.md), based on Mojang 26.3 cursor movement limits.
 Its runtime evidence is recorded separately from compilation and deployment.
 
+Async command synchronization also includes an [identity-based node conversion
+patch](docs/ASYNC_COMMAND_SYNC.md). Its tests and runtime status are documented
+separately; the source change alone does not establish a production deployment.
+
 ## Core Architectural Pillars
 
 ### 1. Kernel Crash Guard & Self-Healing (Zero Server Crashes)
