@@ -37,6 +37,7 @@ public final class HybridNative {
     private static volatile Natives natives;
     private static volatile boolean initialized;
     private static volatile String libraryPath;
+    public static String libraryPath() { return libraryPath; }
     private static volatile String libraryOrigin = "-";
     private static volatile int libraryAbi = -1;
     private static final java.util.concurrent.atomic.AtomicLong FAILURES = new java.util.concurrent.atomic.AtomicLong();

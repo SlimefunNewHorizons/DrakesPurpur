@@ -275,6 +275,7 @@ public final class DrakesPerf {
         final long now = System.currentTimeMillis();
         lastMspt = msptNow();
         if (cfg.getBoolean("load-governor.enabled", true)) safe(() -> govern(now));
+        safe(() -> DrakesEntityGuard.tick(now, lastMspt, cfg));
         if (cfg.getBoolean("status.enabled", true)) {
             final String json = snapshot();
             ex.execute(() -> write(json));

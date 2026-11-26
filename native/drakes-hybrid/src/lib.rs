@@ -25,6 +25,7 @@ pub mod energy_net;
 pub mod block_collision_scan;
 pub mod inventory_tick;
 pub mod piston_movement;
+pub mod entity_guard;
 
 pub const ABI_VERSION: i32 = 1;
 
