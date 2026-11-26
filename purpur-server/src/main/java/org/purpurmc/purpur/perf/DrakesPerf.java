@@ -92,9 +92,9 @@ public final class DrakesPerf {
               max-lookahead-chunks: 8
               half-width-chunks: 2
               max-in-flight: 24      # presupuesto de solicitudes simultaneas
-      per-player-in-flight: 6   # multijugador: presupuesto efectivo = esto x jugadores en vuelo (tope max-in-flight), repartido a partes iguales
-      throttle-mspt: 38.0    # MSPT medio desde el que se usa la mitad del presupuesto
-      pause-mspt: 46.0       # MSPT medio desde el que se pausa el prefetch (el tick manda)
+              per-player-in-flight: 6   # multijugador: presupuesto efectivo = esto x jugadores en vuelo (tope max-in-flight), repartido a partes iguales
+              throttle-mspt: 38.0    # MSPT medio desde el que se usa la mitad del presupuesto
+              pause-mspt: 46.0       # MSPT medio desde el que se pausa el prefetch (el tick manda)
               interval-ms: 250
         # Hilos de generacion/carga de chunks (pool de trabajo de Moonrise) con gobernador adaptativo.
         # Paper deja por defecto nucleos/4 hilos (2 en 8 CPUs) y no los cambia. Con enabled=true el tope se mueve en caliente
@@ -117,9 +117,9 @@ public final class DrakesPerf {
             # posiciones en el hilo principal y colgo el servidor 10 s (ticket #435); por eso treasure-maps.enabled esta en false.
             # Con step 2 o 4 se muestrea 4x o 16x menos (solo cambia el contorno de agua dibujado); la estructura y el marcador
             # "+" son iguales. 0 = sin vista previa. Mide con /drakes hybrid workers antes de activar treasure-maps.
-            maps:
-              biome-preview-step: 1    # 1 vanilla | 2 | 4 | 8 | 0 sin vista previa
-              biome-preview-warn-ms: 50
+        maps:
+          biome-preview-step: 1    # 1 vanilla | 2 | 4 | 8 | 0 sin vista previa
+          biome-preview-warn-ms: 50
             # Copia de seguridad 7z: no compite con el tick ni con la red.
         backup:
           throttle: true           # nice 19 + ionice idle + hilos limitados
