@@ -44,49 +44,48 @@ public final class DrakesPerf {
           file: drakes-data/perf-status.json
           interval-seconds: 10
         # Baja la distancia de envio/simulacion cuando MSPT queda alto de forma sostenida y la devuelve al bajar.
-        # APAGADO por defecto: cambia lo que ven los jugadores; activalo en pruebas (VPS humilde).
+        # Dallas performance defaults; configurable per installation.
         load-governor:
-          enabled: false
+          enabled: true
           mspt-high: 45.0          # sobre esto durante sustain-seconds -> un paso abajo
           mspt-low: 30.0           # bajo esto durante recover-seconds -> un paso arriba
           sustain-seconds: 30
           recover-seconds: 180
           min-send-view-distance: 6
-          min-simulation-distance: 4
+          min-simulation-distance: 3
           max-steps: 6
-        # Horizon Hybrid Engine (Java + Rust). Interruptor unico del motor. Pasa a true por defecto SOLO cuando un componente
-        # cumpla docs/hybrid/CRITERIOS_ESTABLE.md; hoy ninguna aceleracion nativa tiene mejora demostrada, asi que es false.
+        # Dallas hybrid performance defaults. Native paths retain Java fallback.
         # -Ddrakes.hybrid.engine.enabled=true lo fuerza (entornos de prueba controlados). Equivale a native.hybrid.enabled.
         hybrid:
           engine:
-            enabled: false
-        # Bibliotecas nativas (Rust) por Panama. APAGADO: en el benchmark (docs/NATIVO.md) Java gano en todo.
+            enabled: true
+        # Enable supported native libraries by default, retaining safe Java fallback.
         # Si falta el .so/.dll o la ABI no coincide se usa Java sin avisar a nadie mas que el log.
         native:
-          enabled: false           # interruptor maestro
+          enabled: true           # interruptor maestro
           dir: natives             # tambien se busca en drakes-data/natives, -Ddrakes.native.dir y $DRAKES_NATIVE_DIR
           ring-capacity: 64        # marcas de tiempo por bloque (>= limite de pulsos largo)
           max-entries: 8192        # bloques seguidos a la vez; si se llena se deja pasar
           odysseia:
-            pulses: false          # contador de pulsos de redstone
-            aura: false            # aura de jefe por lotes
+            pulses: true          # contador de pulsos de redstone
+            aura: true            # aura de jefe por lotes
           slimefun:
-            fill: false            # reparto EnergyNet (fillSequential/storeRemaining)
-            sum: false             # suma saturada
-            price: false           # precio de DrakesSlimeMarket
+            fill: true            # reparto EnergyNet (fillSequential/storeRemaining)
+            sum: true             # suma saturada
+            price: true           # precio de DrakesSlimeMarket
             tick-engine: false     # SlimefunRustEngine (solo cuenta ticks; sin logica real)
-          # Horizon Hybrid Engine (EXPERIMENTAL, docs/hybrid/). Apagado: nada cambia. Java sigue siendo la autoridad del mundo.
+          # Horizon Hybrid Engine (EXPERIMENTAL, docs/hybrid/). Java remains the fallback.
           hybrid:
             enabled: true          # interruptor maestro del puente libdrakes_hybrid_ffi (Rust permanente con fallback seguro a Java)
             min-batch: 2048        # bajo este tamano de lote se usa Java (el coste de la llamada FFM no compensa)
-            bits: false            # empaquetado SimpleBitStorage por lotes
-            noise: false           # ruido de Perlin por lotes
-            region: false          # analisis (solo lectura) de cabeceras .mca
-            stats: false           # contadores por etapa (pack/unpack Java vs Rust) en el log del autotest
+            bits: true            # empaquetado SimpleBitStorage por lotes
+            noise: true           # ruido de Perlin por lotes
+            region: true          # analisis (solo lectura) de cabeceras .mca
+            stats: true           # contadores por etapa (pack/unpack Java vs Rust) en el log del autotest
             # Prefetch direccional: solicita (async, API publica de Paper) chunks por delante de quien se mueve rapido.
             # EXPERIMENTAL: ver docs/hybrid/RESULTADOS.md antes de activarlo.
             prefetch:
-              enabled: false
+              enabled: true
               min-speed: 20.0        # bloques/s para considerar que se esta "volando"
               lead-seconds: 3.0      # anticipacion
               max-lookahead-chunks: 8
@@ -104,7 +103,7 @@ public final class DrakesPerf {
         # Netty, Slimefun/async, base de datos y respaldos. Mide antes de subirlo: docs/hybrid/RESULTADOS.md (Fase 7 y 8).
         threads:
           chunk-gen:
-            enabled: false
+            enabled: true
             min-threads: 2
             max-threads: 0
             reserve-cores: 2
@@ -118,7 +117,7 @@ public final class DrakesPerf {
             # Con step 2 o 4 se muestrea 4x o 16x menos (solo cambia el contorno de agua dibujado); la estructura y el marcador
             # "+" son iguales. 0 = sin vista previa. Mide con /drakes hybrid workers antes de activar treasure-maps.
         maps:
-          biome-preview-step: 1    # 1 vanilla | 2 | 4 | 8 | 0 sin vista previa
+          biome-preview-step: 4    # 1 vanilla | 2 | 4 | 8 | 0 sin vista previa
           biome-preview-warn-ms: 50
             # Copia de seguridad 7z: no compite con el tick ni con la red.
         backup:
@@ -161,7 +160,7 @@ public final class DrakesPerf {
 
         /** maps.biome-preview-step: 1 = vanilla (128x128 muestras), 2 = 4x menos, 4 = 16x menos, 0 = sin vista previa. */
         public static int mapPreviewStep() {
-            int v = cfg.getInt("maps.biome-preview-step", 1);
+            int v = cfg.getInt("maps.biome-preview-step", 4);
             return v == 0 ? 0 : (v == 2 || v == 4 || v == 8 ? v : 1);
         }
 
@@ -210,7 +209,7 @@ public final class DrakesPerf {
             // el muestreo de gobernador usa el mismo reloj; arranca tras 2 min para no medir el arranque
             ex.scheduleAtFixedRate(() -> safe(() -> onMain(DrakesPerf::sample)), 120, every, java.util.concurrent.TimeUnit.SECONDS);
             LOGGER.info("[Perf] status=" + cfg.getBoolean("status.enabled", true)
-                + " load-governor=" + cfg.getBoolean("load-governor.enabled", false)
+                + " load-governor=" + cfg.getBoolean("load-governor.enabled", true)
                 + " backup-throttle=" + cfg.getBoolean("backup.throttle", true));
         } catch (Throwable t) {
             LOGGER.log(Level.WARNING, "[Perf] no se pudo iniciar: " + t.getMessage());
@@ -227,10 +226,10 @@ public final class DrakesPerf {
     private static void initNative() {
         try {
             org.purpurmc.purpur.nativelib.DrakesNative.init(new org.purpurmc.purpur.nativelib.DrakesNative.Settings(
-                cfg.getBoolean("native.enabled", false), cfg.getString("native.dir", "natives"),
-                cfg.getBoolean("native.odysseia.pulses", false), cfg.getBoolean("native.odysseia.aura", false),
-                cfg.getBoolean("native.slimefun.fill", false), cfg.getBoolean("native.slimefun.sum", false),
-                cfg.getBoolean("native.slimefun.price", false), cfg.getBoolean("native.slimefun.tick-engine", false),
+                cfg.getBoolean("native.enabled", true), cfg.getString("native.dir", "natives"),
+                cfg.getBoolean("native.odysseia.pulses", true), cfg.getBoolean("native.odysseia.aura", true),
+                cfg.getBoolean("native.slimefun.fill", true), cfg.getBoolean("native.slimefun.sum", true),
+                cfg.getBoolean("native.slimefun.price", true), cfg.getBoolean("native.slimefun.tick-engine", false),
                 cfg.getInt("native.ring-capacity", 64), cfg.getInt("native.max-entries", 8192)));
         } catch (Throwable t) {
             LOGGER.log(Level.WARNING, "[Native] init fallo (" + t + "); todo en Java.");
@@ -238,16 +237,16 @@ public final class DrakesPerf {
         try {
             org.purpurmc.purpur.nativelib.HybridNative.init(new org.purpurmc.purpur.nativelib.HybridNative.Settings(
                 engineEnabled(), cfg.getString("native.dir", "natives"),
-                cfg.getBoolean("native.hybrid.bits", false), cfg.getBoolean("native.hybrid.noise", false),
-                cfg.getBoolean("native.hybrid.region", false), cfg.getInt("native.hybrid.min-batch", 2048)));
-            org.purpurmc.purpur.hybrid.HybridStats.enabled = cfg.getBoolean("native.hybrid.stats", false);
-            org.purpurmc.purpur.hybrid.HybridChunkPrefetch.configure(cfg.getBoolean("native.hybrid.prefetch.enabled", false),
+                cfg.getBoolean("native.hybrid.bits", true), cfg.getBoolean("native.hybrid.noise", true),
+                cfg.getBoolean("native.hybrid.region", true), cfg.getInt("native.hybrid.min-batch", 2048)));
+            org.purpurmc.purpur.hybrid.HybridStats.enabled = cfg.getBoolean("native.hybrid.stats", true);
+            org.purpurmc.purpur.hybrid.HybridChunkPrefetch.configure(cfg.getBoolean("native.hybrid.prefetch.enabled", true),
                 cfg.getDouble("native.hybrid.prefetch.min-speed", 20.0), cfg.getDouble("native.hybrid.prefetch.lead-seconds", 3.0),
                 cfg.getInt("native.hybrid.prefetch.max-lookahead-chunks", 8), cfg.getInt("native.hybrid.prefetch.half-width-chunks", 2),
                 cfg.getInt("native.hybrid.prefetch.max-in-flight", 24), cfg.getLong("native.hybrid.prefetch.interval-ms", 250));
             org.purpurmc.purpur.hybrid.HybridChunkPrefetch.tune(cfg.getInt("native.hybrid.prefetch.per-player-in-flight", 6),
                 cfg.getDouble("native.hybrid.prefetch.throttle-mspt", 38.0), cfg.getDouble("native.hybrid.prefetch.pause-mspt", 46.0));
-            org.purpurmc.purpur.hybrid.ChunkThreadGovernor.configure(cfg.getBoolean("threads.chunk-gen.enabled", false),
+            org.purpurmc.purpur.hybrid.ChunkThreadGovernor.configure(cfg.getBoolean("threads.chunk-gen.enabled", true),
                 cfg.getInt("threads.chunk-gen.min-threads", 2), cfg.getInt("threads.chunk-gen.max-threads", 0),
                 cfg.getInt("threads.chunk-gen.reserve-cores", 2), cfg.getDouble("threads.chunk-gen.shrink-mspt", 38.0),
                 cfg.getDouble("threads.chunk-gen.hard-mspt", 46.0), cfg.getDouble("threads.chunk-gen.shrink-cpu", 0.88),
@@ -275,7 +274,7 @@ public final class DrakesPerf {
     private static void sample() {
         final long now = System.currentTimeMillis();
         lastMspt = msptNow();
-        if (cfg.getBoolean("load-governor.enabled", false)) safe(() -> govern(now));
+        if (cfg.getBoolean("load-governor.enabled", true)) safe(() -> govern(now));
         if (cfg.getBoolean("status.enabled", true)) {
             final String json = snapshot();
             ex.execute(() -> write(json));

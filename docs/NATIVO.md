@@ -2,7 +2,7 @@
 
 ## English
 
-**Status (2026-11-12): Java + Rust are ACTIVE together in production on Dallas and tested by the owner with very good performance. The "OFF by default" below is the shipped default and the result of the early benchmark (Java won or tied on every path); it is not the Dallas configuration.**
+**Default configuration (2026-11-26): supported native paths and the hybrid engine are enabled for new installations to match Dallas. Existing perf.yml files are not overwritten. Early benchmarks found Java won or tied on tested paths; measure production performance and retain the Java fallback. The Slimefun tick-engine stub remains disabled.**
 
 ### What exists
 | Library | Repo | ABI | Bridge in the engine |
@@ -13,7 +13,7 @@
 Not bridged (stubs, no real logic in Rust either): Slimefun cargo routing, `TickerEngine` (only counts ticks), `slimefun_load/save_sqlite_db` (BlockStorage import/export), the energy graph solver (Java never registers nodes), Odysseia chat filter / troll / TPS message / legacy `evaluate_clock`. No C code exists in the stack; none is proposed because no hot spot with measurable gain was found.
 
 ### How it works
-- Loaded with Java 22+ FFM (Panama), **no JNI**. `perf.yml -> native.enabled: false` is the master switch; each path has its own switch (`native.odysseia.pulses|aura`, `native.slimefun.fill|sum|price|tick-engine`).
+- Loaded with Java 22+ FFM (Panama), **no JNI**. `perf.yml -> native.enabled` is the master switch; each path has its own switch (`native.odysseia.pulses|aura`, `native.slimefun.fill|sum|price|tick-engine`).
 - Search order for the file: `-Ddrakes.native.dir`, `$DRAKES_NATIVE_DIR`, `native.dir` (default `natives/`), `drakes-data/natives/`, `natives/`.
 - ABI is checked (Odysseia exactly 1, Slimefun 2). Missing file, old library, wrong ABI, missing symbol or any failing downcall => automatic fallback to the Java implementation (same semantics, cross-checked in the benchmark) plus a log line. A runtime failure disables that path until restart.
 - Plugins (Odysseia, Slimefun) call static methods: `DrakesNative.pulses()` (always returns a working counter; Java ring buffer, zero allocation, when native is off), `auraBatch`, `fillSequential`, `storeRemaining`, `sumSaturating`, `marketPrice`. Main-thread use; the Java `PulseCounter` is not thread-safe.
