@@ -5,16 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarFile;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.logging.Logger;
 
 /**
  * Monolito: extrae a plugins/ los jars embebidos en el propio ejecutable (drakes-bundled/index.txt).
- * Solo reescribe un jar si cambia su SHA-256; el plugin-loader de Paper los carga como cualquier otro.
+ * Preserves existing jars and avoids duplicate plugin identities; Paper loads the extracted jars normally.
  * Desactivable con -Ddrakes.bundled=false (p. ej. para probar la rama modular con el mismo jar).
  * Que suites se extraen se elige SIN recompilar en drakes-data/suites.yml (se crea la primera vez).
  */
@@ -68,12 +71,30 @@ public final class DrakesBundledPlugins {
                     if (in == null) { LOGGER.warning("Falta en el jar: " + name); continue; }
                     byte[] data = in.readAllBytes();
                     File dest = new File(plugins, name);
-                    estado.append(key(name)).append(": {modo: true, embebido: ").append(sha(data)).append("}\n");
-                    if (dest.isFile() && sha(Files.readAllBytes(dest.toPath())).equals(sha(data))) continue;
-                    if (dest.isFile()) LOGGER.warning("[DrakesBundled] " + name + " en plugins/ difiere del embebido: se SOBRESCRIBE (usa 'keep' en suites.yml para conservar el tuyo)");
+                    if (dest.isFile() && sha(Files.readAllBytes(dest.toPath())).equals(sha(data))) {
+                        estado.append(key(name)).append(": {mode: unchanged, embedded: ").append(sha(data)).append("}\n");
+                        continue;
+                    }
+                    if (dest.isFile()) {
+                        kept++;
+                        estado.append(key(name)).append(": {mode: preserved, embedded: ").append(sha(data)).append(", deployed: ").append(sha(Files.readAllBytes(dest.toPath()))).append("}\n");
+                        LOGGER.warning("[DrakesBundled] Preserving modified plugin " + name + "; embedded version was not installed.");
+                        continue;
+                    }
+                    String identity = embeddedPluginName(data);
+                    if (identity == null) {
+                        LOGGER.warning("[DrakesBundled] Cannot determine plugin identity for " + name + "; skipping extraction.");
+                        continue;
+                    }
+                    if (hasPluginIdentity(plugins, identity)) {
+                        kept++;
+                        LOGGER.warning("[DrakesBundled] Preserving existing plugin " + identity + " under another filename; skipping " + name);
+                        continue;
+                    }
+                    estado.append(key(name)).append(": {mode: extracted, embedded: ").append(sha(data)).append("}\n");
                     File tmp = new File(plugins, name + ".tmp");
                     Files.write(tmp.toPath(), data);
-                    Files.move(tmp.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    Files.move(tmp.toPath(), dest.toPath());
                     escritos++;
                 }
             }
@@ -82,6 +103,35 @@ public final class DrakesBundledPlugins {
         } catch (Exception e) {
             LOGGER.severe("[DrakesBundled] fallo extrayendo plugins embebidos: " + e);
         }
+    }
+
+    static String embeddedPluginName(byte[] data) throws Exception {
+        try (JarInputStream jar = new JarInputStream(new ByteArrayInputStream(data))) {
+            java.util.jar.JarEntry entry;
+            while ((entry = jar.getNextJarEntry()) != null) {
+                if (entry.getName().equals("plugin.yml") || entry.getName().equals("paper-plugin.yml")) {
+                    return YamlConfiguration.loadConfiguration(new InputStreamReader(jar, StandardCharsets.UTF_8)).getString("name");
+                }
+            }
+        }
+        return null;
+    }
+
+    static boolean hasPluginIdentity(File plugins, String identity) throws Exception {
+        File[] jars = plugins.listFiles((dir, name) -> name.toLowerCase(java.util.Locale.ROOT).endsWith(".jar"));
+        if (jars == null) throw new java.io.IOException("Cannot list plugin directory");
+        for (File file : jars) {
+            try (JarFile jar = new JarFile(file)) {
+                java.util.zip.ZipEntry descriptor = jar.getEntry("paper-plugin.yml");
+                if (descriptor == null) descriptor = jar.getEntry("plugin.yml");
+                if (descriptor == null) continue;
+                try (InputStream in = jar.getInputStream(descriptor)) {
+                    String name = YamlConfiguration.loadConfiguration(new InputStreamReader(in, StandardCharsets.UTF_8)).getString("name");
+                    if (identity.equalsIgnoreCase(name)) return true;
+                }
+            }
+        }
+        return false;
     }
 
     /** drakes-data/suites.yml: una linea por jar embebido (nombre sin version). Falta o ausente = activo. */

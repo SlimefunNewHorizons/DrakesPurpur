@@ -29,6 +29,15 @@
          }
  
          if (commandSelection.includeIntegrated) {
+@@ -505,6 +_,7 @@
+     private void sendAsync(ServerPlayer player, java.util.Collection<CommandNode<CommandSourceStack>> dispatcherRootChildren) {
+         // Paper end - Perf: Async command map building
+-        Map<CommandNode<CommandSourceStack>, CommandNode<CommandSourceStack>> playerCommands = new HashMap<>();
++        // CommandNode.hashCode traverses mutable children; conversion and redirects track node identity.
++        Map<CommandNode<CommandSourceStack>, CommandNode<CommandSourceStack>> playerCommands = new java.util.IdentityHashMap<>();
+         RootCommandNode<CommandSourceStack> root = new RootCommandNode<>();
+         playerCommands.put(this.dispatcher.getRoot(), root);
+         fillUsableCommands(dispatcherRootChildren, root, player.createCommandSourceStack(), playerCommands); // Paper - Perf: Async command map building; pass copy of children
 @@ -523,6 +_,7 @@
      private void runSync(ServerPlayer player, java.util.Collection<String> bukkit, RootCommandNode<CommandSourceStack> root) {
          // Paper end - Perf: Async command map building
