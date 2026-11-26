@@ -26,6 +26,7 @@ pub mod block_collision_scan;
 pub mod inventory_tick;
 pub mod piston_movement;
 pub mod entity_guard;
+pub mod cargo_batch;
 
 pub const ABI_VERSION: i32 = 1;
 
@@ -236,6 +237,90 @@ pub unsafe extern "C" fn drakes_anvil_decompress_batch(
             wr(out_buf, out_buf_len as usize), wr(out_lengths, c)
         ) else { return ERR_NULL };
         anvil_async::decompress_batch(raw, offs, lens, obuf, out_slot_cap as usize, olens, max_threads as usize)
+    })
+}
+
+
+/// Batched item-stack hashing for Slimefun / Networks cargo ticks.
+/// Returns the number of hashes written, or a negative ERR_* code.
+#[no_mangle]
+pub extern "C" fn drakes_cargo_batch_hash(
+    material_ids: *const i32,
+    amounts: *const i32,
+    nbt_hashes: *const u64,
+    flags: *const u8,
+    count: i32,
+    out_hashes: *mut u64,
+) -> i32 {
+    if count < 0 {
+        return ERR_ARG;
+    }
+    let n = count as usize;
+    if n == 0 {
+        return 0;
+    }
+    guard(|| unsafe {
+        let (Some(mats), Some(amts), Some(nbts), Some(fl), Some(out)) = (
+            rd(material_ids, n),
+            rd(amounts, n),
+            rd(nbt_hashes, n),
+            rd(flags, n),
+            wr(out_hashes, n),
+        ) else {
+            return ERR_NULL;
+        };
+        cargo_batch::batch_hash_items(mats, amts, nbts, fl, out) as i32
+    })
+}
+
+/// Batched Slimefun / Networks cargo route matching in one native pass.
+/// Returns the number of matched routes written, or a negative ERR_* code.
+#[no_mangle]
+pub extern "C" fn drakes_cargo_batch_route(
+    src_keys: *const u64,
+    src_amounts: *const i32,
+    src_count: i32,
+    dst_keys: *const u64,
+    dst_caps: *const i32,
+    dst_priorities: *const i32,
+    dst_count: i32,
+    out_src: *mut i32,
+    out_dst: *mut i32,
+    out_amt: *mut i32,
+    out_cap: i32,
+) -> i32 {
+    if src_count < 0 || dst_count < 0 || out_cap < 0 {
+        return ERR_ARG;
+    }
+    let ns = src_count as usize;
+    let nd = dst_count as usize;
+    let cap = out_cap as usize;
+    if ns == 0 || nd == 0 || cap == 0 {
+        return 0;
+    }
+    guard(|| unsafe {
+        let (
+            Some(sk),
+            Some(sa),
+            Some(dk),
+            Some(dc),
+            Some(dp),
+            Some(os),
+            Some(od),
+            Some(oa),
+        ) = (
+            rd(src_keys, ns),
+            rd(src_amounts, ns),
+            rd(dst_keys, nd),
+            rd(dst_caps, nd),
+            rd(dst_priorities, nd),
+            wr(out_src, cap),
+            wr(out_dst, cap),
+            wr(out_amt, cap),
+        ) else {
+            return ERR_NULL;
+        };
+        cargo_batch::batch_match_cargo_routes(sk, sa, dk, dc, dp, os, od, oa) as i32
     })
 }
 
